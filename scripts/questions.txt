@@ -1,0 +1,10 @@
+# Data Agent Test Questions — one per line
+# Lines starting with # are ignored
+what is the churn rate
+what is the total revenue for 2025
+how many active customers do we have
+what is the email open rate
+top 5 campaigns by revenue
+what is the average order value
+show me the return rate
+which customer segments have the highest churn risk

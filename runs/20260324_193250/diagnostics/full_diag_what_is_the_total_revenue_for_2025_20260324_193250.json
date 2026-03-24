@@ -1,0 +1,331 @@
+{
+  "downloaded_at": "2026-03-24T19:34:56.384557+00:00",
+  "rolloutEnvironment": "PROD",
+  "stage": "sandbox",
+  "artifactId": "e92e5867-213a-4a7d-8fac-af1711046527",
+  "workspaceId": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2",
+  "source": "full_diagnostic.py (Fabric REST API + Python Client SDK)",
+  "config": {
+    "status": "Succeeded",
+    "createdTimeUtc": "2026-03-24T19:33:01.2009832",
+    "lastUpdatedTimeUtc": "2026-03-24T19:33:02.1992285",
+    "percentComplete": 100,
+    "error": null
+  },
+  "datasources": {
+    "3d00aeaa-91b9-4567-9166-fa3fc8249e6f": {
+      "fewshots": {
+        "fewShots": [],
+        "parentId": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+        "type": "semantic_model"
+      },
+      "schema": {
+        "dataSourceInfo": {
+          "type": "semantic_model",
+          "semantic_model_id": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+          "semantic_model_name": "Marketing360_Model",
+          "semantic_model_workspace_id": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
+        },
+        "elements": [],
+        "relationships": [],
+        "model_annotations": [],
+        "stats": {
+          "tables": 0,
+          "columns": 0,
+          "measures": 0,
+          "relationships": 0,
+          "annotations": 0,
+          "description_coverage": {
+            "tables": "0/0",
+            "columns": "0/0",
+            "measures": "0/0"
+          }
+        }
+      }
+    }
+  },
+  "thread": {
+    "question": "what is the total revenue for 2025",
+    "messages": {
+      "data": [
+        {
+          "id": "msg_osdcXIjctPoBT7egUxpLXHrE",
+          "assistant_id": null,
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "what is the total revenue for 2025"
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774380876,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "user",
+          "run_id": null,
+          "status": null,
+          "thread_id": "thread_J0P1NitWJ9xyA6mhjkOIMTj4"
+        },
+        {
+          "id": "msg_9aHFwpNHMV5XuXA6RlpbtrCL",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "For the full year 2025, the total e-commerce revenue is €163,340,720 (source: Commerce tables, synthetic/fictitious data).\n\nNext step: If you want to break down this revenue further (by month, channel, segment, or campaign), let me know!"
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774380892,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "assistant",
+          "run_id": "run_fabiCOVfrAR6MVg56zhWmUlrwesU",
+          "status": null,
+          "thread_id": "thread_J0P1NitWJ9xyA6mhjkOIMTj4"
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "msg_osdcXIjctPoBT7egUxpLXHrE",
+      "last_id": "msg_9aHFwpNHMV5XuXA6RlpbtrCL"
+    },
+    "run_status": "completed",
+    "run_steps": {
+      "data": [
+        {
+          "id": "step_fabJvfwwh2Faf1ljM3TC7bKXQzr1",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380890,
+          "created_at": 1774380890,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabiCOVfrAR6MVg56zhWmUlrwesU",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fabHbH8GIlJ4wnn1kw33ofQV8VeT",
+                "function": {
+                  "arguments": "{\"natural_language_description\":\"What is the total e-commerce revenue for the year 2025?\"}",
+                  "name": "generate.filename",
+                  "output": "{\"generated_filename\":\"result_0.json\"}",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_J0P1NitWJ9xyA6mhjkOIMTj4",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381490
+        },
+        {
+          "id": "step_fabIGGyJM6IYmAZnMpkfYLHlg1z4",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380890,
+          "created_at": 1774380890,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabiCOVfrAR6MVg56zhWmUlrwesU",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_ozZyWxYoH5QIMyNbz3FeJlg0",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"What is the total e-commerce revenue for the year 2025?\",\"code\":\"```dax\\n// Total e-commerce revenue for the year 2025\\nEVALUATE\\n  ROW(\\n    \\\"Total E-commerce Revenue 2025\\\",\\n    CALCULATE(\\n      [Total Revenue], // 'order_lines'[Total Revenue] measure\\n      FILTER(\\n        ALL('orders'[order_at]),\\n        YEAR('orders'[order_at]) == 2025\\n      )\\n    )\\n  )\\n```\"}",
+                  "name": "analyze.database.execute",
+                  "output": "| Total E-commerce Revenue 2025 |\r\n|------------------------------:|\r\n|              163340720.239999 |",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_J0P1NitWJ9xyA6mhjkOIMTj4",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381490
+        },
+        {
+          "id": "step_fabHiW0UCXa6L2cCQg2gIZyA63np",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380890,
+          "created_at": 1774380882,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabiCOVfrAR6MVg56zhWmUlrwesU",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_ozZyWxYoH5QIMyNbz3FeJlg0",
+                "function": {
+                  "arguments": "{\"query\":\"What is the total e-commerce revenue for the year 2025?\"}",
+                  "name": "trace.analyze_semantic_model",
+                  "output": "| Total E-commerce Revenue 2025 |\r\n|------------------------------:|\r\n|              163340720.239999 |",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_J0P1NitWJ9xyA6mhjkOIMTj4",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381482
+        },
+        {
+          "id": "step_fabUgwEVopxdwTSP9Ns5AV25d9bZ",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380890,
+          "created_at": 1774380882,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabiCOVfrAR6MVg56zhWmUlrwesU",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_ozZyWxYoH5QIMyNbz3FeJlg0",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"What is the total e-commerce revenue for the year 2025?\"}",
+                  "name": "analyze.database.nl2code",
+                  "output": "# Variation 1\n\n```dax\n// Total e-commerce revenue for the year 2025\nEVALUATE\n  ROW(\n    \"Total E-commerce Revenue 2025\",\n    CALCULATE(\n      [Total Revenue], // 'order_lines'[Total Revenue] measure\n      FILTER(\n        ALL('orders'[order_at]),\n        YEAR('orders'[order_at]) == 2025\n      )\n    )\n  )\n```",
+                  "diagnostic_details": {
+                    "natural_language_query": "What is the total e-commerce revenue for the year 2025?",
+                    "few_shot_examples": null,
+                    "prompt_arguments": null,
+                    "nl2sa_request": "{\r\n  \"targetItem\": {\r\n    \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n    \"itemType\": \"SemanticModel\",\r\n    \"name\": \"Marketing360_Model\"\r\n  },\r\n  \"sourceContext\": {\r\n    \"itemContext\": {\r\n      \"itemId\": \"e92e5867-213a-4a7d-8fac-af1711046527\",\r\n      \"itemType\": \"LLMPlugin\",\r\n      \"name\": \"Marketing360_Agent\"\r\n    }\r\n  },\r\n  \"prompt\": {\r\n    \"parts\": [\r\n      {\r\n        \"partType\": \"text\",\r\n        \"id\": \"0\",\r\n        \"text\": {\r\n          \"type\": \"plain\",\r\n          \"spans\": [\r\n            {\r\n              \"content\": \"What is the total e-commerce revenue for the year 2025?\"\r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"hints\": {\r\n      \"daxSchema\": null\r\n    },\r\n    \"options\": {\r\n      \"nl2dax_options\": {\r\n        \"includeTextualAnswer\": false,\r\n        \"includeQuery\": true,\r\n        \"includeDataTable\": true,\r\n        \"retryOnFailure\": true,\r\n        \"maxDataTableRows\": 25,\r\n        \"maxDataTableCols\": 25,\r\n        \"useCopilotTooling\": true\r\n      }\r\n    }\r\n  }\r\n}",
+                    "nl2sa_response": "{\r\n  \"answer\": {\r\n    \"nodes\": [\r\n      {\r\n        \"id\": \"root1\",\r\n        \"parts\": [\r\n          {\r\n            \"partType\": \"dataTable\",\r\n            \"id\": \"dataTable1\",\r\n            \"dataTable\": {\r\n              \"columns\": [\r\n                {\r\n                  \"name\": \"Total E-commerce Revenue 2025\",\r\n                  \"type\": \"Double\"\r\n                }\r\n              ],\r\n              \"rows\": [\r\n                [\r\n                  163340720.23999944\r\n                ]\r\n              ],\r\n              \"partRef\": {\r\n                \"partId\": \"daxQuery1\"\r\n              }\r\n            }\r\n          },\r\n          {\r\n            \"partType\": \"daxQuery\",\r\n            \"id\": \"daxQuery1\",\r\n            \"daxQuery\": {\r\n              \"query\": \"// Total e-commerce revenue for the year 2025\\nEVALUATE\\n  ROW(\\n    \\\"Total E-commerce Revenue 2025\\\",\\n    CALCULATE(\\n      [Total Revenue], // 'order_lines'[Total Revenue] measure\\n      FILTER(\\n        ALL('orders'[order_at]),\\n        YEAR('orders'[order_at]) == 2025\\n      )\\n    )\\n  )\",\r\n              \"modelRef\": {\r\n                \"partId\": \"modelRef1\"\r\n              }\r\n            }\r\n          },\r\n          {\r\n            \"partType\": \"itemReference\",\r\n            \"id\": \"modelRef1\",\r\n            \"role\": \"metadata\",\r\n            \"itemReference\": {\r\n              \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n              \"itemType\": \"SemanticModel\",\r\n              \"name\": \"Marketing360_Model\"\r\n            }\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}",
+                    "nl2sa_request_id": "fc9c2267-715b-45c0-9a0e-b5d4522caa7d",
+                    "choices": null,
+                    "choices_per_temperature": null,
+                    "clusters": null,
+                    "ranked_choices": null
+                  },
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_J0P1NitWJ9xyA6mhjkOIMTj4",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381482
+        },
+        {
+          "id": "step_fabVNKumxNQLBpex9pQSwE67O33X",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380878,
+          "created_at": 1774380878,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabiCOVfrAR6MVg56zhWmUlrwesU",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fabdWDBRSQFFe6bcuAHuQyId2NLE",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\"}",
+                  "name": "analyze.database.fewshots.loading",
+                  "output": "Loaded 0 fewshots",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_J0P1NitWJ9xyA6mhjkOIMTj4",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381478
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "step_fabJvfwwh2Faf1ljM3TC7bKXQzr1",
+      "last_id": "step_fabVNKumxNQLBpex9pQSwE67O33X"
+    }
+  },
+  "timing": {
+    "total_seconds": 12,
+    "steps": [
+      {
+        "tool": "generate.filename",
+        "status": "completed",
+        "created_at": 1774380890,
+        "completed_at": 1774380890
+      },
+      {
+        "tool": "analyze.database.execute",
+        "status": "completed",
+        "created_at": 1774380890,
+        "completed_at": 1774380890
+      },
+      {
+        "tool": "trace.analyze_semantic_model",
+        "status": "completed",
+        "created_at": 1774380882,
+        "completed_at": 1774380890
+      },
+      {
+        "tool": "analyze.database.nl2code",
+        "status": "completed",
+        "created_at": 1774380882,
+        "completed_at": 1774380890
+      },
+      {
+        "tool": "analyze.database.fewshots.loading",
+        "status": "completed",
+        "created_at": 1774380878,
+        "completed_at": 1774380878
+      }
+    ]
+  }
+}

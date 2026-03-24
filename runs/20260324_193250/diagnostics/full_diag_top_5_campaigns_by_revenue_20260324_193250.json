@@ -1,0 +1,334 @@
+{
+  "downloaded_at": "2026-03-24T19:37:49.976653+00:00",
+  "rolloutEnvironment": "PROD",
+  "stage": "sandbox",
+  "artifactId": "e92e5867-213a-4a7d-8fac-af1711046527",
+  "workspaceId": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2",
+  "source": "full_diagnostic.py (Fabric REST API + Python Client SDK)",
+  "config": {
+    "status": "Succeeded",
+    "createdTimeUtc": "2026-03-24T19:33:01.2009832",
+    "lastUpdatedTimeUtc": "2026-03-24T19:33:02.1992285",
+    "percentComplete": 100,
+    "error": null
+  },
+  "datasources": {
+    "3d00aeaa-91b9-4567-9166-fa3fc8249e6f": {
+      "fewshots": {
+        "fewShots": [],
+        "parentId": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+        "type": "semantic_model"
+      },
+      "schema": {
+        "dataSourceInfo": {
+          "type": "semantic_model",
+          "semantic_model_id": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+          "semantic_model_name": "Marketing360_Model",
+          "semantic_model_workspace_id": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
+        },
+        "elements": [],
+        "relationships": [],
+        "model_annotations": [],
+        "stats": {
+          "tables": 0,
+          "columns": 0,
+          "measures": 0,
+          "relationships": 0,
+          "annotations": 0,
+          "description_coverage": {
+            "tables": "0/0",
+            "columns": "0/0",
+            "measures": "0/0"
+          }
+        }
+      }
+    }
+  },
+  "thread": {
+    "question": "top 5 campaigns by revenue",
+    "messages": {
+      "data": [
+        {
+          "id": "msg_gnUuz4wJiyh2KKrKBwDj9OCk",
+          "assistant_id": null,
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "top 5 campaigns by revenue"
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774380965,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "user",
+          "run_id": null,
+          "status": null,
+          "thread_id": "thread_Pb5LZ1b5nwVwAeKaTLobkCkO"
+        },
+        {
+          "id": "msg_DPA0RdtDlKIoAcu96644AXw3",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "There was a technical issue retrieving the data for the top 5 campaigns by revenue using the available tools and tables (error with campaign data relationship).\n\nWhat went wrong:\n- The system was unable to join campaign send and order attribution data due to a technical mapping error.\n\nWhat you can do next:\n- Please try narrowing your request (e.g., ask for top campaigns by another metric: clicks, opens, or send volume).\n- Alternatively, you might contact your data team to verify the link between marketing sends/campaigns and order attribution.\n\nI cannot fabricate or guess these numbers due to anti-hallucination rules. If you have a different question, feel free to ask!"
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774381065,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "assistant",
+          "run_id": "run_fabRkLJInwCx7wvqLZqaYTpExode",
+          "status": null,
+          "thread_id": "thread_Pb5LZ1b5nwVwAeKaTLobkCkO"
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "msg_gnUuz4wJiyh2KKrKBwDj9OCk",
+      "last_id": "msg_DPA0RdtDlKIoAcu96644AXw3"
+    },
+    "run_status": "completed",
+    "run_steps": {
+      "data": [
+        {
+          "id": "step_fabEnDyPYqMrkcwAUSqGNU6O9oHF",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774381062,
+          "created_at": 1774381062,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabRkLJInwCx7wvqLZqaYTpExode",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fabEJTIhmYRHoukvmT14br1qva3z",
+                "function": {
+                  "arguments": "{\"natural_language_description\":\"List the top 5 marketing campaigns by total attributed revenue in 2025. For each, provide campaign name, attributed revenue, sends, conversion rate (orders/sends), ROI ((revenue-cost)/cost), and indicate if any have negative ROI. Use marketing_campaigns, marketing_events, marketing_sends, marketing_audiences, and commerce_orders tables. Attribution = last-touch, within 14 days of send/open.\"}",
+                  "name": "generate.filename",
+                  "output": "{\"generated_filename\":\"result_0.json\"}",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_Pb5LZ1b5nwVwAeKaTLobkCkO",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381662
+        },
+        {
+          "id": "step_fabqR3ihbEYyGq8YPaYx9nBNTMhg",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": null,
+          "created_at": 1774381062,
+          "expired_at": null,
+          "failed_at": 1774381063,
+          "last_error": {
+            "code": "server_error",
+            "message": "Failed to execute step (RAID: e416d803-4215-4f1d-99bc-2829949101a2). Error: Query (51, 37) The column '<oii>marketing_sends</oii>[<oii>campaign_id</oii>]' either doesn't exist or doesn't have a relationship to any table available in the current context.\r\n\r\nTechnical Details:\r\nRootActivityId: 68b001cd-10d2-4e43-bc22-29d71791fed1\r\nDate (UTC): 3/24/2026 7:37:43 PM"
+          },
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabRkLJInwCx7wvqLZqaYTpExode",
+          "status": "failed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_EUQ5DrvoUbpL8JvI8pmoWrxc",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"List the top 5 marketing campaigns by total attributed revenue in 2025. For each, provide campaign name, attributed revenue, sends, conversion rate (orders/sends), ROI ((revenue-cost)/cost), and indicate if any have negative ROI. Use marketing_campaigns, marketing_events, marketing_sends, marketing_audiences, and commerce_orders tables. Attribution = last-touch, within 14 days of send/open.\",\"code\":\"```dax\\n// Top 5 marketing campaigns by total attributed revenue in 2025\\r\\n// Attribution model: Last-touch (open/click) within 14 days before the order date.\\r\\n\\r\\nDEFINE\\r\\n  // Helper table for allowed event types in attribution (open, click)\\r\\n  VAR _EventTypes =\\r\\n    DATATABLE(\\r\\n      \\\"event_type\\\",\\r\\n      STRING,\\r\\n      {\\r\\n        { \\\"open\\\" },\\r\\n        { \\\"click\\\" }\\r\\n      }\\r\\n    )\\r\\n\\r\\n  // Orders in 2025 (completed only)\\r\\n  VAR _Orders2025 =\\r\\n    FILTER(\\r\\n      ALL('orders'),\\r\\n      YEAR('orders'[order_at]) = 2025\\r\\n        && 'orders'[status] = \\\"completed\\\"\\r\\n    )\\r\\n\\r\\n  // Add last-touch attributed campaign id to each 2025 order\\r\\n  VAR _AttributedOrders =\\r\\n    ADDCOLUMNS(\\r\\n      _Orders2025,\\r\\n      \\\"AttributedCampaignId\\\",\\r\\n        VAR _OrderDate = 'orders'[order_at]\\r\\n        VAR _CustomerId = 'orders'[customer_id]\\r\\n        VAR _EventsForOrder =\\r\\n          FILTER(\\r\\n            ALL('marketing_events'),\\r\\n            'marketing_events'[customer_id] = _CustomerId\\r\\n              && 'marketing_events'[event_type] IN _EventTypes\\r\\n              && 'marketing_events'[event_at] <= _OrderDate\\r\\n              && DATEDIFF('marketing_events'[event_at], _OrderDate, DAY) >= 0\\r\\n              && DATEDIFF('marketing_events'[event_at], _OrderDate, DAY) <= 14\\r\\n          )\\r\\n        VAR _LastEvent =\\r\\n          TOPN(\\r\\n            1,\\r\\n            _EventsForOrder,\\r\\n            'marketing_events'[event_at],\\r\\n            DESC\\r\\n          )\\r\\n        VAR _CampaignIdFromLastEvent =\\r\\n          MAXX(\\r\\n            ADDCOLUMNS(\\r\\n              _LastEvent,\\r\\n              \\\"CampaignId\\\", RELATED('marketing_sends'[campaign_id])\\r\\n            ),\\r\\n            [CampaignId]\\r\\n          )\\r\\n        RETURN\\r\\n          _CampaignIdFromLastEvent\\r\\n    )\\r\\n\\r\\n  // Base campaign-level metrics (revenue, orders, sends, budget)\\r\\n  VAR _CampaignBaseMetrics =\\r\\n    ADDCOLUMNS(\\r\\n      VALUES('marketing_campaigns'[campaign_id]),\\r\\n      \\\"campaign_name\\\", MAX('marketing_campaigns'[campaign_name]),\\r\\n      \\\"Budget\\\", MAX('marketing_campaigns'[budget_eur]),\\r\\n\\r\\n      // Attributed Revenue (from order_lines[Total Revenue]) for 2025 orders attributed via last-touch\\r\\n      \\\"Attributed Revenue\\\",\\r\\n        VAR _CampId_AR = 'marketing_campaigns'[campaign_id]\\r\\n        VAR _OrdersForCamp_AR =\\r\\n          FILTER(\\r\\n            _AttributedOrders,\\r\\n            [AttributedCampaignId] = _CampId_AR\\r\\n          )\\r\\n        VAR _OrderIdsForCamp_AR =\\r\\n          SELECTCOLUMNS(\\r\\n            _OrdersForCamp_AR,\\r\\n            \\\"order_id\\\", 'orders'[order_id]\\r\\n          )\\r\\n        RETURN\\r\\n          CALCULATE(\\r\\n            'order_lines'[Total Revenue],\\r\\n            TREATAS(_OrderIdsForCamp_AR, 'orders'[order_id])\\r\\n          ),\\r\\n\\r\\n      // Attributed Orders (count of 2025 orders with last-touch attribution to this campaign)\\r\\n      \\\"Attributed Orders\\\",\\r\\n        VAR _CampId_AO = 'marketing_campaigns'[campaign_id]\\r\\n        VAR _OrdersForCamp_AO =\\r\\n          FILTER(\\r\\n            _AttributedOrders,\\r\\n            [AttributedCampaignId] = _CampId_AO\\r\\n          )\\r\\n        RETURN\\r\\n          COUNTROWS(_OrdersForCamp_AO),\\r\\n\\r\\n      // Sends in 2025 for this campaign (context transition from campaign row filters via relationship)\\r\\n      \\\"Sends 2025\\\",\\r\\n        CALCULATE(\\r\\n          'marketing_sends'[Total Email Sends],\\r\\n          YEAR('marketing_sends'[send_at]) = 2025\\r\\n        )\\r\\n    )\\r\\n\\r\\n  // Add derived KPIs: Conversion Rate, ROI, Negative ROI flag\\r\\n  VAR _CampaignPerf =\\r\\n    ADDCOLUMNS(\\r\\n      _CampaignBaseMetrics,\\r\\n      \\\"Conversion Rate\\\",\\r\\n        VAR _OrdersCnt = [Attributed Orders]\\r\\n        VAR _SendsCnt = [Sends 2025]\\r\\n        RETURN\\r\\n          DIVIDE(_OrdersCnt, _SendsCnt),\\r\\n\\r\\n      \\\"ROI\\\",\\r\\n        VAR _Revenue = [Attributed Revenue]\\r\\n        VAR _Cost = [Budget]\\r\\n        RETURN\\r\\n          IF(\\r\\n            NOT ISBLANK(_Cost) && _Cost <> 0,\\r\\n            DIVIDE(_Revenue - _Cost, _Cost),\\r\\n            BLANK()\\r\\n          ),\\r\\n\\r\\n      \\\"Negative ROI\\\",\\r\\n        VAR _Revenue2 = [Attributed Revenue]\\r\\n        VAR _Cost2 = [Budget]\\r\\n        VAR _ROI2 =\\r\\n          IF(\\r\\n            NOT ISBLANK(_Cost2) && _Cost2 <> 0,\\r\\n            DIVIDE(_Revenue2 - _Cost2, _Cost2),\\r\\n            BLANK()\\r\\n          )\\r\\n        RETURN\\r\\n          IF(\\r\\n            NOT ISBLANK(_ROI2) && _ROI2 < 0,\\r\\n            TRUE,\\r\\n            FALSE\\r\\n          )\\r\\n    )\\r\\n\\r\\n  // Top 5 campaigns by Attributed Revenue\\r\\n  VAR _Top5Campaigns =\\r\\n    TOPN(\\r\\n      5,\\r\\n      _CampaignPerf,\\r\\n      [Attributed Revenue],\\r\\n      DESC\\r\\n    )\\r\\n\\r\\nEVALUATE\\r\\n  SELECTCOLUMNS(\\r\\n    _Top5Campaigns,\\r\\n    \\\"Campaign Name\\\", [campaign_name],\\r\\n    \\\"Attributed Revenue\\\", [Attributed Revenue],\\r\\n    \\\"Sends 2025\\\", [Sends 2025],\\r\\n    \\\"Conversion Rate\\\", [Conversion Rate],\\r\\n    \\\"ROI\\\", [ROI],\\r\\n    \\\"Negative ROI\\\", [Negative ROI]\\r\\n  )\\r\\nORDER BY\\r\\n  [Attributed Revenue] DESC,\\r\\n  [Campaign Name] ASC\\n```\"}",
+                  "name": "analyze.database.execute",
+                  "output": null,
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_Pb5LZ1b5nwVwAeKaTLobkCkO",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381662
+        },
+        {
+          "id": "step_fabfyhDbyKcun80mv0OvO3vAb5D2",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774381063,
+          "created_at": 1774380970,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabRkLJInwCx7wvqLZqaYTpExode",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_EUQ5DrvoUbpL8JvI8pmoWrxc",
+                "function": {
+                  "arguments": "{\"query\":\"List the top 5 marketing campaigns by total attributed revenue in 2025. For each, provide campaign name, attributed revenue, sends, conversion rate (orders/sends), ROI ((revenue-cost)/cost), and indicate if any have negative ROI. Use marketing_campaigns, marketing_events, marketing_sends, marketing_audiences, and commerce_orders tables. Attribution = last-touch, within 14 days of send/open.\"}",
+                  "name": "trace.analyze_semantic_model",
+                  "output": "All attempts to generate and execute code failed after reaching maximum retries.\r\n\r\nThe first code candidate tried was:\r\n```dax\r\n// Top 5 marketing campaigns by total attributed revenue in 2025\r\n// Attribution model: Last-touch (open/click) within 14 days before the order date.\r\n\r\nDEFINE\r\n  // Helper table for allowed event types in attribution (open, click)\r\n  VAR _EventTypes =\r\n    DATATABLE(\r\n      \"event_type\",\r\n      STRING,\r\n      {\r\n        { \"open\" },\r\n        { \"click\" }\r\n      }\r\n    )\r\n\r\n  // Orders in 2025 (completed only)\r\n  VAR _Orders2025 =\r\n    FILTER(\r\n      ALL('orders'),\r\n      YEAR('orders'[order_at]) = 2025\r\n        && 'orders'[status] = \"completed\"\r\n    )\r\n\r\n  // Add last-touch attributed campaign id to each 2025 order\r\n  VAR _AttributedOrders =\r\n    ADDCOLUMNS(\r\n      _Orders2025,\r\n      \"AttributedCampaignId\",\r\n        VAR _OrderDate = 'orders'[order_at]\r\n        VAR _CustomerId = 'orders'[customer_id]\r\n        VAR _EventsForOrder =\r\n          FILTER(\r\n            ALL('marketing_events'),\r\n            'marketing_events'[customer_id] = _CustomerId\r\n              && 'marketing_events'[event_type] IN _EventTypes\r\n              && 'marketing_events'[event_at] <= _OrderDate\r\n              && DATEDIFF('marketing_events'[event_at], _OrderDate, DAY) >= 0\r\n              && DATEDIFF('marketing_events'[event_at], _OrderDate, DAY) <= 14\r\n          )\r\n        VAR _LastEvent =\r\n          TOPN(\r\n            1,\r\n            _EventsForOrder,\r\n            'marketing_events'[event_at],\r\n            DESC\r\n          )\r\n        VAR _CampaignIdFromLastEvent =\r\n          MAXX(\r\n            ADDCOLUMNS(\r\n              _LastEvent,\r\n              \"CampaignId\", RELATED('marketing_sends'[campaign_id])\r\n            ),\r\n            [CampaignId]\r\n          )\r\n        RETURN\r\n          _CampaignIdFromLastEvent\r\n    )\r\n\r\n  // Base campaign-level metrics (revenue, orders, sends, budget)\r\n  VAR _CampaignBaseMetrics =\r\n    ADDCOLUMNS(\r\n      VALUES('marketing_campaigns'[campaign_id]),\r\n      \"campaign_name\", MAX('marketing_campaigns'[campaign_name]),\r\n      \"Budget\", MAX('marketing_campaigns'[budget_eur]),\r\n\r\n      // Attributed Revenue (from order_lines[Total Revenue]) for 2025 orders attributed via last-touch\r\n      \"Attributed Revenue\",\r\n        VAR _CampId_AR = 'marketing_campaigns'[campaign_id]\r\n        VAR _OrdersForCamp_AR =\r\n          FILTER(\r\n            _AttributedOrders,\r\n            [AttributedCampaignId] = _CampId_AR\r\n          )\r\n        VAR _OrderIdsForCamp_AR =\r\n          SELECTCOLUMNS(\r\n            _OrdersForCamp_AR,\r\n            \"order_id\", 'orders'[order_id]\r\n          )\r\n        RETURN\r\n          CALCULATE(\r\n            'order_lines'[Total Revenue],\r\n            TREATAS(_OrderIdsForCamp_AR, 'orders'[order_id])\r\n          ),\r\n\r\n      // Attributed Orders (count of 2025 orders with last-touch attribution to this campaign)\r\n      \"Attributed Orders\",\r\n        VAR _CampId_AO = 'marketing_campaigns'[campaign_id]\r\n        VAR _OrdersForCamp_AO =\r\n          FILTER(\r\n            _AttributedOrders,\r\n            [AttributedCampaignId] = _CampId_AO\r\n          )\r\n        RETURN\r\n          COUNTROWS(_OrdersForCamp_AO),\r\n\r\n      // Sends in 2025 for this campaign (context transition from campaign row filters via relationship)\r\n      \"Sends 2025\",\r\n        CALCULATE(\r\n          'marketing_sends'[Total Email Sends],\r\n          YEAR('marketing_sends'[send_at]) = 2025\r\n        )\r\n    )\r\n\r\n  // Add derived KPIs: Conversion Rate, ROI, Negative ROI flag\r\n  VAR _CampaignPerf =\r\n    ADDCOLUMNS(\r\n      _CampaignBaseMetrics,\r\n      \"Conversion Rate\",\r\n        VAR _OrdersCnt = [Attributed Orders]\r\n        VAR _SendsCnt = [Sends 2025]\r\n        RETURN\r\n          DIVIDE(_OrdersCnt, _SendsCnt),\r\n\r\n      \"ROI\",\r\n        VAR _Revenue = [Attributed Revenue]\r\n        VAR _Cost = [Budget]\r\n        RETURN\r\n          IF(\r\n            NOT ISBLANK(_Cost) && _Cost <> 0,\r\n            DIVIDE(_Revenue - _Cost, _Cost),\r\n            BLANK()\r\n          ),\r\n\r\n      \"Negative ROI\",\r\n        VAR _Revenue2 = [Attributed Revenue]\r\n        VAR _Cost2 = [Budget]\r\n        VAR _ROI2 =\r\n          IF(\r\n            NOT ISBLANK(_Cost2) && _Cost2 <> 0,\r\n            DIVIDE(_Revenue2 - _Cost2, _Cost2),\r\n            BLANK()\r\n          )\r\n        RETURN\r\n          IF(\r\n            NOT ISBLANK(_ROI2) && _ROI2 < 0,\r\n            TRUE,\r\n            FALSE\r\n          )\r\n    )\r\n\r\n  // Top 5 campaigns by Attributed Revenue\r\n  VAR _Top5Campaigns =\r\n    TOPN(\r\n      5,\r\n      _CampaignPerf,\r\n      [Attributed Revenue],\r\n      DESC\r\n    )\r\n\r\nEVALUATE\r\n  SELECTCOLUMNS(\r\n    _Top5Campaigns,\r\n    \"Campaign Name\", [campaign_name],\r\n    \"Attributed Revenue\", [Attributed Revenue],\r\n    \"Sends 2025\", [Sends 2025],\r\n    \"Conversion Rate\", [Conversion Rate],\r\n    \"ROI\", [ROI],\r\n    \"Negative ROI\", [Negative ROI]\r\n  )\r\nORDER BY\r\n  [Attributed Revenue] DESC,\r\n  [Campaign Name] ASC\r\n```\r\n\r\nThe error was: Query (51, 37) The column '<oii>marketing_sends</oii>[<oii>campaign_id</oii>]' either doesn't exist or doesn't have a relationship to any table available in the current context.\r\n\r\nTechnical Details:\r\nRootActivityId: 68b001cd-10d2-4e43-bc22-29d71791fed1\r\nDate (UTC): 3/24/2026 7:37:43 PM",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_Pb5LZ1b5nwVwAeKaTLobkCkO",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381570
+        },
+        {
+          "id": "step_fabqFdb2rzNWRr00eyy3jzU1Eqsd",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774381062,
+          "created_at": 1774380970,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabRkLJInwCx7wvqLZqaYTpExode",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_EUQ5DrvoUbpL8JvI8pmoWrxc",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"List the top 5 marketing campaigns by total attributed revenue in 2025. For each, provide campaign name, attributed revenue, sends, conversion rate (orders/sends), ROI ((revenue-cost)/cost), and indicate if any have negative ROI. Use marketing_campaigns, marketing_events, marketing_sends, marketing_audiences, and commerce_orders tables. Attribution = last-touch, within 14 days of send/open.\"}",
+                  "name": "analyze.database.nl2code",
+                  "output": "# Variation 1\n\n```dax\n// Top 5 marketing campaigns by total attributed revenue in 2025\r\n// Attribution model: Last-touch (open/click) within 14 days before the order date.\r\n\r\nDEFINE\r\n  // Helper table for allowed event types in attribution (open, click)\r\n  VAR _EventTypes =\r\n    DATATABLE(\r\n      \"event_type\",\r\n      STRING,\r\n      {\r\n        { \"open\" },\r\n        { \"click\" }\r\n      }\r\n    )\r\n\r\n  // Orders in 2025 (completed only)\r\n  VAR _Orders2025 =\r\n    FILTER(\r\n      ALL('orders'),\r\n      YEAR('orders'[order_at]) = 2025\r\n        && 'orders'[status] = \"completed\"\r\n    )\r\n\r\n  // Add last-touch attributed campaign id to each 2025 order\r\n  VAR _AttributedOrders =\r\n    ADDCOLUMNS(\r\n      _Orders2025,\r\n      \"AttributedCampaignId\",\r\n        VAR _OrderDate = 'orders'[order_at]\r\n        VAR _CustomerId = 'orders'[customer_id]\r\n        VAR _EventsForOrder =\r\n          FILTER(\r\n            ALL('marketing_events'),\r\n            'marketing_events'[customer_id] = _CustomerId\r\n              && 'marketing_events'[event_type] IN _EventTypes\r\n              && 'marketing_events'[event_at] <= _OrderDate\r\n              && DATEDIFF('marketing_events'[event_at], _OrderDate, DAY) >= 0\r\n              && DATEDIFF('marketing_events'[event_at], _OrderDate, DAY) <= 14\r\n          )\r\n        VAR _LastEvent =\r\n          TOPN(\r\n            1,\r\n            _EventsForOrder,\r\n            'marketing_events'[event_at],\r\n            DESC\r\n          )\r\n        VAR _CampaignIdFromLastEvent =\r\n          MAXX(\r\n            ADDCOLUMNS(\r\n              _LastEvent,\r\n              \"CampaignId\", RELATED('marketing_sends'[campaign_id])\r\n            ),\r\n            [CampaignId]\r\n          )\r\n        RETURN\r\n          _CampaignIdFromLastEvent\r\n    )\r\n\r\n  // Base campaign-level metrics (revenue, orders, sends, budget)\r\n  VAR _CampaignBaseMetrics =\r\n    ADDCOLUMNS(\r\n      VALUES('marketing_campaigns'[campaign_id]),\r\n      \"campaign_name\", MAX('marketing_campaigns'[campaign_name]),\r\n      \"Budget\", MAX('marketing_campaigns'[budget_eur]),\r\n\r\n      // Attributed Revenue (from order_lines[Total Revenue]) for 2025 orders attributed via last-touch\r\n      \"Attributed Revenue\",\r\n        VAR _CampId_AR = 'marketing_campaigns'[campaign_id]\r\n        VAR _OrdersForCamp_AR =\r\n          FILTER(\r\n            _AttributedOrders,\r\n            [AttributedCampaignId] = _CampId_AR\r\n          )\r\n        VAR _OrderIdsForCamp_AR =\r\n          SELECTCOLUMNS(\r\n            _OrdersForCamp_AR,\r\n            \"order_id\", 'orders'[order_id]\r\n          )\r\n        RETURN\r\n          CALCULATE(\r\n            'order_lines'[Total Revenue],\r\n            TREATAS(_OrderIdsForCamp_AR, 'orders'[order_id])\r\n          ),\r\n\r\n      // Attributed Orders (count of 2025 orders with last-touch attribution to this campaign)\r\n      \"Attributed Orders\",\r\n        VAR _CampId_AO = 'marketing_campaigns'[campaign_id]\r\n        VAR _OrdersForCamp_AO =\r\n          FILTER(\r\n            _AttributedOrders,\r\n            [AttributedCampaignId] = _CampId_AO\r\n          )\r\n        RETURN\r\n          COUNTROWS(_OrdersForCamp_AO),\r\n\r\n      // Sends in 2025 for this campaign (context transition from campaign row filters via relationship)\r\n      \"Sends 2025\",\r\n        CALCULATE(\r\n          'marketing_sends'[Total Email Sends],\r\n          YEAR('marketing_sends'[send_at]) = 2025\r\n        )\r\n    )\r\n\r\n  // Add derived KPIs: Conversion Rate, ROI, Negative ROI flag\r\n  VAR _CampaignPerf =\r\n    ADDCOLUMNS(\r\n      _CampaignBaseMetrics,\r\n      \"Conversion Rate\",\r\n        VAR _OrdersCnt = [Attributed Orders]\r\n        VAR _SendsCnt = [Sends 2025]\r\n        RETURN\r\n          DIVIDE(_OrdersCnt, _SendsCnt),\r\n\r\n      \"ROI\",\r\n        VAR _Revenue = [Attributed Revenue]\r\n        VAR _Cost = [Budget]\r\n        RETURN\r\n          IF(\r\n            NOT ISBLANK(_Cost) && _Cost <> 0,\r\n            DIVIDE(_Revenue - _Cost, _Cost),\r\n            BLANK()\r\n          ),\r\n\r\n      \"Negative ROI\",\r\n        VAR _Revenue2 = [Attributed Revenue]\r\n        VAR _Cost2 = [Budget]\r\n        VAR _ROI2 =\r\n          IF(\r\n            NOT ISBLANK(_Cost2) && _Cost2 <> 0,\r\n            DIVIDE(_Revenue2 - _Cost2, _Cost2),\r\n            BLANK()\r\n          )\r\n        RETURN\r\n          IF(\r\n            NOT ISBLANK(_ROI2) && _ROI2 < 0,\r\n            TRUE,\r\n            FALSE\r\n          )\r\n    )\r\n\r\n  // Top 5 campaigns by Attributed Revenue\r\n  VAR _Top5Campaigns =\r\n    TOPN(\r\n      5,\r\n      _CampaignPerf,\r\n      [Attributed Revenue],\r\n      DESC\r\n    )\r\n\r\nEVALUATE\r\n  SELECTCOLUMNS(\r\n    _Top5Campaigns,\r\n    \"Campaign Name\", [campaign_name],\r\n    \"Attributed Revenue\", [Attributed Revenue],\r\n    \"Sends 2025\", [Sends 2025],\r\n    \"Conversion Rate\", [Conversion Rate],\r\n    \"ROI\", [ROI],\r\n    \"Negative ROI\", [Negative ROI]\r\n  )\r\nORDER BY\r\n  [Attributed Revenue] DESC,\r\n  [Campaign Name] ASC\n```",
+                  "diagnostic_details": {
+                    "natural_language_query": "List the top 5 marketing campaigns by total attributed revenue in 2025. For each, provide campaign name, attributed revenue, sends, conversion rate (orders/sends), ROI ((revenue-cost)/cost), and indicate if any have negative ROI. Use marketing_campaigns, marketing_events, marketing_sends, marketing_audiences, and commerce_orders tables. Attribution = last-touch, within 14 days of send/open.",
+                    "few_shot_examples": null,
+                    "prompt_arguments": null,
+                    "nl2sa_request": "{\r\n  \"targetItem\": {\r\n    \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n    \"itemType\": \"SemanticModel\",\r\n    \"name\": \"Marketing360_Model\"\r\n  },\r\n  \"sourceContext\": {\r\n    \"itemContext\": {\r\n      \"itemId\": \"e92e5867-213a-4a7d-8fac-af1711046527\",\r\n      \"itemType\": \"LLMPlugin\",\r\n      \"name\": \"Marketing360_Agent\"\r\n    }\r\n  },\r\n  \"prompt\": {\r\n    \"parts\": [\r\n      {\r\n        \"partType\": \"text\",\r\n        \"id\": \"0\",\r\n        \"text\": {\r\n          \"type\": \"plain\",\r\n          \"spans\": [\r\n            {\r\n              \"content\": \"List the top 5 marketing campaigns by total attributed revenue in 2025. For each, provide campaign name, attributed revenue, sends, conversion rate (orders/sends), ROI ((revenue-cost)/cost), and indicate if any have negative ROI. Use marketing_campaigns, marketing_events, marketing_sends, marketing_audiences, and commerce_orders tables. Attribution = last-touch, within 14 days of send/open.\"\r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"hints\": {\r\n      \"daxSchema\": null\r\n    },\r\n    \"options\": {\r\n      \"nl2dax_options\": {\r\n        \"includeTextualAnswer\": false,\r\n        \"includeQuery\": true,\r\n        \"includeDataTable\": true,\r\n        \"retryOnFailure\": true,\r\n        \"maxDataTableRows\": 25,\r\n        \"maxDataTableCols\": 25,\r\n        \"useCopilotTooling\": true\r\n      }\r\n    }\r\n  }\r\n}",
+                    "nl2sa_response": "{\r\n  \"answer\": {\r\n    \"nodes\": [\r\n      {\r\n        \"id\": \"root1\",\r\n        \"parts\": [\r\n          {\r\n            \"partType\": \"daxQuery\",\r\n            \"id\": \"daxQuery1\",\r\n            \"daxQuery\": {\r\n              \"query\": \"// Top 5 marketing campaigns by total attributed revenue in 2025\\r\\n// Attribution model: Last-touch (open/click) within 14 days before the order date.\\r\\n\\r\\nDEFINE\\r\\n  // Helper table for allowed event types in attribution (open, click)\\r\\n  VAR _EventTypes =\\r\\n    DATATABLE(\\r\\n      \\\"event_type\\\",\\r\\n      STRING,\\r\\n      {\\r\\n        { \\\"open\\\" },\\r\\n        { \\\"click\\\" }\\r\\n      }\\r\\n    )\\r\\n\\r\\n  // Orders in 2025 (completed only)\\r\\n  VAR _Orders2025 =\\r\\n    FILTER(\\r\\n      ALL('orders'),\\r\\n      YEAR('orders'[order_at]) = 2025\\r\\n        && 'orders'[status] = \\\"completed\\\"\\r\\n    )\\r\\n\\r\\n  // Add last-touch attributed campaign id to each 2025 order\\r\\n  VAR _AttributedOrders =\\r\\n    ADDCOLUMNS(\\r\\n      _Orders2025,\\r\\n      \\\"AttributedCampaignId\\\",\\r\\n        VAR _OrderDate = 'orders'[order_at]\\r\\n        VAR _CustomerId = 'orders'[customer_id]\\r\\n        VAR _EventsForOrder =\\r\\n          FILTER(\\r\\n            ALL('marketing_events'),\\r\\n            'marketing_events'[customer_id] = _CustomerId\\r\\n              && 'marketing_events'[event_type] IN _EventTypes\\r\\n              && 'marketing_events'[event_at] <= _OrderDate\\r\\n              && DATEDIFF('marketing_events'[event_at], _OrderDate, DAY) >= 0\\r\\n              && DATEDIFF('marketing_events'[event_at], _OrderDate, DAY) <= 14\\r\\n          )\\r\\n        VAR _LastEvent =\\r\\n          TOPN(\\r\\n            1,\\r\\n            _EventsForOrder,\\r\\n            'marketing_events'[event_at],\\r\\n            DESC\\r\\n          )\\r\\n        VAR _CampaignIdFromLastEvent =\\r\\n          MAXX(\\r\\n            ADDCOLUMNS(\\r\\n              _LastEvent,\\r\\n              \\\"CampaignId\\\", RELATED('marketing_sends'[campaign_id])\\r\\n            ),\\r\\n            [CampaignId]\\r\\n          )\\r\\n        RETURN\\r\\n          _CampaignIdFromLastEvent\\r\\n    )\\r\\n\\r\\n  // Base campaign-level metrics (revenue, orders, sends, budget)\\r\\n  VAR _CampaignBaseMetrics =\\r\\n    ADDCOLUMNS(\\r\\n      VALUES('marketing_campaigns'[campaign_id]),\\r\\n      \\\"campaign_name\\\", MAX('marketing_campaigns'[campaign_name]),\\r\\n      \\\"Budget\\\", MAX('marketing_campaigns'[budget_eur]),\\r\\n\\r\\n      // Attributed Revenue (from order_lines[Total Revenue]) for 2025 orders attributed via last-touch\\r\\n      \\\"Attributed Revenue\\\",\\r\\n        VAR _CampId_AR = 'marketing_campaigns'[campaign_id]\\r\\n        VAR _OrdersForCamp_AR =\\r\\n          FILTER(\\r\\n            _AttributedOrders,\\r\\n            [AttributedCampaignId] = _CampId_AR\\r\\n          )\\r\\n        VAR _OrderIdsForCamp_AR =\\r\\n          SELECTCOLUMNS(\\r\\n            _OrdersForCamp_AR,\\r\\n            \\\"order_id\\\", 'orders'[order_id]\\r\\n          )\\r\\n        RETURN\\r\\n          CALCULATE(\\r\\n            'order_lines'[Total Revenue],\\r\\n            TREATAS(_OrderIdsForCamp_AR, 'orders'[order_id])\\r\\n          ),\\r\\n\\r\\n      // Attributed Orders (count of 2025 orders with last-touch attribution to this campaign)\\r\\n      \\\"Attributed Orders\\\",\\r\\n        VAR _CampId_AO = 'marketing_campaigns'[campaign_id]\\r\\n        VAR _OrdersForCamp_AO =\\r\\n          FILTER(\\r\\n            _AttributedOrders,\\r\\n            [AttributedCampaignId] = _CampId_AO\\r\\n          )\\r\\n        RETURN\\r\\n          COUNTROWS(_OrdersForCamp_AO),\\r\\n\\r\\n      // Sends in 2025 for this campaign (context transition from campaign row filters via relationship)\\r\\n      \\\"Sends 2025\\\",\\r\\n        CALCULATE(\\r\\n          'marketing_sends'[Total Email Sends],\\r\\n          YEAR('marketing_sends'[send_at]) = 2025\\r\\n        )\\r\\n    )\\r\\n\\r\\n  // Add derived KPIs: Conversion Rate, ROI, Negative ROI flag\\r\\n  VAR _CampaignPerf =\\r\\n    ADDCOLUMNS(\\r\\n      _CampaignBaseMetrics,\\r\\n      \\\"Conversion Rate\\\",\\r\\n        VAR _OrdersCnt = [Attributed Orders]\\r\\n        VAR _SendsCnt = [Sends 2025]\\r\\n        RETURN\\r\\n          DIVIDE(_OrdersCnt, _SendsCnt),\\r\\n\\r\\n      \\\"ROI\\\",\\r\\n        VAR _Revenue = [Attributed Revenue]\\r\\n        VAR _Cost = [Budget]\\r\\n        RETURN\\r\\n          IF(\\r\\n            NOT ISBLANK(_Cost) && _Cost <> 0,\\r\\n            DIVIDE(_Revenue - _Cost, _Cost),\\r\\n            BLANK()\\r\\n          ),\\r\\n\\r\\n      \\\"Negative ROI\\\",\\r\\n        VAR _Revenue2 = [Attributed Revenue]\\r\\n        VAR _Cost2 = [Budget]\\r\\n        VAR _ROI2 =\\r\\n          IF(\\r\\n            NOT ISBLANK(_Cost2) && _Cost2 <> 0,\\r\\n            DIVIDE(_Revenue2 - _Cost2, _Cost2),\\r\\n            BLANK()\\r\\n          )\\r\\n        RETURN\\r\\n          IF(\\r\\n            NOT ISBLANK(_ROI2) && _ROI2 < 0,\\r\\n            TRUE,\\r\\n            FALSE\\r\\n          )\\r\\n    )\\r\\n\\r\\n  // Top 5 campaigns by Attributed Revenue\\r\\n  VAR _Top5Campaigns =\\r\\n    TOPN(\\r\\n      5,\\r\\n      _CampaignPerf,\\r\\n      [Attributed Revenue],\\r\\n      DESC\\r\\n    )\\r\\n\\r\\nEVALUATE\\r\\n  SELECTCOLUMNS(\\r\\n    _Top5Campaigns,\\r\\n    \\\"Campaign Name\\\", [campaign_name],\\r\\n    \\\"Attributed Revenue\\\", [Attributed Revenue],\\r\\n    \\\"Sends 2025\\\", [Sends 2025],\\r\\n    \\\"Conversion Rate\\\", [Conversion Rate],\\r\\n    \\\"ROI\\\", [ROI],\\r\\n    \\\"Negative ROI\\\", [Negative ROI]\\r\\n  )\\r\\nORDER BY\\r\\n  [Attributed Revenue] DESC,\\r\\n  [Campaign Name] ASC\",\r\n              \"modelRef\": {\r\n                \"partId\": \"modelRef1\"\r\n              }\r\n            }\r\n          },\r\n          {\r\n            \"partType\": \"itemReference\",\r\n            \"id\": \"modelRef1\",\r\n            \"role\": \"metadata\",\r\n            \"itemReference\": {\r\n              \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n              \"itemType\": \"SemanticModel\",\r\n              \"name\": \"Marketing360_Model\"\r\n            }\r\n          }\r\n        ],\r\n        \"errors\": [\r\n          {\r\n            \"code\": \"QuerySyntaxError\"\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}",
+                    "nl2sa_request_id": "e416d803-4215-4f1d-99bc-2829949101a2",
+                    "choices": null,
+                    "choices_per_temperature": null,
+                    "clusters": null,
+                    "ranked_choices": null
+                  },
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_Pb5LZ1b5nwVwAeKaTLobkCkO",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381570
+        },
+        {
+          "id": "step_fabk6AW199Rz8cEmrsgeNdJhSppt",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380967,
+          "created_at": 1774380967,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabRkLJInwCx7wvqLZqaYTpExode",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fabxWlo3jxVOvdBMNywtxhmGPzmz",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\"}",
+                  "name": "analyze.database.fewshots.loading",
+                  "output": "Loaded 0 fewshots",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_Pb5LZ1b5nwVwAeKaTLobkCkO",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381567
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "step_fabEnDyPYqMrkcwAUSqGNU6O9oHF",
+      "last_id": "step_fabk6AW199Rz8cEmrsgeNdJhSppt"
+    }
+  },
+  "timing": {
+    "total_seconds": 96,
+    "steps": [
+      {
+        "tool": "generate.filename",
+        "status": "completed",
+        "created_at": 1774381062,
+        "completed_at": 1774381062
+      },
+      {
+        "tool": "analyze.database.execute",
+        "status": "failed",
+        "created_at": 1774381062,
+        "completed_at": null
+      },
+      {
+        "tool": "trace.analyze_semantic_model",
+        "status": "completed",
+        "created_at": 1774380970,
+        "completed_at": 1774381063
+      },
+      {
+        "tool": "analyze.database.nl2code",
+        "status": "completed",
+        "created_at": 1774380970,
+        "completed_at": 1774381062
+      },
+      {
+        "tool": "analyze.database.fewshots.loading",
+        "status": "completed",
+        "created_at": 1774380967,
+        "completed_at": 1774380967
+      }
+    ]
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "timestamp": "20260324_201734",
+  "agent_id": "e92e5867-213a-4a7d-8fac-af1711046527",
+  "model_id": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+  "schema_stats": {
+    "tables": 16,
+    "columns": 120,
+    "measures": 34,
+    "relationships": 15,
+    "description_coverage": {
+      "tables": "16/16",
+      "columns": "120/120",
+      "measures": "34/34"
+    }
+  },
+  "results": [
+    {
+      "question": "what is the churn rate",
+      "status": "completed",
+      "answer": "The customer churn rate for the full year 2025 is 9.92%.\n\nSource: CRM (crm_customers table), synthetic/fictitious data.\n\nThis means that nearly 1 in 10 customers stopped being active in 2025. If this ",
+      "tools": [
+        "generate.filename",
+        "analyze.database.execute",
+        "trace.analyze_semantic_model",
+        "analyze.database.nl2code",
+        "analyze.database.fewshots.loading"
+      ],
+      "file": "full_diag_what_is_the_churn_rate_20260324_201734.json",
+      "duration": 14
+    },
+    {
+      "question": "what is the total revenue for 2025",
+      "status": "completed",
+      "answer": "For the full year 2025 (synthetic/fictitious data), the total e-commerce revenue is €163,340,720.24.\n\nSource: Commerce table (orders).\nIf you need a breakdown (e.g., by quarter, segment, or campaign i",
+      "tools": [
+        "generate.filename",
+        "analyze.database.execute",
+        "trace.analyze_semantic_model",
+        "analyze.database.nl2code",
+        "analyze.database.fewshots.loading"
+      ],
+      "file": "full_diag_what_is_the_total_revenue_for_2025_20260324_201734.json",
+      "duration": 8
+    },
+    {
+      "question": "how many active customers do we have",
+      "status": "completed",
+      "answer": "For the full year 2025, there are 49 active customers. This figure comes from the CRM (crm_customers) table.\n\nReminder: This data is synthetic/fictitious.\n\nNext step suggestion: With a relatively smal",
+      "tools": [
+        "generate.filename",
+        "analyze.database.execute",
+        "trace.analyze_semantic_model",
+        "analyze.database.nl2code",
+        "analyze.database.fewshots.loading"
+      ],
+      "file": "full_diag_how_many_active_customers_do_we_have_20260324_201734.json",
+      "duration": 10
+    },
+    {
+      "question": "what is the email open rate",
+      "status": "completed",
+      "answer": "I was unable to retrieve the actual email open rate for the full year 2025 due to a technical issue accessing the marketing data. This sometimes happens if data relationships or metrics in the source ",
+      "tools": [
+        "generate.filename",
+        "analyze.database.execute",
+        "trace.analyze_semantic_model",
+        "analyze.database.nl2code",
+        "analyze.database.fewshots.loading"
+      ],
+      "file": "full_diag_what_is_the_email_open_rate_20260324_201734.json",
+      "duration": 56
+    },
+    {
+      "question": "top 5 campaigns by revenue",
+      "status": "completed",
+      "answer": "The system was unable to retrieve the top 5 campaigns by revenue due to a technical timeout. This means the data could not be calculated or retrieved within the required period.\n\nWhat went wrong:\n- Th",
+      "tools": [
+        "generate.filename",
+        "analyze.database.execute",
+        "trace.analyze_semantic_model",
+        "analyze.database.nl2code",
+        "analyze.database.fewshots.loading"
+      ],
+      "file": "full_diag_top_5_campaigns_by_revenue_20260324_201734.json",
+      "duration": 290
+    },
+    {
+      "question": "what is the average order value",
+      "status": "completed",
+      "answer": "The average order value for all e-commerce orders in 2025 is €4,099.30.\n\n- Source: Commerce table – calculation based on all 2025 orders\n\nThis value is synthetic/fictitious and meant for data analysis",
+      "tools": [
+        "generate.filename",
+        "analyze.database.execute",
+        "trace.analyze_semantic_model",
+        "analyze.database.nl2code",
+        "analyze.database.fewshots.loading"
+      ],
+      "file": "full_diag_what_is_the_average_order_value_20260324_201734.json",
+      "duration": 10
+    },
+    {
+      "question": "show me the return rate",
+      "status": "completed",
+      "answer": "The ecommerce return rate for 2025 averages 1,240.7%. This figure is extremely high and likely signals a data anomaly. Throughout the year, monthly return rates remain in the 1,075–1,227% range, with ",
+      "tools": [
+        "generate.filename",
+        "analyze.database.execute",
+        "trace.analyze_semantic_model",
+        "analyze.database.nl2code",
+        "analyze.database.fewshots.loading"
+      ],
+      "file": "full_diag_show_me_the_return_rate_20260324_201734.json",
+      "duration": 27
+    },
+    {
+      "question": "which customer segments have the highest churn risk",
+      "status": "completed",
+      "answer": "Top Customer Segments with Highest Churn Risk (2025, synthetic data):\n\n- All major customer segments show the same average churn risk score of 37.17 (out of 100) for 2025.\n- Example segments (all with",
+      "tools": [
+        "generate.filename",
+        "analyze.database.execute",
+        "trace.analyze_semantic_model",
+        "analyze.database.nl2code",
+        "analyze.database.fewshots.loading"
+      ],
+      "file": "full_diag_which_customer_segments_have_the_highest_20260324_201734.json",
+      "duration": 25
+    }
+  ]
+}

@@ -1,0 +1,334 @@
+{
+  "downloaded_at": "2026-03-24T19:36:00.787846+00:00",
+  "rolloutEnvironment": "PROD",
+  "stage": "sandbox",
+  "artifactId": "e92e5867-213a-4a7d-8fac-af1711046527",
+  "workspaceId": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2",
+  "source": "full_diagnostic.py (Fabric REST API + Python Client SDK)",
+  "config": {
+    "status": "Succeeded",
+    "createdTimeUtc": "2026-03-24T19:33:01.2009832",
+    "lastUpdatedTimeUtc": "2026-03-24T19:33:02.1992285",
+    "percentComplete": 100,
+    "error": null
+  },
+  "datasources": {
+    "3d00aeaa-91b9-4567-9166-fa3fc8249e6f": {
+      "fewshots": {
+        "fewShots": [],
+        "parentId": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+        "type": "semantic_model"
+      },
+      "schema": {
+        "dataSourceInfo": {
+          "type": "semantic_model",
+          "semantic_model_id": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+          "semantic_model_name": "Marketing360_Model",
+          "semantic_model_workspace_id": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
+        },
+        "elements": [],
+        "relationships": [],
+        "model_annotations": [],
+        "stats": {
+          "tables": 0,
+          "columns": 0,
+          "measures": 0,
+          "relationships": 0,
+          "annotations": 0,
+          "description_coverage": {
+            "tables": "0/0",
+            "columns": "0/0",
+            "measures": "0/0"
+          }
+        }
+      }
+    }
+  },
+  "thread": {
+    "question": "what is the email open rate",
+    "messages": {
+      "data": [
+        {
+          "id": "msg_pB1Vv5GgwswxBg6Ux5m14gE3",
+          "assistant_id": null,
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "what is the email open rate"
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774380923,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "user",
+          "run_id": null,
+          "status": null,
+          "thread_id": "thread_E9n9CMeGAjCtnKqoDoLQmI5w"
+        },
+        {
+          "id": "msg_A2EFE1eHFwpEVFcdABAJmjSR",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "The query to retrieve the overall email open rate for 2025 was unsuccessful due to a technical error in the data model—specifically, duplicate send_id values in the marketing_events table. As a result, I cannot provide the actual open rate figure at this time.\n\nLimitations:\n- The actual open rate data could not be retrieved due to technical issues.\n- No fabricated or estimated figures are provided, in line with data integrity guidelines.\n\nNext steps:\n- I recommend investigating and resolving the duplicate send_id issue in the marketing_events table so that accurate open rate reporting can be enabled.\n- Once resolved, please re-ask your question or reach out for further KPI analysis.\n\nReminder: All data in this environment is synthetic/fictitious and used for illustrative purposes only."
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774380956,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "assistant",
+          "run_id": "run_fabCbnBscU9MSDe4BnSObUhPtcMm",
+          "status": null,
+          "thread_id": "thread_E9n9CMeGAjCtnKqoDoLQmI5w"
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "msg_pB1Vv5GgwswxBg6Ux5m14gE3",
+      "last_id": "msg_A2EFE1eHFwpEVFcdABAJmjSR"
+    },
+    "run_status": "completed",
+    "run_steps": {
+      "data": [
+        {
+          "id": "step_fab2Ku1TShLh0EqmljfSvhC8r1D0",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380953,
+          "created_at": 1774380953,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabCbnBscU9MSDe4BnSObUhPtcMm",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fabeLorB6FtDlBUv5BtolEHkF4m3",
+                "function": {
+                  "arguments": "{\"natural_language_description\":\"What is the overall email open rate for the year 2025?\"}",
+                  "name": "generate.filename",
+                  "output": "{\"generated_filename\":\"result_0.json\"}",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_E9n9CMeGAjCtnKqoDoLQmI5w",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381553
+        },
+        {
+          "id": "step_fabzfxuT2co7DqhkCudlocD3PE7T",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": null,
+          "created_at": 1774380953,
+          "expired_at": null,
+          "failed_at": 1774380954,
+          "last_error": {
+            "code": "server_error",
+            "message": "Failed to execute step (RAID: 99f3e35b-934b-44fa-9047-addb1248a9e8). Error: Column '<oii>send_id</oii>' in Table '<oii>marketing_events</oii>' contains a duplicate value '<ccon>SEND_00098736</ccon>' and this is not allowed for columns on the one side of a many-to-one relationship or for columns that are used as the primary key of a table.\r\nColumn '<oii>send_id</oii>' in Table '<oii>marketing_events</oii>' contains a duplicate value '<ccon>SEND_00000009</ccon>' and this is not allowed for columns on the one side of a many-to-one relationship or for columns that are used as the primary key of a table.\r\n\r\nTechnical Details:\r\nRootActivityId: dc39ea39-c377-4d16-bd4b-a69102200b69\r\nDate (UTC): 3/24/2026 7:35:54 PM"
+          },
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabCbnBscU9MSDe4BnSObUhPtcMm",
+          "status": "failed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_HpPf5aldozMqcE0LLzuU31cU",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"What is the overall email open rate for the year 2025?\",\"code\":\"```dax\\n// Overall email open rate for the full year 2025\\nEVALUATE\\n  ROW(\\n    \\\"Open Rate % 2025\\\",\\n    CALCULATE(\\n      [Open Rate %],\\n      YEAR('marketing_events'[event_at]) == 2025\\n    )\\n  )\\n```\"}",
+                  "name": "analyze.database.execute",
+                  "output": null,
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_E9n9CMeGAjCtnKqoDoLQmI5w",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381553
+        },
+        {
+          "id": "step_fabmNz1mN49OAhykJ3I3nNyx0LeR",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380954,
+          "created_at": 1774380928,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabCbnBscU9MSDe4BnSObUhPtcMm",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_HpPf5aldozMqcE0LLzuU31cU",
+                "function": {
+                  "arguments": "{\"query\":\"What is the overall email open rate for the year 2025?\"}",
+                  "name": "trace.analyze_semantic_model",
+                  "output": "All attempts to generate and execute code failed after reaching maximum retries.\r\n\r\nThe first code candidate tried was:\r\n```dax\r\n// Overall email open rate for the full year 2025\nEVALUATE\n  ROW(\n    \"Open Rate % 2025\",\n    CALCULATE(\n      [Open Rate %],\n      YEAR('marketing_events'[event_at]) == 2025\n    )\n  )\r\n```\r\n\r\nThe error was: Column '<oii>send_id</oii>' in Table '<oii>marketing_events</oii>' contains a duplicate value '<ccon>SEND_00098736</ccon>' and this is not allowed for columns on the one side of a many-to-one relationship or for columns that are used as the primary key of a table.\r\nColumn '<oii>send_id</oii>' in Table '<oii>marketing_events</oii>' contains a duplicate value '<ccon>SEND_00000009</ccon>' and this is not allowed for columns on the one side of a many-to-one relationship or for columns that are used as the primary key of a table.\r\n\r\nTechnical Details:\r\nRootActivityId: dc39ea39-c377-4d16-bd4b-a69102200b69\r\nDate (UTC): 3/24/2026 7:35:54 PM",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_E9n9CMeGAjCtnKqoDoLQmI5w",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381528
+        },
+        {
+          "id": "step_fabo5uWS2Xwy2xU4yKmvsf7IatbI",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380953,
+          "created_at": 1774380928,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabCbnBscU9MSDe4BnSObUhPtcMm",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_HpPf5aldozMqcE0LLzuU31cU",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"What is the overall email open rate for the year 2025?\"}",
+                  "name": "analyze.database.nl2code",
+                  "output": "# Variation 1\n\n```dax\n// Overall email open rate for the full year 2025\nEVALUATE\n  ROW(\n    \"Open Rate % 2025\",\n    CALCULATE(\n      [Open Rate %],\n      YEAR('marketing_events'[event_at]) == 2025\n    )\n  )\n```",
+                  "diagnostic_details": {
+                    "natural_language_query": "What is the overall email open rate for the year 2025?",
+                    "few_shot_examples": null,
+                    "prompt_arguments": null,
+                    "nl2sa_request": "{\r\n  \"targetItem\": {\r\n    \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n    \"itemType\": \"SemanticModel\",\r\n    \"name\": \"Marketing360_Model\"\r\n  },\r\n  \"sourceContext\": {\r\n    \"itemContext\": {\r\n      \"itemId\": \"e92e5867-213a-4a7d-8fac-af1711046527\",\r\n      \"itemType\": \"LLMPlugin\",\r\n      \"name\": \"Marketing360_Agent\"\r\n    }\r\n  },\r\n  \"prompt\": {\r\n    \"parts\": [\r\n      {\r\n        \"partType\": \"text\",\r\n        \"id\": \"0\",\r\n        \"text\": {\r\n          \"type\": \"plain\",\r\n          \"spans\": [\r\n            {\r\n              \"content\": \"What is the overall email open rate for the year 2025?\"\r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"hints\": {\r\n      \"daxSchema\": null\r\n    },\r\n    \"options\": {\r\n      \"nl2dax_options\": {\r\n        \"includeTextualAnswer\": false,\r\n        \"includeQuery\": true,\r\n        \"includeDataTable\": true,\r\n        \"retryOnFailure\": true,\r\n        \"maxDataTableRows\": 25,\r\n        \"maxDataTableCols\": 25,\r\n        \"useCopilotTooling\": true\r\n      }\r\n    }\r\n  }\r\n}",
+                    "nl2sa_response": "{\r\n  \"answer\": {\r\n    \"nodes\": [\r\n      {\r\n        \"id\": \"root1\",\r\n        \"parts\": [\r\n          {\r\n            \"partType\": \"daxQuery\",\r\n            \"id\": \"daxQuery1\",\r\n            \"daxQuery\": {\r\n              \"query\": \"// Overall email open rate for the full year 2025\\nEVALUATE\\n  ROW(\\n    \\\"Open Rate % 2025\\\",\\n    CALCULATE(\\n      [Open Rate %],\\n      YEAR('marketing_events'[event_at]) == 2025\\n    )\\n  )\",\r\n              \"modelRef\": {\r\n                \"partId\": \"modelRef1\"\r\n              }\r\n            }\r\n          },\r\n          {\r\n            \"partType\": \"itemReference\",\r\n            \"id\": \"modelRef1\",\r\n            \"role\": \"metadata\",\r\n            \"itemReference\": {\r\n              \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n              \"itemType\": \"SemanticModel\",\r\n              \"name\": \"Marketing360_Model\"\r\n            }\r\n          }\r\n        ],\r\n        \"errors\": [\r\n          {\r\n            \"code\": \"QuerySyntaxError\"\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}",
+                    "nl2sa_request_id": "99f3e35b-934b-44fa-9047-addb1248a9e8",
+                    "choices": null,
+                    "choices_per_temperature": null,
+                    "clusters": null,
+                    "ranked_choices": null
+                  },
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_E9n9CMeGAjCtnKqoDoLQmI5w",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381528
+        },
+        {
+          "id": "step_fabwNenpWBazk3CFhIN9dI0WQjTr",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380925,
+          "created_at": 1774380925,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabCbnBscU9MSDe4BnSObUhPtcMm",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fabmR2cTltNAemKXAfAvKuVJcqEP",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\"}",
+                  "name": "analyze.database.fewshots.loading",
+                  "output": "Loaded 0 fewshots",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_E9n9CMeGAjCtnKqoDoLQmI5w",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381525
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "step_fab2Ku1TShLh0EqmljfSvhC8r1D0",
+      "last_id": "step_fabwNenpWBazk3CFhIN9dI0WQjTr"
+    }
+  },
+  "timing": {
+    "total_seconds": 29,
+    "steps": [
+      {
+        "tool": "generate.filename",
+        "status": "completed",
+        "created_at": 1774380953,
+        "completed_at": 1774380953
+      },
+      {
+        "tool": "analyze.database.execute",
+        "status": "failed",
+        "created_at": 1774380953,
+        "completed_at": null
+      },
+      {
+        "tool": "trace.analyze_semantic_model",
+        "status": "completed",
+        "created_at": 1774380928,
+        "completed_at": 1774380954
+      },
+      {
+        "tool": "analyze.database.nl2code",
+        "status": "completed",
+        "created_at": 1774380928,
+        "completed_at": 1774380953
+      },
+      {
+        "tool": "analyze.database.fewshots.loading",
+        "status": "completed",
+        "created_at": 1774380925,
+        "completed_at": 1774380925
+      }
+    ]
+  }
+}

@@ -1,0 +1,3087 @@
+{
+  "downloaded_at": "2026-03-24T20:31:19.188892+00:00",
+  "rolloutEnvironment": "PROD",
+  "stage": "sandbox",
+  "artifactId": "e92e5867-213a-4a7d-8fac-af1711046527",
+  "workspaceId": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2",
+  "source": "full_diagnostic.py (Fabric REST API + Python Client SDK)",
+  "config": {
+    "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/dataAgent/definition/dataSource/1.0.0/schema.json",
+    "artifactId": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+    "workspaceId": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2",
+    "dataSourceInstructions": null,
+    "displayName": "Marketing360_Model",
+    "type": "semantic_model",
+    "userDescription": null,
+    "metadata": {},
+    "elements": [
+      {
+        "id": "6b1cafe3-7340-4d8f-a2cd-ef384cf045b0",
+        "is_selected": true,
+        "display_name": "crm_accounts",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "26cbee1f-172e-4c56-9b11-3e27e71f5b44",
+            "is_selected": true,
+            "display_name": "account_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "7ac3aedf-eede-4020-b9e0-c2e18e9b4cc1",
+            "is_selected": true,
+            "display_name": "account_name",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "7995b74f-4cd7-44bd-a702-19e89bc59e39",
+            "is_selected": true,
+            "display_name": "annual_revenue_eur",
+            "type": "semantic_model.column",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "d1549b33-d2f8-4086-9c85-849db14bcd0c",
+            "is_selected": true,
+            "display_name": "created_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "c6b2f2e6-7809-450a-bfdf-e43611d3db81",
+            "is_selected": true,
+            "display_name": "employee_count",
+            "type": "semantic_model.column",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "d502a213-afb4-46d8-8b88-e8402c6b1add",
+            "is_selected": true,
+            "display_name": "industry",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "a785e20d-5bbd-4cef-af16-ed57543bd313",
+            "is_selected": true,
+            "display_name": "region",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "984edeb6-2e71-4454-8eca-ecc171e842d8",
+            "is_selected": true,
+            "display_name": "status",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "93682075-a870-4b96-9f1c-f09d8e1dc880",
+            "is_selected": true,
+            "display_name": "tier",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "dc89bc8b-2266-4292-80f1-119a344c9730",
+        "is_selected": true,
+        "display_name": "crm_customer_profile",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "3aa029ec-231f-44af-96fb-657a55b5f086",
+            "is_selected": true,
+            "display_name": "Avg Churn Risk",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "6edbdeaf-d51d-4632-b270-3862814a2570",
+            "is_selected": true,
+            "display_name": "Avg CLV",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "3e83ce62-34ff-41ce-a9f7-0ef8d19b5b7d",
+            "is_selected": true,
+            "display_name": "Avg NPS",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "b210422e-b716-4de8-9b29-d4327d50a55e",
+            "is_selected": true,
+            "display_name": "avg_order_value_eur",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "b90f8990-eb39-4032-a020-942bb01bb5b8",
+            "is_selected": true,
+            "display_name": "churn_risk_score",
+            "type": "semantic_model.column",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "8ea706db-20d6-43d1-aeb7-38e648d1d902",
+            "is_selected": true,
+            "display_name": "click_rate_pct",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "6abf271b-c705-4316-8edf-106a1c4e8abc",
+            "is_selected": true,
+            "display_name": "clv_score",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "cae62641-5f93-4535-a396-f72b795c7716",
+            "is_selected": true,
+            "display_name": "customer_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "6b349f0b-983e-4f73-9dff-04b82d1664cb",
+            "is_selected": true,
+            "display_name": "last_contact_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "dc726cf8-a67a-4538-8b5f-ba06a49d934b",
+            "is_selected": true,
+            "display_name": "nps_last",
+            "type": "semantic_model.column",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "f1f2f7da-2e48-4ebb-92f1-54c69d8736cd",
+            "is_selected": true,
+            "display_name": "open_rate_pct",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "caa2b9e2-ba74-4265-a5f2-7d5b4bf9b54d",
+            "is_selected": true,
+            "display_name": "total_interactions",
+            "type": "semantic_model.column",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "396b6fbc-3bc8-4ae5-9e1b-a89d0645b60e",
+            "is_selected": true,
+            "display_name": "total_orders",
+            "type": "semantic_model.column",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "8269c809-dea8-43bc-8586-e4960e66b7fb",
+            "is_selected": true,
+            "display_name": "total_spend_eur",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "77f62002-be47-406c-be3a-bd6981f727ac",
+        "is_selected": true,
+        "display_name": "crm_customer_segments",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "bb37aab8-8250-423b-bde6-9d41f3ba01e4",
+            "is_selected": true,
+            "display_name": "customer_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "30591311-4e66-473d-8d90-0da6087e2835",
+            "is_selected": true,
+            "display_name": "end_date",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "cc051beb-aa11-4359-863c-443d9b1b7041",
+            "is_selected": true,
+            "display_name": "segment_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "8e23a8f1-bc8d-460d-9e6f-6dc6b64fdf05",
+            "is_selected": true,
+            "display_name": "start_date",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "f31271cd-253d-4b32-8ca4-52221cf91683",
+        "is_selected": true,
+        "display_name": "crm_customers",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "88928d80-e84b-423b-9cd6-dda8789bc9e4",
+            "is_selected": true,
+            "display_name": "account_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "438599ff-71d8-4df9-bb05-f9dd96e4ec35",
+            "is_selected": true,
+            "display_name": "Active Customers",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "3117efcc-7664-4163-8671-48abb18f2e4c",
+            "is_selected": true,
+            "display_name": "Churn Rate %",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "6281f04a-edcb-4123-a093-5d8dd554e4fd",
+            "is_selected": true,
+            "display_name": "Churned Customers",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "0f0616ce-6f8a-453a-adcb-03f7b0506455",
+            "is_selected": true,
+            "display_name": "consent_email",
+            "type": "semantic_model.column",
+            "data_type": "Boolean",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "3f91a4b3-e341-4e3b-af08-ab7003a20427",
+            "is_selected": true,
+            "display_name": "consent_sms",
+            "type": "semantic_model.column",
+            "data_type": "Boolean",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "ae451863-c29c-4085-a8bf-454669a8c6e4",
+            "is_selected": true,
+            "display_name": "country",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "b496cf98-f9ad-4794-82e0-b83e1d9efe4e",
+            "is_selected": true,
+            "display_name": "customer_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "35fb00e2-2151-484f-a933-dbd4aac74eda",
+            "is_selected": true,
+            "display_name": "email",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "437112ed-30d1-4e64-9c4f-6cb61ea08b03",
+            "is_selected": true,
+            "display_name": "first_seen_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "eef47042-6c60-463a-a0b6-724a1388c217",
+            "is_selected": true,
+            "display_name": "lifecycle_stage",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "dd44f8a1-f5d7-4a6a-aa88-a472e7e73085",
+            "is_selected": true,
+            "display_name": "locale",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "2121dbf4-49e9-4c5d-9cf4-f9cd7ebd7e4c",
+            "is_selected": true,
+            "display_name": "preferred_channel",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "ae951af5-9682-4381-b328-6308922adbbb",
+            "is_selected": true,
+            "display_name": "Revenue per Customer",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "309ffe4b-d9d4-409c-9d6c-f24e0c6003cf",
+            "is_selected": true,
+            "display_name": "status",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "c7191452-b9c8-4c09-ab80-0e44804b7234",
+            "is_selected": true,
+            "display_name": "Total Customers",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "018dd05d-8f80-4c26-b630-5147335d8249",
+        "is_selected": true,
+        "display_name": "crm_interactions",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "bc602d44-cac8-4852-93fe-d52b5a0fbc33",
+            "is_selected": true,
+            "display_name": "Avg Satisfaction",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "475da189-be42-4788-ae51-df2fcdc590bd",
+            "is_selected": true,
+            "display_name": "channel",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "cd6133c5-6792-4924-886c-1327567e0e87",
+            "is_selected": true,
+            "display_name": "customer_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "885b09e8-2024-4f43-9a58-12ec7086e9a1",
+            "is_selected": true,
+            "display_name": "duration_min",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "afa8a360-0ef5-4ef5-b9a8-1d3aa620a0c1",
+            "is_selected": true,
+            "display_name": "interaction_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "8f449a40-e528-4681-bb55-626ffcff50ac",
+            "is_selected": true,
+            "display_name": "occurred_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "f653dfdf-7473-42aa-aa41-28c38674ad1b",
+            "is_selected": true,
+            "display_name": "outcome",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "5af7e7b4-6f60-4ec4-81bd-0f3cb4ff4aa8",
+            "is_selected": true,
+            "display_name": "satisfaction_score",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "115f59f5-d92d-4e9c-ac7e-2393fa914c33",
+            "is_selected": true,
+            "display_name": "topic",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "787f5dc5-4842-411a-98d9-771c013bc2a7",
+            "is_selected": true,
+            "display_name": "Total Interactions",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "576acc16-95d1-430a-b634-d0104bca500b",
+            "is_selected": true,
+            "display_name": "type",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "34e6f0d3-b854-4f2f-8d5f-7952bedfb424",
+        "is_selected": true,
+        "display_name": "crm_segments",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "c8cdd5b0-c7f8-4e2b-8728-0e1581635e52",
+            "is_selected": true,
+            "display_name": "created_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "5ba94e2b-1fc3-4977-9e87-2f8e32214ebc",
+            "is_selected": true,
+            "display_name": "description",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "675cea09-0e8f-4d4c-aa44-3e79e81fbf4d",
+            "is_selected": true,
+            "display_name": "is_active",
+            "type": "semantic_model.column",
+            "data_type": "Boolean",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "964cbd0c-95d1-49a7-817a-caf2b1a68a62",
+            "is_selected": true,
+            "display_name": "segment_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "306d3879-313c-40c4-955e-8e2c12d67d49",
+            "is_selected": true,
+            "display_name": "segment_name",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "e6f9adda-3f2d-4425-a1f5-002cec663cf7",
+        "is_selected": true,
+        "display_name": "customer_knowledge_transformed",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "8526127c-e3e0-428c-a271-8ab2caeef346",
+            "is_selected": true,
+            "display_name": "__filepath__",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "3f2813fd-642b-4a21-841f-bf02086d7ed7",
+            "is_selected": true,
+            "display_name": "Classification",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "ee02aa13-7938-4051-8312-f531ca4951be",
+            "is_selected": true,
+            "display_name": "LanguageCode",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "25e23857-c9c0-4295-8591-8515d55d6250",
+            "is_selected": true,
+            "display_name": "NegativeConfidenceScore",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "d270c5bc-fcc5-4a20-8b89-200bcf1d4fb5",
+            "is_selected": true,
+            "display_name": "NeutralConfidenceScore",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "9772e4c8-e5ed-483e-ade0-50064deeb0b9",
+            "is_selected": true,
+            "display_name": "PositiveConfidenceScore",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "1f211606-8a20-4501-9749-f1c535540f47",
+            "is_selected": true,
+            "display_name": "Sentiment",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "777b1c9c-729c-47a9-b1ea-62e86823d82f",
+            "is_selected": true,
+            "display_name": "text",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1870c433-b11b-46b2-a998-97345c73ebad",
+        "is_selected": true,
+        "display_name": "marketing_assets",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "82441baa-0138-4282-89a2-6d21238f59a2",
+            "is_selected": true,
+            "display_name": "asset_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "a4a5f18a-40ad-4ceb-abdf-b2e7d9f54235",
+            "is_selected": true,
+            "display_name": "asset_type",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "6fa2af23-b1d7-44c2-b5fc-413e804ba42a",
+            "is_selected": true,
+            "display_name": "campaign_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "3f1b9b6b-3e4a-41c3-8b44-4fd0ad5024c8",
+            "is_selected": true,
+            "display_name": "created_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "fb79f17a-4b22-4c8e-8b0e-a94cf2575a65",
+            "is_selected": true,
+            "display_name": "language",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "a36c91d7-1a20-444b-bdbb-598bec0d9e9a",
+            "is_selected": true,
+            "display_name": "subject",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "80cc7755-3446-4f8b-b855-5570de00c39f",
+            "is_selected": true,
+            "display_name": "variant",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "9711f48a-24b0-4856-bb17-e2b79462cb36",
+        "is_selected": true,
+        "display_name": "marketing_audiences",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "c39be7b7-7f95-4d12-a64f-fde5b4f6d0e5",
+            "is_selected": true,
+            "display_name": "audience_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "5607f3aa-2f69-497f-83ef-d1f0fc548d54",
+            "is_selected": true,
+            "display_name": "campaign_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "765d69bb-5622-4f23-9bc6-14a2614c41d1",
+            "is_selected": true,
+            "display_name": "criteria_json",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "321f2620-3cf4-45cc-afdd-721ca065a4a1",
+            "is_selected": true,
+            "display_name": "segment_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "2bda33fe-7180-4e01-b7e6-7b68239c2845",
+        "is_selected": true,
+        "display_name": "marketing_campaigns",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "9904f89e-da01-4fd1-9866-6cdeed4a50ff",
+            "is_selected": true,
+            "display_name": "ab_test_flag",
+            "type": "semantic_model.column",
+            "data_type": "Boolean",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "f7ca22d9-bd2e-435a-b1da-4ae20a0059bd",
+            "is_selected": true,
+            "display_name": "budget_eur",
+            "type": "semantic_model.column",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "74ad3301-eec9-4f26-8c85-b267f8f75b90",
+            "is_selected": true,
+            "display_name": "campaign_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "77117220-c7f7-4c52-b6cc-cd2a8f740fe7",
+            "is_selected": true,
+            "display_name": "campaign_name",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "0a93fe68-d587-48b0-9c0f-1ceffbac4f57",
+            "is_selected": true,
+            "display_name": "channel",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "28b2a49b-c4e2-4ed4-9c58-3c82212b3b68",
+            "is_selected": true,
+            "display_name": "end_date",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "4255f4a8-3311-4509-b2b2-3ac529432a2b",
+            "is_selected": true,
+            "display_name": "Marketing Attributed Orders",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "a4195bea-c559-4fdb-9912-d5964debae59",
+            "is_selected": true,
+            "display_name": "objective",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "23cfbf21-446d-4136-b1fb-08ee028ee430",
+            "is_selected": true,
+            "display_name": "start_date",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "500a8abb-9f9a-4a0e-9e11-0c00c2e980a1",
+            "is_selected": true,
+            "display_name": "status",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "8c10977e-c870-4556-80d0-bd376355ee54",
+            "is_selected": true,
+            "display_name": "Total Campaigns",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "ed1b73c2-1258-4290-a52b-b594a8eac35e",
+            "is_selected": true,
+            "display_name": "Total Marketing Budget",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "8da883b4-480f-497f-baff-cb301ecb6ea5",
+        "is_selected": true,
+        "display_name": "marketing_events",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "63c31f79-06b3-4654-a2c4-465a7889b912",
+            "is_selected": true,
+            "display_name": "Bounce Rate %",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "dd558c44-90b3-42cf-9d21-64bb52d9e37c",
+            "is_selected": true,
+            "display_name": "Click Rate %",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "2e46d7c0-e68f-4935-8ded-a020d2a1ec20",
+            "is_selected": true,
+            "display_name": "customer_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "89cbf984-df1d-4f4b-9fa0-90cb9a4d7b0e",
+            "is_selected": true,
+            "display_name": "device",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "3a4dcbd0-dfe6-4892-8cfb-367eb97b2cfe",
+            "is_selected": true,
+            "display_name": "Email Bounces",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "db41f25c-a9ec-4954-92c8-c83391396451",
+            "is_selected": true,
+            "display_name": "Email Clicks",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "83035ddb-f140-425e-bb0e-818edcd885ca",
+            "is_selected": true,
+            "display_name": "Email Opens",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "28c6410e-d5f7-436a-af2c-5b22d2376b96",
+            "is_selected": true,
+            "display_name": "Email Unsubscribes",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "0281d311-5e13-4fa1-8325-b6dc0b5705c7",
+            "is_selected": true,
+            "display_name": "event_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "c9336aad-dd2f-47dd-ac00-6c25aa39a72d",
+            "is_selected": true,
+            "display_name": "event_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "adeff02b-b480-4ddd-a165-a0e5fbcd698f",
+            "is_selected": true,
+            "display_name": "event_type",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "4c314080-3d5a-47f4-8114-b7c031b58743",
+            "is_selected": true,
+            "display_name": "Open Rate %",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "4fb9bd01-7c9a-491e-a3bd-1773752b1881",
+            "is_selected": true,
+            "display_name": "send_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "c617aad4-b53c-4c1a-9748-c310e267bf99",
+            "is_selected": true,
+            "display_name": "Total Email Events",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "6930e8e2-ef09-4d0a-9804-6078b97f4d38",
+            "is_selected": true,
+            "display_name": "Unsubscribe Rate %",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "8fff24dd-1979-417a-9c05-d1caa0e78d4a",
+            "is_selected": true,
+            "display_name": "url_clicked",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "ca4c7d41-b6cc-4461-975b-a1622ef79312",
+            "is_selected": true,
+            "display_name": "user_agent",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1fddf9c6-441c-4922-9fc8-16a5dec19a71",
+        "is_selected": true,
+        "display_name": "marketing_sends",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "41872503-9641-4808-b3d5-9b37683f2601",
+            "is_selected": true,
+            "display_name": "asset_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "cdd5e0ae-9959-4539-bfd7-864b9ee5d485",
+            "is_selected": true,
+            "display_name": "campaign_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "ffda62e8-4a96-404d-8758-7be16e8cc7b1",
+            "is_selected": true,
+            "display_name": "customer_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "6dbd22d6-66b1-4dd4-80e6-b50f62cbd223",
+            "is_selected": true,
+            "display_name": "send_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "f7988410-8b8c-466b-a966-b815ab1be849",
+            "is_selected": true,
+            "display_name": "send_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "714740b3-3949-4253-9df4-3e51fb346d0b",
+            "is_selected": true,
+            "display_name": "Total Email Sends",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "779b877b-3a65-414c-9cc2-7d5a10cdf7cd",
+        "is_selected": true,
+        "display_name": "order_lines",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "180a6c98-60eb-4455-bc44-da28a8eed390",
+            "is_selected": true,
+            "display_name": "Avg Order Value",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "869c2c2f-24d8-46eb-8c66-81e558154937",
+            "is_selected": true,
+            "display_name": "discount_eur",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "3d788bcd-58ed-4a85-8ffd-0c788c36fa5a",
+            "is_selected": true,
+            "display_name": "line_total_eur",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "8a818b7b-eba9-4365-b13d-9b23c0a991bb",
+            "is_selected": true,
+            "display_name": "order_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "27a4f610-9765-4e4e-b90e-34aeb7fb8f63",
+            "is_selected": true,
+            "display_name": "order_line_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "804d8c77-9a66-4a2e-a229-21b993624704",
+            "is_selected": true,
+            "display_name": "product_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "5727cba2-bffe-4492-8bc9-1a30231e0add",
+            "is_selected": true,
+            "display_name": "qty",
+            "type": "semantic_model.column",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "0090779a-f3ad-4f6e-a214-32cbc8f16c6d",
+            "is_selected": true,
+            "display_name": "Total Products Sold",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "f854910b-30d3-4bbe-8890-a4714d4475c4",
+            "is_selected": true,
+            "display_name": "Total Revenue",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "c1b229ec-c52b-4aba-aea1-fb523b14cd8b",
+            "is_selected": true,
+            "display_name": "unit_price_eur",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "50fb5cc1-a93b-4dce-8a59-f9485195b4a5",
+        "is_selected": true,
+        "display_name": "orders",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "e5c14652-bef7-41bf-938c-84d6146d0479",
+            "is_selected": true,
+            "display_name": "attributed_campaign_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "9768ee81-0bb9-4887-a072-e1a46872ee26",
+            "is_selected": true,
+            "display_name": "channel",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "1327a962-949b-4a46-9761-bf9dd315b37b",
+            "is_selected": true,
+            "display_name": "Conversion Rate %",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "c17a0bac-778d-4ba7-9f04-9da90f3a0eb7",
+            "is_selected": true,
+            "display_name": "customer_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "b4a09796-8873-4058-bdf7-1180e514308c",
+            "is_selected": true,
+            "display_name": "Customers Who Ordered",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "8d26c540-21b4-4e15-95bc-7a10252e1a9f",
+            "is_selected": true,
+            "display_name": "order_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "73f65a89-a0ba-4425-aaaa-61a6a3a1a856",
+            "is_selected": true,
+            "display_name": "order_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "83d9b91b-bacd-470c-9898-dec60b260d70",
+            "is_selected": true,
+            "display_name": "Orders MTD",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "c2991ebe-58c1-420e-a010-874d4a2be50b",
+            "is_selected": true,
+            "display_name": "Orders per Customer",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "b3ab0e77-566e-4ae7-ba44-b23a7b37d288",
+            "is_selected": true,
+            "display_name": "promo_code",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "6846adc8-964a-4104-b9d8-80e6a75cf63c",
+            "is_selected": true,
+            "display_name": "Revenue YTD",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "fd6b000a-7996-493d-a5ab-bc69278b18f6",
+            "is_selected": true,
+            "display_name": "status",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "e9ce71ce-c2cd-420e-9be8-242dca3b8d29",
+            "is_selected": true,
+            "display_name": "Total Orders",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "478fad92-778c-4101-bd5e-e17dc8786a8f",
+            "is_selected": true,
+            "display_name": "total_amount_eur",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "0faa99ed-6565-4e46-8532-3a93d475233e",
+        "is_selected": true,
+        "display_name": "products",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "b278eebd-2902-4e66-aa9d-8783c23df88c",
+            "is_selected": true,
+            "display_name": "brand",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "d4528084-593d-427f-baf7-79246a988e51",
+            "is_selected": true,
+            "display_name": "category",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "dc37daf5-de75-4a72-bdfb-6aba2a508398",
+            "is_selected": true,
+            "display_name": "in_stock",
+            "type": "semantic_model.column",
+            "data_type": "Boolean",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "be9f0b8e-b369-441a-bef6-e3d700c1be4e",
+            "is_selected": true,
+            "display_name": "margin_pct",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "bd738775-3d88-4f5b-823c-ee9ad231e4ea",
+            "is_selected": true,
+            "display_name": "price_eur",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "edca5a1d-6bcb-43a4-bb68-6030158707c6",
+            "is_selected": true,
+            "display_name": "product_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "e59f6b81-a7ba-4328-8c50-b330e12b3789",
+            "is_selected": true,
+            "display_name": "product_name",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "b685022c-29e9-47f0-96d2-391c362e0d26",
+            "is_selected": true,
+            "display_name": "sku",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "609bcbf0-f859-4d8f-9055-98128d7ee8ea",
+        "is_selected": true,
+        "display_name": "returns",
+        "type": "semantic_model.table",
+        "description": null,
+        "children": [
+          {
+            "id": "69330053-3f25-4530-868d-846917a488b7",
+            "is_selected": true,
+            "display_name": "amount_refunded_eur",
+            "type": "semantic_model.column",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "aa8c6bd6-b558-4951-b055-3ec5edc5d092",
+            "is_selected": true,
+            "display_name": "created_at",
+            "type": "semantic_model.column",
+            "data_type": "DateTime",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "96975f3d-1b3a-487e-bd33-dff52a65ccaf",
+            "is_selected": true,
+            "display_name": "customer_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "3c14164b-49bc-462c-b4ae-03627bfc83f1",
+            "is_selected": true,
+            "display_name": "order_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "7ef921e3-f63c-4618-8c4d-4cfa063c0957",
+            "is_selected": true,
+            "display_name": "reason",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "1506343a-8463-4131-9508-05479dfd9de8",
+            "is_selected": true,
+            "display_name": "Return Rate %",
+            "type": "semantic_model.measure",
+            "data_type": "Double",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "d8a089c9-3548-4fb9-9a61-790bf8217891",
+            "is_selected": true,
+            "display_name": "return_id",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "c6c0cfa7-cabb-4241-85e3-3beb4a2bcead",
+            "is_selected": true,
+            "display_name": "status",
+            "type": "semantic_model.column",
+            "data_type": "String",
+            "description": null,
+            "children": []
+          },
+          {
+            "id": "b1ac08cf-409e-405c-aa0c-d83960253fc4",
+            "is_selected": true,
+            "display_name": "Total Returns",
+            "type": "semantic_model.measure",
+            "data_type": "Int64",
+            "description": null,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "datasources": {
+    "3d00aeaa-91b9-4567-9166-fa3fc8249e6f": {
+      "fewshots": {
+        "fewShots": [],
+        "parentId": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+        "type": "semantic_model"
+      },
+      "schema": {
+        "dataSourceInfo": {
+          "type": "semantic_model",
+          "semantic_model_id": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+          "semantic_model_name": "Marketing360_Model",
+          "semantic_model_workspace_id": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
+        },
+        "elements": [
+          {
+            "display_name": "customer_knowledge_transformed",
+            "type": "semantic_model.table",
+            "description": "AI-enriched customer feedback. Each row contains classified text (complaint, praise, question), sentiment (positive, neutral, negative), confidence scores for each sentiment, and detected language code. Produced by Azure AI text analytics.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "Classification",
+                "type": "semantic_model.column",
+                "description": "AI classification label (complaint, praise, question, suggestion).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "text",
+                "type": "semantic_model.column",
+                "description": "Original customer feedback text analyzed by AI.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Sentiment",
+                "type": "semantic_model.column",
+                "description": "Overall sentiment. Values: positive, neutral, negative, mixed.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "PositiveConfidenceScore",
+                "type": "semantic_model.column",
+                "description": "Confidence score (0-1) that the sentiment is positive.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "NeutralConfidenceScore",
+                "type": "semantic_model.column",
+                "description": "Confidence score (0-1) that the sentiment is neutral.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "NegativeConfidenceScore",
+                "type": "semantic_model.column",
+                "description": "Confidence score (0-1) that the sentiment is negative.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "LanguageCode",
+                "type": "semantic_model.column",
+                "description": "ISO language code detected by AI (e.g. en, fr, de).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "__filepath__",
+                "type": "semantic_model.column",
+                "description": "Source file path in OneLake for data lineage.",
+                "data_type": "string",
+                "is_hidden": false
+              }
+            ]
+          },
+          {
+            "display_name": "marketing_campaigns",
+            "type": "semantic_model.table",
+            "description": "Marketing campaign definitions. Each row is one campaign with name, objective (acquisition, retention, awareness), start/end dates, budget in EUR, channel (email, social, display, search), A/B test flag, and status (active, completed, draft). Primary key: campaign_id.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "campaign_id",
+                "type": "semantic_model.column",
+                "description": "Unique campaign identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "campaign_name",
+                "type": "semantic_model.column",
+                "description": "Campaign display name.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "objective",
+                "type": "semantic_model.column",
+                "description": "Campaign objective. Values: acquisition, retention, awareness, reactivation.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "start_date",
+                "type": "semantic_model.column",
+                "description": "Campaign start date.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "end_date",
+                "type": "semantic_model.column",
+                "description": "Campaign end date.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "budget_eur",
+                "type": "semantic_model.column",
+                "description": "Campaign budget in EUR.",
+                "data_type": "int64",
+                "is_hidden": false
+              },
+              {
+                "display_name": "channel",
+                "type": "semantic_model.column",
+                "description": "Marketing channel used. Values: email, social, display, search, events.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "ab_test_flag",
+                "type": "semantic_model.column",
+                "description": "Whether this campaign includes an A/B test. TRUE/FALSE.",
+                "data_type": "boolean",
+                "is_hidden": false
+              },
+              {
+                "display_name": "status",
+                "type": "semantic_model.column",
+                "description": "Campaign status. Values: active, completed, draft, paused.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Total Campaigns",
+                "type": "semantic_model.measure",
+                "description": "Count of all campaigns in marketing_campaigns table.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Total Marketing Budget",
+                "type": "semantic_model.measure",
+                "description": "Sum of all campaign budgets in EUR from marketing_campaigns.budget_eur.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Marketing Attributed Orders",
+                "type": "semantic_model.measure",
+                "description": "Count of orders where attribution_source equals marketing. Shows how many sales were driven by marketing campaigns.",
+                "expression": "",
+                "format_string": "TRUE\"\";\"\"TRUE\"\";\"\"FALSE"
+              }
+            ]
+          },
+          {
+            "display_name": "crm_accounts",
+            "type": "semantic_model.table",
+            "description": "B2B company accounts. Each row is one organization with industry, region, tier (enterprise, mid-market, SMB), headcount, annual revenue in EUR, and status. Primary key: account_id. Linked to customers via crm_customers.account_id.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "account_id",
+                "type": "semantic_model.column",
+                "description": "Unique account identifier (string). Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "account_name",
+                "type": "semantic_model.column",
+                "description": "Company name.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "industry",
+                "type": "semantic_model.column",
+                "description": "Industry vertical (e.g. Technology, Healthcare, Finance, Retail).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "region",
+                "type": "semantic_model.column",
+                "description": "Geographic region (e.g. Europe, North America, APAC).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "tier",
+                "type": "semantic_model.column",
+                "description": "Account tier classification. Values: enterprise, mid-market, SMB.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "employee_count",
+                "type": "semantic_model.column",
+                "description": "Number of employees in the company.",
+                "data_type": "int64",
+                "is_hidden": false
+              },
+              {
+                "display_name": "created_at",
+                "type": "semantic_model.column",
+                "description": "Date the account was created in CRM.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "status",
+                "type": "semantic_model.column",
+                "description": "Account status. Values: active, inactive, prospect.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "annual_revenue_eur",
+                "type": "semantic_model.column",
+                "description": "Company annual revenue in EUR.",
+                "data_type": "int64",
+                "is_hidden": false
+              }
+            ]
+          },
+          {
+            "display_name": "marketing_events",
+            "type": "semantic_model.table",
+            "description": "Email engagement events. Each row is one event (open, click, bounce, unsubscribe) tied to a send, with timestamp, clicked URL, device, and user agent. Primary key: event_id. Foreign key: send_id to marketing_sends.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "event_id",
+                "type": "semantic_model.column",
+                "description": "Unique event identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "send_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to marketing_sends. The email send that triggered this event.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "customer_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_customers.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "event_type",
+                "type": "semantic_model.column",
+                "description": "Type of email event. Values: open, click, bounce, unsubscribe, complaint.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "event_at",
+                "type": "semantic_model.column",
+                "description": "Date/time when the event occurred.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "url_clicked",
+                "type": "semantic_model.column",
+                "description": "URL clicked by the recipient (only for click events, null otherwise).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "device",
+                "type": "semantic_model.column",
+                "description": "Device type used (desktop, mobile, tablet).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "user_agent",
+                "type": "semantic_model.column",
+                "description": "User agent string from the email client.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Total Email Events",
+                "type": "semantic_model.measure",
+                "description": "Count of all rows in marketing_events. Includes opens, clicks, bounces, and unsubscribes.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Email Opens' =",
+                "type": "semantic_model.measure",
+                "description": "Count of email open events. Filtered to marketing_events where event_type equals open.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Open Rate %' =",
+                "type": "semantic_model.measure",
+                "description": "Email open rate as percentage: (Email Opens / Total Email Sends) * 100.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Email Clicks' =",
+                "type": "semantic_model.measure",
+                "description": "Count of email click events. Filtered to marketing_events where event_type equals click.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Click Rate %' =",
+                "type": "semantic_model.measure",
+                "description": "Email click rate as percentage: (Email Clicks / Total Email Sends) * 100.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Email Bounces' =",
+                "type": "semantic_model.measure",
+                "description": "Count of email bounce events. Filtered to marketing_events where event_type equals bounce.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Bounce Rate %' =",
+                "type": "semantic_model.measure",
+                "description": "Email bounce rate as percentage: (Email Bounces / Total Email Sends) * 100.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Email Unsubscribes' =",
+                "type": "semantic_model.measure",
+                "description": "Count of email unsubscribe events. Filtered to marketing_events where event_type equals unsubscribe.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Unsubscribe Rate %' =",
+                "type": "semantic_model.measure",
+                "description": "Unsubscribe rate as percentage: (Email Unsubscribes / Total Email Sends) * 100.",
+                "expression": "",
+                "format_string": "General Date"
+              }
+            ]
+          },
+          {
+            "display_name": "crm_interactions",
+            "type": "semantic_model.table",
+            "description": "Customer interaction log. Each row is one touchpoint (call, email, chat, meeting) with channel, topic, outcome (resolved, escalated, pending), satisfaction score (1-5), and duration in minutes. Primary key: interaction_id. Foreign key: customer_id to crm_customers.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "interaction_id",
+                "type": "semantic_model.column",
+                "description": "Unique interaction identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "customer_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_customers.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "type",
+                "type": "semantic_model.column",
+                "description": "Interaction type (call, email, chat, meeting).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "channel",
+                "type": "semantic_model.column",
+                "description": "Channel used for interaction (phone, email, web, in-person).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "occurred_at",
+                "type": "semantic_model.column",
+                "description": "Date/time when the interaction took place.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "topic",
+                "type": "semantic_model.column",
+                "description": "Subject or topic of the interaction (e.g. billing, support, onboarding).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "outcome",
+                "type": "semantic_model.column",
+                "description": "Outcome of the interaction. Values: resolved, escalated, pending, no-answer.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "satisfaction_score",
+                "type": "semantic_model.column",
+                "description": "Customer satisfaction score from 1 (very dissatisfied) to 5 (very satisfied).",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "duration_min",
+                "type": "semantic_model.column",
+                "description": "Duration of the interaction in minutes.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Total Interactions",
+                "type": "semantic_model.measure",
+                "description": "Count of all customer interactions in crm_interactions.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Avg Satisfaction",
+                "type": "semantic_model.measure",
+                "description": "Average customer satisfaction score across all interactions. Scale: 1 (very dissatisfied) to 5 (very satisfied).",
+                "expression": "",
+                "format_string": "General Date"
+              }
+            ]
+          },
+          {
+            "display_name": "marketing_assets",
+            "type": "semantic_model.table",
+            "description": "Creative assets used in campaigns. Each row is one asset (email template, banner, landing page) with subject line, language, A/B variant label, and creation date. Primary key: asset_id. Foreign key: campaign_id to marketing_campaigns.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "asset_id",
+                "type": "semantic_model.column",
+                "description": "Unique asset identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "campaign_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to marketing_campaigns.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "asset_type",
+                "type": "semantic_model.column",
+                "description": "Type of creative asset. Values: email_template, banner, landing_page, social_post.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "subject",
+                "type": "semantic_model.column",
+                "description": "Email subject line or asset title.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "language",
+                "type": "semantic_model.column",
+                "description": "Language of the asset (e.g. fr, en, de).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "variant",
+                "type": "semantic_model.column",
+                "description": "A/B test variant label (e.g. A, B, control).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "created_at",
+                "type": "semantic_model.column",
+                "description": "Date the asset was created.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              }
+            ]
+          },
+          {
+            "display_name": "crm_customer_profile",
+            "type": "semantic_model.table",
+            "description": "Pre-computed customer analytics profile. Each row contains churn_risk_score (0-100, higher = riskier), CLV score, last NPS, total interactions, total orders, total spend in EUR, average order value, email open rate pct, and click rate pct. Foreign key: customer_id to crm_customers.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "customer_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_customers.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "churn_risk_score",
+                "type": "semantic_model.column",
+                "description": "Churn risk score from 0 (no risk) to 100 (highest risk). Pre-computed ML score.",
+                "data_type": "int64",
+                "is_hidden": false
+              },
+              {
+                "display_name": "clv_score",
+                "type": "semantic_model.column",
+                "description": "Customer Lifetime Value score. Higher = more valuable customer.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "nps_last",
+                "type": "semantic_model.column",
+                "description": "Last recorded Net Promoter Score (-100 to 100). Detractors < 0, Promoters > 50.",
+                "data_type": "int64",
+                "is_hidden": false
+              },
+              {
+                "display_name": "last_contact_at",
+                "type": "semantic_model.column",
+                "description": "Date/time of most recent customer contact.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "total_interactions",
+                "type": "semantic_model.column",
+                "description": "Total number of interactions the customer has had.",
+                "data_type": "int64",
+                "is_hidden": false
+              },
+              {
+                "display_name": "total_orders",
+                "type": "semantic_model.column",
+                "description": "Total number of orders placed by the customer.",
+                "data_type": "int64",
+                "is_hidden": false
+              },
+              {
+                "display_name": "total_spend_eur",
+                "type": "semantic_model.column",
+                "description": "Total amount spent by customer across all orders, in EUR.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "avg_order_value_eur",
+                "type": "semantic_model.column",
+                "description": "Average order value for this customer, in EUR.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "open_rate_pct",
+                "type": "semantic_model.column",
+                "description": "Customer email open rate as a percentage (0-100).",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "click_rate_pct",
+                "type": "semantic_model.column",
+                "description": "Customer email click rate as a percentage (0-100).",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Avg CLV",
+                "type": "semantic_model.measure",
+                "description": "Average Customer Lifetime Value score across all customer profiles.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Avg Churn Risk",
+                "type": "semantic_model.measure",
+                "description": "Average churn risk score across all customers. Scale: 0 (no risk) to 100 (highest risk).",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Avg NPS",
+                "type": "semantic_model.measure",
+                "description": "Average Net Promoter Score across all customers. Range: -100 to 100.",
+                "expression": "",
+                "format_string": "0"
+              }
+            ]
+          },
+          {
+            "display_name": "crm_customer_segments",
+            "type": "semantic_model.table",
+            "description": "Many-to-many bridge between customers and segments. Each row assigns one customer to one segment with validity period (start_date to end_date). Foreign keys: customer_id to crm_customers, segment_id to crm_segments.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "customer_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_customers.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "segment_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_segments.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "start_date",
+                "type": "semantic_model.column",
+                "description": "Date when the customer was added to this segment.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "end_date",
+                "type": "semantic_model.column",
+                "description": "Date when the customer left this segment (null if still active).",
+                "data_type": "dateTime",
+                "is_hidden": false
+              }
+            ]
+          },
+          {
+            "display_name": "returns",
+            "type": "semantic_model.table",
+            "description": "Product returns. Each row is one return request with reason, refunded amount in EUR, and status (approved, pending, rejected). Primary key: return_id. Foreign key: order_id to orders.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "return_id",
+                "type": "semantic_model.column",
+                "description": "Unique return identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "order_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to orders.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "customer_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_customers.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "created_at",
+                "type": "semantic_model.column",
+                "description": "Date/time the return was created.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "reason",
+                "type": "semantic_model.column",
+                "description": "Reason for the return (e.g. defective, wrong item, not satisfied).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "amount_refunded_eur",
+                "type": "semantic_model.column",
+                "description": "Refunded amount in EUR.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "status",
+                "type": "semantic_model.column",
+                "description": "Return status. Values: approved, pending, rejected.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Total Returns",
+                "type": "semantic_model.measure",
+                "description": "Count of all product returns in the returns table.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Return Rate %' =",
+                "type": "semantic_model.measure",
+                "description": "Return rate as percentage: (Total Returns / Total Orders) * 100.",
+                "expression": "",
+                "format_string": "General Date"
+              }
+            ]
+          },
+          {
+            "display_name": "marketing_audiences",
+            "type": "semantic_model.table",
+            "description": "Campaign audience targeting. Each row links a campaign to a customer segment with targeting criteria in JSON. Foreign keys: campaign_id to marketing_campaigns, segment_id to crm_segments.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "audience_id",
+                "type": "semantic_model.column",
+                "description": "Unique audience targeting identifier.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "campaign_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to marketing_campaigns.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "segment_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_segments. Target segment for this campaign.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "criteria_json",
+                "type": "semantic_model.column",
+                "description": "JSON object containing detailed targeting criteria (filters, exclusions).",
+                "data_type": "string",
+                "is_hidden": false
+              }
+            ]
+          },
+          {
+            "display_name": "crm_customers",
+            "type": "semantic_model.table",
+            "description": "Master customer dimension. Each row is one customer with lifecycle stage (prospect, active, churned), consent flags, locale, preferred channel, and link to B2B account. Primary key: customer_id. Status values: active, churned, prospect.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "customer_id",
+                "type": "semantic_model.column",
+                "description": "Unique customer identifier (string). Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "account_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_accounts. Links customer to their B2B company.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "email",
+                "type": "semantic_model.column",
+                "description": "Customer email address.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "first_seen_at",
+                "type": "semantic_model.column",
+                "description": "Date/time when customer was first created in the system.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "status",
+                "type": "semantic_model.column",
+                "description": "Customer lifecycle status. Values: active, churned, prospect.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "locale",
+                "type": "semantic_model.column",
+                "description": "Customer locale code (e.g. fr-FR, en-US).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "lifecycle_stage",
+                "type": "semantic_model.column",
+                "description": "Current lifecycle stage of the customer (e.g. lead, opportunity, customer, churned).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "consent_email",
+                "type": "semantic_model.column",
+                "description": "Whether customer has opted in for email marketing. TRUE/FALSE.",
+                "data_type": "boolean",
+                "is_hidden": false
+              },
+              {
+                "display_name": "consent_sms",
+                "type": "semantic_model.column",
+                "description": "Whether customer has opted in for SMS marketing. TRUE/FALSE.",
+                "data_type": "boolean",
+                "is_hidden": false
+              },
+              {
+                "display_name": "preferred_channel",
+                "type": "semantic_model.column",
+                "description": "Customer preferred communication channel (email, phone, sms, chat).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "country",
+                "type": "semantic_model.column",
+                "description": "Customer country (ISO country name, e.g. France, Germany, United States).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Active Customers' =",
+                "type": "semantic_model.measure",
+                "description": "Count of customers where status equals active. This is a current snapshot count. Do NOT filter by first_seen_at or any date column. Use it directly without any date filter: EVALUATE ROW(\"Active Customers\", [Active Customers]).",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Churned Customers' =",
+                "type": "semantic_model.measure",
+                "description": "Count of customers where status equals churned.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Total Customers",
+                "type": "semantic_model.measure",
+                "description": "Count of all customers in crm_customers table.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Revenue per Customer' =",
+                "type": "semantic_model.measure",
+                "description": "Average revenue per customer: Total Revenue / Total Customers. In EUR.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Churn Rate pourcentage' =",
+                "type": "semantic_model.measure",
+                "description": "Customer churn rate as percentage: (Churned Customers / Total Customers) * 100. Key retention KPI.",
+                "expression": "",
+                "format_string": "TRUE\"\";\"\"TRUE\"\";\"\"FALSE"
+              }
+            ]
+          },
+          {
+            "display_name": "orders",
+            "type": "semantic_model.table",
+            "description": "Sales order header. Each row is one order with order date, sales channel (web, store, marketplace), total amount in EUR, promo code used, attributed marketing campaign, and status (completed, cancelled, pending). Primary key: order_id. Foreign keys: customer_id to crm_customers, attributed_campaign_id to marketing_campaigns.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "order_id",
+                "type": "semantic_model.column",
+                "description": "Unique order identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "customer_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_customers.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "order_at",
+                "type": "semantic_model.column",
+                "description": "Date/time when the order was placed.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "channel",
+                "type": "semantic_model.column",
+                "description": "Sales channel. Values: web, store, marketplace, phone.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "total_amount_eur",
+                "type": "semantic_model.column",
+                "description": "Total order amount in EUR (header-level, may differ from sum of lines).",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "promo_code",
+                "type": "semantic_model.column",
+                "description": "Promotional code applied to the order, if any.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "attributed_campaign_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to marketing_campaigns. Campaign attributed to this sale.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "status",
+                "type": "semantic_model.column",
+                "description": "Order status. Values: completed, cancelled, pending, returned.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Total Orders",
+                "type": "semantic_model.measure",
+                "description": "Count of all orders in the orders table.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Orders per Customer' =",
+                "type": "semantic_model.measure",
+                "description": "Average number of orders per customer: Total Orders / Total Customers.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Customers Who Ordered' =",
+                "type": "semantic_model.measure",
+                "description": "Count of distinct customers who have placed at least one order.",
+                "expression": "",
+                "format_string": "0"
+              },
+              {
+                "display_name": "Conversion Rate %",
+                "type": "semantic_model.measure",
+                "description": "Customer conversion rate as percentage: (Customers Who Ordered / Total Customers) * 100. Measures what share of customers have purchased.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Revenue YTD' =",
+                "type": "semantic_model.measure",
+                "description": "Year-to-date revenue using TOTALYTD based on orders.order_at. In EUR.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Orders MTD' =",
+                "type": "semantic_model.measure",
+                "description": "Month-to-date order count using TOTALMTD based on orders.order_at.",
+                "expression": "",
+                "format_string": "General Date"
+              }
+            ]
+          },
+          {
+            "display_name": "order_lines",
+            "type": "semantic_model.table",
+            "description": "Sales order line items. Each row is one product in an order with quantity, unit price in EUR, discount in EUR, and line total in EUR. Primary key: order_line_id. Foreign keys: order_id to orders, product_id to products.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "order_line_id",
+                "type": "semantic_model.column",
+                "description": "Unique order line identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "order_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to orders.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "product_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to products.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "qty",
+                "type": "semantic_model.column",
+                "description": "Quantity of product ordered.",
+                "data_type": "int64",
+                "is_hidden": false
+              },
+              {
+                "display_name": "unit_price_eur",
+                "type": "semantic_model.column",
+                "description": "Unit price of the product in EUR before discount.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "discount_eur",
+                "type": "semantic_model.column",
+                "description": "Discount applied per unit in EUR.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "line_total_eur",
+                "type": "semantic_model.column",
+                "description": "Total line amount in EUR: qty * (unit_price_eur - discount_eur).",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Total Revenue' =",
+                "type": "semantic_model.measure",
+                "description": "Total revenue calculated from order lines: SUM of qty * (unit_price_eur - discount_eur). In EUR. This is the accurate revenue measure based on line-level data.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Avg Order Value",
+                "type": "semantic_model.measure",
+                "description": "Average order value: Total Revenue / Total Orders. In EUR.",
+                "expression": "",
+                "format_string": ""
+              },
+              {
+                "display_name": "Total Products Sold",
+                "type": "semantic_model.measure",
+                "description": "Total quantity of products sold across all order lines.",
+                "expression": "",
+                "format_string": "0"
+              }
+            ]
+          },
+          {
+            "display_name": "marketing_sends",
+            "type": "semantic_model.table",
+            "description": "Email send log. Each row is one email sent to one customer for a campaign, with send timestamp. Primary key: send_id. Foreign keys: campaign_id to marketing_campaigns, customer_id to crm_customers.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "send_id",
+                "type": "semantic_model.column",
+                "description": "Unique send identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "campaign_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to marketing_campaigns.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "asset_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to marketing_assets.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "customer_id",
+                "type": "semantic_model.column",
+                "description": "Foreign key to crm_customers. Recipient of the email.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "send_at",
+                "type": "semantic_model.column",
+                "description": "Date/time when the email was sent.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "Total Email Sends",
+                "type": "semantic_model.measure",
+                "description": "Count of all email sends in marketing_sends. Base denominator for email rate calculations.",
+                "expression": "",
+                "format_string": "General Date"
+              }
+            ]
+          },
+          {
+            "display_name": "products",
+            "type": "semantic_model.table",
+            "description": "Product catalog. Each row is one product with name, category, brand, list price in EUR, margin percentage, SKU, and stock availability. Primary key: product_id.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "product_id",
+                "type": "semantic_model.column",
+                "description": "Unique product identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "product_name",
+                "type": "semantic_model.column",
+                "description": "Product display name.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "category",
+                "type": "semantic_model.column",
+                "description": "Product category (e.g. Electronics, Clothing, Home).",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "brand",
+                "type": "semantic_model.column",
+                "description": "Product brand name.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "price_eur",
+                "type": "semantic_model.column",
+                "description": "Product list price in EUR.",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "margin_pct",
+                "type": "semantic_model.column",
+                "description": "Product profit margin as a percentage (0-100).",
+                "data_type": "double",
+                "is_hidden": false
+              },
+              {
+                "display_name": "sku",
+                "type": "semantic_model.column",
+                "description": "Stock Keeping Unit code.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "in_stock",
+                "type": "semantic_model.column",
+                "description": "Whether the product is currently in stock. TRUE/FALSE.",
+                "data_type": "boolean",
+                "is_hidden": false
+              }
+            ]
+          },
+          {
+            "display_name": "crm_segments",
+            "type": "semantic_model.table",
+            "description": "Customer segment definitions. Each row defines a segment with name, description, creation date, and active flag. Primary key: segment_id. Examples: VIP, At-Risk, New Buyers.",
+            "is_selected": true,
+            "children": [
+              {
+                "display_name": "segment_id",
+                "type": "semantic_model.column",
+                "description": "Unique segment identifier. Primary key.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "segment_name",
+                "type": "semantic_model.column",
+                "description": "Display name of the customer segment.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "description",
+                "type": "semantic_model.column",
+                "description": "Free-text description of the segment criteria.",
+                "data_type": "string",
+                "is_hidden": false
+              },
+              {
+                "display_name": "created_at",
+                "type": "semantic_model.column",
+                "description": "Date the segment was created.",
+                "data_type": "dateTime",
+                "is_hidden": false
+              },
+              {
+                "display_name": "is_active",
+                "type": "semantic_model.column",
+                "description": "Whether this segment is currently active. TRUE/FALSE.",
+                "data_type": "boolean",
+                "is_hidden": false
+              }
+            ]
+          }
+        ],
+        "relationships": [
+          "relationship 2c317f42-8fdc-7968-3bc2-2574f7314319",
+          "relationship 0f56bb6b-1e75-f490-46aa-c783b0053f08",
+          "relationship 3ff38507-a703-89fd-c4bf-fa6b753d3354",
+          "relationship 1c1f691f-9eb2-cf64-5620-33c0d5569f72",
+          "relationship 791e01b4-04c7-900c-5f90-37489b5a2faa",
+          "relationship 7d85f2a3-a12a-61f8-c72f-ecf8c086d7cd",
+          "relationship 1247315c-a470-b5c0-b599-49df5773cf62",
+          "relationship 794aafcc-a0d5-9370-ff97-e4bd157cf47b",
+          "relationship 63826a8a-394f-be21-4382-31b4c8c72677",
+          "relationship 46b7da3b-cfb7-efe6-9186-0a225bd11689",
+          "relationship 0c45b7ff-a891-bb35-671a-5482cf76f9c7",
+          "relationship 83b08e1f-8718-fda9-9e05-8daae5eb39ff",
+          "relationship 8440d70d-fdf3-c21d-adfc-700fe1abdbf8",
+          "relationship db4d12e9-e7f0-e879-952a-69a8ca635e64",
+          "relationship marketing_events_to_marketing_sends"
+        ],
+        "stats": {
+          "tables": 16,
+          "columns": 120,
+          "measures": 34,
+          "relationships": 15,
+          "description_coverage": {
+            "tables": "16/16",
+            "columns": "120/120",
+            "measures": "34/34"
+          }
+        }
+      }
+    }
+  },
+  "thread": {
+    "question": "top 5 campaigns by revenue",
+    "messages": {
+      "data": [
+        {
+          "id": "msg_RsSrGBZw9sdEaqvv4Hu1G6Ag",
+          "assistant_id": null,
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "top 5 campaigns by revenue"
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774384241,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "user",
+          "run_id": null,
+          "status": null,
+          "thread_id": "thread_IkxtfCtUIDVi0Q6FcBgefFn0"
+        },
+        {
+          "id": "msg_VZgfAE5IhkfGjoKfUTZBmI6I",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "Here are the top 5 marketing campaigns by total revenue generated in 2025 (synthetic/fictitious data):\n\n| Rank | Campaign Name                                                   | Total Revenue (2025) | Orders | Sends | ROI      |\n|------|-----------------------------------------------------------------|---------------------:|-------:|-------:|----------:|\n| 1    | Acquisition Campaign Cloned fresh-thinking task-force (CAMP_020) | €163,340,720         | 39,846 | 8,794  | 2,380.7%  |\n| 2    | Acquisition Campaign L'assurance d'avancer en toute tranquilité (CAMP_008) | €163,340,720         | 39,846 | 7,506  | 1,938.2%  |\n| 3    | Acquisition Campaign Organic analyzing model (CAMP_003)          | €163,340,720         | 39,846 | 6,693  | 21,236.9% |\n| 4    | Engagement Campaign Le droit d'évoluer plus rapidement (CAMP_005)| €163,340,720         | 39,846 | 9,882  | 4,301.6%  |\n| 5    | Engagement Campaign Le pouvoir d'innover plus facilement (CAMP_013)| €163,340,720        | 39,846 | 6,877  | 3,472.1%  |\n\n- Period: Full year 2025\n- Sources: Marketing (campaigns, sends, orders), Commerce (orders)\n- Objectives: All campaigns far exceed any standard ROI or revenue targets\n- Every top campaign drove the same order count and revenue, which is highly unusual (potential data duplication/synthetic generation anomaly)\n\nDisclaimers & Anomaly Alerts:\n- This is synthetic/fictitious demo data.\n- All campaigns showing identical revenue & order counts is not realistic and may be due to a data simulation artifact. Interpret with caution.\n\nNext Steps:\n- Deep-dive into individual campaign targeting and channel costs to validate the data and ensure accuracy.\n- Refocus budget towards campaigns with highest effective ROI and lower cost per acquisition based on verified numbers.\n- Recommend segment-level analysis to identify high-value customer groups and optimize messaging for the next cycle.\n\nWould you like to see segment performance for these campaigns or a Power BI visualization (e.g., revenue vs. ROI chart)?"
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774384273,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "assistant",
+          "run_id": "run_fablfXgwTEVFuC4oUr2Hz6on5tJX",
+          "status": null,
+          "thread_id": "thread_IkxtfCtUIDVi0Q6FcBgefFn0"
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "msg_RsSrGBZw9sdEaqvv4Hu1G6Ag",
+      "last_id": "msg_VZgfAE5IhkfGjoKfUTZBmI6I"
+    },
+    "run_status": "completed",
+    "run_steps": {
+      "data": [
+        {
+          "id": "step_fabCjG8HNMX0yRKvuuwT3IaTguhd",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774384271,
+          "created_at": 1774384271,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fablfXgwTEVFuC4oUr2Hz6on5tJX",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fab5TjHl47BFAoAiB18oW60g669U",
+                "function": {
+                  "arguments": "{\"natural_language_description\":\"List the top 5 marketing campaigns by total revenue generated in 2025. Include total revenue, number of orders, number of sends, and ROI for each campaign. Use campaign names for clarity.\"}",
+                  "name": "generate.filename",
+                  "output": "{\"generated_filename\":\"result_0.json\"}",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_IkxtfCtUIDVi0Q6FcBgefFn0",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774384871
+        },
+        {
+          "id": "step_fabuQ8gZxdCAPWUwQFgPOmYVHGwx",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774384271,
+          "created_at": 1774384271,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fablfXgwTEVFuC4oUr2Hz6on5tJX",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_BBNgStr0WzGyusxEW9kwCL5C",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"List the top 5 marketing campaigns by total revenue generated in 2025. Include total revenue, number of orders, number of sends, and ROI for each campaign. Use campaign names for clarity.\",\"code\":\"```dax\\n// Top 5 marketing campaigns by 2025 revenue, including revenue, orders, sends, and ROI.\\nDEFINE\\n  // Total revenue in 2025 based on order_lines, using orders[order_at] as the date.\\n  MEASURE 'order_lines'[Revenue 2025] =\\n    CALCULATE(\\n      [Total Revenue],\\n      YEAR('orders'[order_at]) == 2025\\n    )\\n\\n  // Number of orders in 2025.\\n  MEASURE 'orders'[Orders 2025] =\\n    CALCULATE(\\n      [Total Orders],\\n      YEAR('orders'[order_at]) == 2025\\n    )\\n\\n  // Number of email sends in 2025.\\n  MEASURE 'marketing_sends'[Sends 2025] =\\n    CALCULATE(\\n      [Total Email Sends],\\n      YEAR('marketing_sends'[send_at]) == 2025\\n    )\\n\\n  // ROI in 2025: (Revenue - Cost) / Cost, where Cost = campaign budget.\\n  MEASURE 'marketing_campaigns'[ROI 2025] =\\n    VAR _Revenue2025 = [Revenue 2025]\\n    VAR _Budget =\\n      SUM ( 'marketing_campaigns'[budget_eur] )\\n    RETURN\\n      DIVIDE ( _Revenue2025 - _Budget, _Budget )\\n\\n  // Summary table by campaign with 2025 KPIs.\\n  VAR _CampaignPerf2025 =\\n    SUMMARIZECOLUMNS(\\n      'marketing_campaigns'[campaign_id],\\n      'marketing_campaigns'[campaign_name],\\n      \\\"Total Revenue 2025\\\", [Revenue 2025],\\n      \\\"Orders 2025\\\", [Orders 2025],\\n      \\\"Sends 2025\\\", [Sends 2025],\\n      \\\"ROI 2025\\\", [ROI 2025]\\n    )\\n\\nEVALUATE\\n  // Top 5 campaigns by total revenue in 2025.\\n  TOPN(\\n    5,\\n    _CampaignPerf2025,\\n    [Total Revenue 2025],\\n    DESC\\n  )\\nORDER BY\\n  [Total Revenue 2025] DESC,\\n  'marketing_campaigns'[campaign_name] ASC\\n```\"}",
+                  "name": "analyze.database.execute",
+                  "output": "| marketing_campaigns campaign_id | marketing_campaigns campaign_name                                    | Total Revenue 2025 | Orders 2025 | Sends 2025 | ROI 2025         |\r\n|:--------------------------------|:---------------------------------------------------------------------|-------------------:|------------:|:-----------|:-----------------|\r\n|                                 |                                                                      |   163340720.239999 |       39846 |            |                  |\r\n| CAMP_020                        | Acquisition Campaign Cloned fresh-thinking task-force                |   163340720.239999 |       39846 | 8794       | 2380.65026668416 |\r\n| CAMP_008                        | Acquisition Campaign L'assurance d'avancer en toute tranquilité      |   163340720.239999 |       39846 | 7506       | 1938.15354124867 |\r\n| CAMP_003                        | Acquisition Campaign Organic analyzing model                         |   163340720.239999 |       39846 | 6693       | 21236.9040748927 |\r\n| CAMP_005                        | Engagement Campaign Le droit d'évoluer plus rapidement               |   163340720.239999 |       39846 | 9882       | 4301.62940863471 |\r\n| CAMP_013                        | Engagement Campaign Le pouvoir d'innover plus facilement             |   163340720.239999 |       39846 | 6877       | 3472.11758962363 |\r\n| CAMP_019                        | Retention Campaign Ergonomic user-facing solution                    |   163340720.239999 |       39846 | 8422       | 1814.86535307719 |\r\n| CAMP_016                        | Retention Campaign Face-to-face bandwidth-monitored functionalities  |   163340720.239999 |       39846 | 10214      | 3663.56644695218 |\r\n| CAMP_007                        | Retention Campaign Horizontal user-facing encoding                   |   163340720.239999 |       39846 | 5184       | 2853.70866230905 |\r\n| CAMP_012                        | Retention Campaign Innovative interactive forecast                   |   163340720.239999 |       39846 | 8153       | 2315.23256154282 |\r\n| CAMP_014                        | Retention Campaign L'avantage de concrétiser vos projets à sa source |   163340720.239999 |       39846 | 6977       | 1821.20596213701 |\r\n| CAMP_015                        | Retention Campaign Le confort d'atteindre vos buts sans soucis       |   163340720.239999 |       39846 | 6086       | 2164.71936516354 |\r\n| CAMP_017                        | Retention Campaign Polarized system-worthy utilization               |   163340720.239999 |       39846 | 6072       | 2361.87351348223 |\r\n| CAMP_018                        | Upsell Campaign Compatible 24/7 workforce                            |   163340720.239999 |       39846 | 5046       | 3353.50106257572 |\r\n| CAMP_004                        | Upsell Campaign Le plaisir d'évoluer autrement                       |   163340720.239999 |       39846 | 10925      | 1774.65491787061 |\r\n| CAMP_009                        | Upsell Campaign Reactive hybrid archive                              |   163340720.239999 |       39846 | 3833       | 2023.39977492997 |\r\n| CAMP_001                        | Winback Campaign Decentralized dynamic contingency                   |   163340720.239999 |       39846 | 9633       | 3647.9303958538  |\r\n| CAMP_002                        | Winback Campaign L'avantage de changer plus rapidement               |   163340720.239999 |       39846 | 9740       | 2401.59940045597 |\r\n| CAMP_006                        | Winback Campaign Multi-tiered context-sensitive moderator            |   163340720.239999 |       39846 | 4917       | 3030.0586620646  |\r\n| CAMP_010                        | Winback Campaign Multi-tiered non-volatile software                  |   163340720.239999 |       39846 | 9445       | 7632.10062339359 |\r\n| CAMP_011                        | Winback Campaign Reverse-engineered zero administration secured line |   163340720.239999 |       39846 | 4851       | 2003.67256062837 |",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_IkxtfCtUIDVi0Q6FcBgefFn0",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774384871
+        },
+        {
+          "id": "step_fabVOyXweaNYCw93JwjmF6RVmoN9",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774384271,
+          "created_at": 1774384246,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fablfXgwTEVFuC4oUr2Hz6on5tJX",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_BBNgStr0WzGyusxEW9kwCL5C",
+                "function": {
+                  "arguments": "{\"query\":\"List the top 5 marketing campaigns by total revenue generated in 2025. Include total revenue, number of orders, number of sends, and ROI for each campaign. Use campaign names for clarity.\"}",
+                  "name": "trace.analyze_semantic_model",
+                  "output": "| marketing_campaigns campaign_id | marketing_campaigns campaign_name                                    | Total Revenue 2025 | Orders 2025 | Sends 2025 | ROI 2025         |\r\n|:--------------------------------|:---------------------------------------------------------------------|-------------------:|------------:|:-----------|:-----------------|\r\n|                                 |                                                                      |   163340720.239999 |       39846 |            |                  |\r\n| CAMP_020                        | Acquisition Campaign Cloned fresh-thinking task-force                |   163340720.239999 |       39846 | 8794       | 2380.65026668416 |\r\n| CAMP_008                        | Acquisition Campaign L'assurance d'avancer en toute tranquilité      |   163340720.239999 |       39846 | 7506       | 1938.15354124867 |\r\n| CAMP_003                        | Acquisition Campaign Organic analyzing model                         |   163340720.239999 |       39846 | 6693       | 21236.9040748927 |\r\n| CAMP_005                        | Engagement Campaign Le droit d'évoluer plus rapidement               |   163340720.239999 |       39846 | 9882       | 4301.62940863471 |\r\n| CAMP_013                        | Engagement Campaign Le pouvoir d'innover plus facilement             |   163340720.239999 |       39846 | 6877       | 3472.11758962363 |\r\n| CAMP_019                        | Retention Campaign Ergonomic user-facing solution                    |   163340720.239999 |       39846 | 8422       | 1814.86535307719 |\r\n| CAMP_016                        | Retention Campaign Face-to-face bandwidth-monitored functionalities  |   163340720.239999 |       39846 | 10214      | 3663.56644695218 |\r\n| CAMP_007                        | Retention Campaign Horizontal user-facing encoding                   |   163340720.239999 |       39846 | 5184       | 2853.70866230905 |\r\n| CAMP_012                        | Retention Campaign Innovative interactive forecast                   |   163340720.239999 |       39846 | 8153       | 2315.23256154282 |\r\n| CAMP_014                        | Retention Campaign L'avantage de concrétiser vos projets à sa source |   163340720.239999 |       39846 | 6977       | 1821.20596213701 |\r\n| CAMP_015                        | Retention Campaign Le confort d'atteindre vos buts sans soucis       |   163340720.239999 |       39846 | 6086       | 2164.71936516354 |\r\n| CAMP_017                        | Retention Campaign Polarized system-worthy utilization               |   163340720.239999 |       39846 | 6072       | 2361.87351348223 |\r\n| CAMP_018                        | Upsell Campaign Compatible 24/7 workforce                            |   163340720.239999 |       39846 | 5046       | 3353.50106257572 |\r\n| CAMP_004                        | Upsell Campaign Le plaisir d'évoluer autrement                       |   163340720.239999 |       39846 | 10925      | 1774.65491787061 |\r\n| CAMP_009                        | Upsell Campaign Reactive hybrid archive                              |   163340720.239999 |       39846 | 3833       | 2023.39977492997 |\r\n| CAMP_001                        | Winback Campaign Decentralized dynamic contingency                   |   163340720.239999 |       39846 | 9633       | 3647.9303958538  |\r\n| CAMP_002                        | Winback Campaign L'avantage de changer plus rapidement               |   163340720.239999 |       39846 | 9740       | 2401.59940045597 |\r\n| CAMP_006                        | Winback Campaign Multi-tiered context-sensitive moderator            |   163340720.239999 |       39846 | 4917       | 3030.0586620646  |\r\n| CAMP_010                        | Winback Campaign Multi-tiered non-volatile software                  |   163340720.239999 |       39846 | 9445       | 7632.10062339359 |\r\n| CAMP_011                        | Winback Campaign Reverse-engineered zero administration secured line |   163340720.239999 |       39846 | 4851       | 2003.67256062837 |",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_IkxtfCtUIDVi0Q6FcBgefFn0",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774384846
+        },
+        {
+          "id": "step_fab1wmwJfInjrOh03jh1LpLH6yZg",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774384271,
+          "created_at": 1774384246,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fablfXgwTEVFuC4oUr2Hz6on5tJX",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_BBNgStr0WzGyusxEW9kwCL5C",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"List the top 5 marketing campaigns by total revenue generated in 2025. Include total revenue, number of orders, number of sends, and ROI for each campaign. Use campaign names for clarity.\"}",
+                  "name": "analyze.database.nl2code",
+                  "output": "# Variation 1\n\n```dax\n// Top 5 marketing campaigns by 2025 revenue, including revenue, orders, sends, and ROI.\nDEFINE\n  // Total revenue in 2025 based on order_lines, using orders[order_at] as the date.\n  MEASURE 'order_lines'[Revenue 2025] =\n    CALCULATE(\n      [Total Revenue],\n      YEAR('orders'[order_at]) == 2025\n    )\n\n  // Number of orders in 2025.\n  MEASURE 'orders'[Orders 2025] =\n    CALCULATE(\n      [Total Orders],\n      YEAR('orders'[order_at]) == 2025\n    )\n\n  // Number of email sends in 2025.\n  MEASURE 'marketing_sends'[Sends 2025] =\n    CALCULATE(\n      [Total Email Sends],\n      YEAR('marketing_sends'[send_at]) == 2025\n    )\n\n  // ROI in 2025: (Revenue - Cost) / Cost, where Cost = campaign budget.\n  MEASURE 'marketing_campaigns'[ROI 2025] =\n    VAR _Revenue2025 = [Revenue 2025]\n    VAR _Budget =\n      SUM ( 'marketing_campaigns'[budget_eur] )\n    RETURN\n      DIVIDE ( _Revenue2025 - _Budget, _Budget )\n\n  // Summary table by campaign with 2025 KPIs.\n  VAR _CampaignPerf2025 =\n    SUMMARIZECOLUMNS(\n      'marketing_campaigns'[campaign_id],\n      'marketing_campaigns'[campaign_name],\n      \"Total Revenue 2025\", [Revenue 2025],\n      \"Orders 2025\", [Orders 2025],\n      \"Sends 2025\", [Sends 2025],\n      \"ROI 2025\", [ROI 2025]\n    )\n\nEVALUATE\n  // Top 5 campaigns by total revenue in 2025.\n  TOPN(\n    5,\n    _CampaignPerf2025,\n    [Total Revenue 2025],\n    DESC\n  )\nORDER BY\n  [Total Revenue 2025] DESC,\n  'marketing_campaigns'[campaign_name] ASC\n```",
+                  "diagnostic_details": {
+                    "natural_language_query": "List the top 5 marketing campaigns by total revenue generated in 2025. Include total revenue, number of orders, number of sends, and ROI for each campaign. Use campaign names for clarity.",
+                    "few_shot_examples": null,
+                    "prompt_arguments": null,
+                    "nl2sa_request": "{\r\n  \"targetItem\": {\r\n    \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n    \"itemType\": \"SemanticModel\",\r\n    \"name\": \"Marketing360_Model\"\r\n  },\r\n  \"sourceContext\": {\r\n    \"itemContext\": {\r\n      \"itemId\": \"e92e5867-213a-4a7d-8fac-af1711046527\",\r\n      \"itemType\": \"LLMPlugin\",\r\n      \"name\": \"Marketing360_Agent\"\r\n    }\r\n  },\r\n  \"prompt\": {\r\n    \"parts\": [\r\n      {\r\n        \"partType\": \"text\",\r\n        \"id\": \"0\",\r\n        \"text\": {\r\n          \"type\": \"plain\",\r\n          \"spans\": [\r\n            {\r\n              \"content\": \"List the top 5 marketing campaigns by total revenue generated in 2025. Include total revenue, number of orders, number of sends, and ROI for each campaign. Use campaign names for clarity.\"\r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"hints\": {\r\n      \"daxSchema\": null\r\n    },\r\n    \"options\": {\r\n      \"nl2dax_options\": {\r\n        \"includeTextualAnswer\": false,\r\n        \"includeQuery\": true,\r\n        \"includeDataTable\": true,\r\n        \"retryOnFailure\": true,\r\n        \"maxDataTableRows\": 25,\r\n        \"maxDataTableCols\": 25,\r\n        \"useCopilotTooling\": true\r\n      }\r\n    }\r\n  }\r\n}",
+                    "nl2sa_response": "{\r\n  \"answer\": {\r\n    \"nodes\": [\r\n      {\r\n        \"id\": \"root1\",\r\n        \"parts\": [\r\n          {\r\n            \"partType\": \"dataTable\",\r\n            \"id\": \"dataTable1\",\r\n            \"dataTable\": {\r\n              \"columns\": [\r\n                {\r\n                  \"name\": \"marketing_campaigns campaign_id\",\r\n                  \"type\": \"String\"\r\n                },\r\n                {\r\n                  \"name\": \"marketing_campaigns campaign_name\",\r\n                  \"type\": \"String\"\r\n                },\r\n                {\r\n                  \"name\": \"Total Revenue 2025\",\r\n                  \"type\": \"Double\"\r\n                },\r\n                {\r\n                  \"name\": \"Orders 2025\",\r\n                  \"type\": \"Int64\"\r\n                },\r\n                {\r\n                  \"name\": \"Sends 2025\",\r\n                  \"type\": \"Int64\"\r\n                },\r\n                {\r\n                  \"name\": \"ROI 2025\",\r\n                  \"type\": \"Double\"\r\n                }\r\n              ],\r\n              \"rows\": [\r\n                [\r\n                  null,\r\n                  null,\r\n                  163340720.23999944,\r\n                  39846,\r\n                  null,\r\n                  null\r\n                ],\r\n                [\r\n                  \"CAMP_020\",\r\n                  \"Acquisition Campaign Cloned fresh-thinking task-force\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  8794,\r\n                  2380.6502666841557\r\n                ],\r\n                [\r\n                  \"CAMP_008\",\r\n                  \"Acquisition Campaign L'assurance d'avancer en toute tranquilité\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  7506,\r\n                  1938.1535412486726\r\n                ],\r\n                [\r\n                  \"CAMP_003\",\r\n                  \"Acquisition Campaign Organic analyzing model\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  6693,\r\n                  21236.90407489266\r\n                ],\r\n                [\r\n                  \"CAMP_005\",\r\n                  \"Engagement Campaign Le droit d'évoluer plus rapidement\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  9882,\r\n                  4301.629408634709\r\n                ],\r\n                [\r\n                  \"CAMP_013\",\r\n                  \"Engagement Campaign Le pouvoir d'innover plus facilement\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  6877,\r\n                  3472.1175896236327\r\n                ],\r\n                [\r\n                  \"CAMP_019\",\r\n                  \"Retention Campaign Ergonomic user-facing solution\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  8422,\r\n                  1814.8653530771905\r\n                ],\r\n                [\r\n                  \"CAMP_016\",\r\n                  \"Retention Campaign Face-to-face bandwidth-monitored functionalities\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  10214,\r\n                  3663.5664469521785\r\n                ],\r\n                [\r\n                  \"CAMP_007\",\r\n                  \"Retention Campaign Horizontal user-facing encoding\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  5184,\r\n                  2853.708662309054\r\n                ],\r\n                [\r\n                  \"CAMP_012\",\r\n                  \"Retention Campaign Innovative interactive forecast\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  8153,\r\n                  2315.2325615428167\r\n                ],\r\n                [\r\n                  \"CAMP_014\",\r\n                  \"Retention Campaign L'avantage de concrétiser vos projets à sa source\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  6977,\r\n                  1821.2059621370101\r\n                ],\r\n                [\r\n                  \"CAMP_015\",\r\n                  \"Retention Campaign Le confort d'atteindre vos buts sans soucis\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  6086,\r\n                  2164.719365163541\r\n                ],\r\n                [\r\n                  \"CAMP_017\",\r\n                  \"Retention Campaign Polarized system-worthy utilization\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  6072,\r\n                  2361.8735134822277\r\n                ],\r\n                [\r\n                  \"CAMP_018\",\r\n                  \"Upsell Campaign Compatible 24/7 workforce\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  5046,\r\n                  3353.501062575718\r\n                ],\r\n                [\r\n                  \"CAMP_004\",\r\n                  \"Upsell Campaign Le plaisir d'évoluer autrement\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  10925,\r\n                  1774.6549178706089\r\n                ],\r\n                [\r\n                  \"CAMP_009\",\r\n                  \"Upsell Campaign Reactive hybrid archive\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  3833,\r\n                  2023.3997749299685\r\n                ],\r\n                [\r\n                  \"CAMP_001\",\r\n                  \"Winback Campaign Decentralized dynamic contingency\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  9633,\r\n                  3647.9303958537985\r\n                ],\r\n                [\r\n                  \"CAMP_002\",\r\n                  \"Winback Campaign L'avantage de changer plus rapidement\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  9740,\r\n                  2401.599400455975\r\n                ],\r\n                [\r\n                  \"CAMP_006\",\r\n                  \"Winback Campaign Multi-tiered context-sensitive moderator\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  4917,\r\n                  3030.058662064604\r\n                ],\r\n                [\r\n                  \"CAMP_010\",\r\n                  \"Winback Campaign Multi-tiered non-volatile software\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  9445,\r\n                  7632.1006233935905\r\n                ],\r\n                [\r\n                  \"CAMP_011\",\r\n                  \"Winback Campaign Reverse-engineered zero administration secured line\",\r\n                  163340720.23999944,\r\n                  39846,\r\n                  4851,\r\n                  2003.6725606283683\r\n                ]\r\n              ],\r\n              \"partRef\": {\r\n                \"partId\": \"daxQuery1\"\r\n              }\r\n            }\r\n          },\r\n          {\r\n            \"partType\": \"daxQuery\",\r\n            \"id\": \"daxQuery1\",\r\n            \"daxQuery\": {\r\n              \"query\": \"// Top 5 marketing campaigns by 2025 revenue, including revenue, orders, sends, and ROI.\\nDEFINE\\n  // Total revenue in 2025 based on order_lines, using orders[order_at] as the date.\\n  MEASURE 'order_lines'[Revenue 2025] =\\n    CALCULATE(\\n      [Total Revenue],\\n      YEAR('orders'[order_at]) == 2025\\n    )\\n\\n  // Number of orders in 2025.\\n  MEASURE 'orders'[Orders 2025] =\\n    CALCULATE(\\n      [Total Orders],\\n      YEAR('orders'[order_at]) == 2025\\n    )\\n\\n  // Number of email sends in 2025.\\n  MEASURE 'marketing_sends'[Sends 2025] =\\n    CALCULATE(\\n      [Total Email Sends],\\n      YEAR('marketing_sends'[send_at]) == 2025\\n    )\\n\\n  // ROI in 2025: (Revenue - Cost) / Cost, where Cost = campaign budget.\\n  MEASURE 'marketing_campaigns'[ROI 2025] =\\n    VAR _Revenue2025 = [Revenue 2025]\\n    VAR _Budget =\\n      SUM ( 'marketing_campaigns'[budget_eur] )\\n    RETURN\\n      DIVIDE ( _Revenue2025 - _Budget, _Budget )\\n\\n  // Summary table by campaign with 2025 KPIs.\\n  VAR _CampaignPerf2025 =\\n    SUMMARIZECOLUMNS(\\n      'marketing_campaigns'[campaign_id],\\n      'marketing_campaigns'[campaign_name],\\n      \\\"Total Revenue 2025\\\", [Revenue 2025],\\n      \\\"Orders 2025\\\", [Orders 2025],\\n      \\\"Sends 2025\\\", [Sends 2025],\\n      \\\"ROI 2025\\\", [ROI 2025]\\n    )\\n\\nEVALUATE\\n  // Top 5 campaigns by total revenue in 2025.\\n  TOPN(\\n    5,\\n    _CampaignPerf2025,\\n    [Total Revenue 2025],\\n    DESC\\n  )\\nORDER BY\\n  [Total Revenue 2025] DESC,\\n  'marketing_campaigns'[campaign_name] ASC\",\r\n              \"modelRef\": {\r\n                \"partId\": \"modelRef1\"\r\n              }\r\n            }\r\n          },\r\n          {\r\n            \"partType\": \"itemReference\",\r\n            \"id\": \"modelRef1\",\r\n            \"role\": \"metadata\",\r\n            \"itemReference\": {\r\n              \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n              \"itemType\": \"SemanticModel\",\r\n              \"name\": \"Marketing360_Model\"\r\n            }\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}",
+                    "nl2sa_request_id": "21d871b4-a8f6-427d-abe8-018723b45f35",
+                    "choices": null,
+                    "choices_per_temperature": null,
+                    "clusters": null,
+                    "ranked_choices": null
+                  },
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_IkxtfCtUIDVi0Q6FcBgefFn0",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774384846
+        },
+        {
+          "id": "step_fabiDl7U9ZImTSqU9Iqy5fUg0PJX",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774384243,
+          "created_at": 1774384243,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fablfXgwTEVFuC4oUr2Hz6on5tJX",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fabtIrPyhEkvGCgyK9fOHPvMfcL1",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\"}",
+                  "name": "analyze.database.fewshots.loading",
+                  "output": "Loaded 0 fewshots",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_IkxtfCtUIDVi0Q6FcBgefFn0",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774384843
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "step_fabCjG8HNMX0yRKvuuwT3IaTguhd",
+      "last_id": "step_fabiDl7U9ZImTSqU9Iqy5fUg0PJX"
+    }
+  },
+  "timing": {
+    "total_seconds": 28,
+    "steps": [
+      {
+        "tool": "generate.filename",
+        "status": "completed",
+        "created_at": 1774384271,
+        "completed_at": 1774384271
+      },
+      {
+        "tool": "analyze.database.execute",
+        "status": "completed",
+        "created_at": 1774384271,
+        "completed_at": 1774384271
+      },
+      {
+        "tool": "trace.analyze_semantic_model",
+        "status": "completed",
+        "created_at": 1774384246,
+        "completed_at": 1774384271
+      },
+      {
+        "tool": "analyze.database.nl2code",
+        "status": "completed",
+        "created_at": 1774384246,
+        "completed_at": 1774384271
+      },
+      {
+        "tool": "analyze.database.fewshots.loading",
+        "status": "completed",
+        "created_at": 1774384243,
+        "completed_at": 1774384243
+      }
+    ]
+  }
+}

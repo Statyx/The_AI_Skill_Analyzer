@@ -1,0 +1,32 @@
+{
+  "timestamp": "20260324_194852",
+  "agent_id": "e92e5867-213a-4a7d-8fac-af1711046527",
+  "model_id": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+  "schema_stats": {
+    "tables": 16,
+    "columns": 120,
+    "measures": 34,
+    "relationships": 15,
+    "description_coverage": {
+      "tables": "0/16",
+      "columns": "0/120",
+      "measures": "0/34"
+    }
+  },
+  "results": [
+    {
+      "question": "what is the churn rate",
+      "status": "completed",
+      "answer": "The customer churn rate for the full year 2025 is 9.92%.\n\n- Source: CRM (crm_customers table)\n- Data is synthetic/fictitious\n\nThis churn rate means that nearly 1 in 10 customers left during 2025. If y",
+      "tools": [
+        "generate.filename",
+        "analyze.database.execute",
+        "trace.analyze_semantic_model",
+        "analyze.database.nl2code",
+        "analyze.database.fewshots.loading"
+      ],
+      "file": "full_diag_what_is_the_churn_rate_20260324_194852.json",
+      "duration": 12
+    }
+  ]
+}

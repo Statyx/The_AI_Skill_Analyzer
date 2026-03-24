@@ -1,0 +1,8 @@
+=== Test 1: DMV query ===
+Status: 202
+null
+
+=== Test 2: DAX INFO.TABLES() ===
+Status: 202
+Error parsing: 'NoneType' object is not subscriptable
+null

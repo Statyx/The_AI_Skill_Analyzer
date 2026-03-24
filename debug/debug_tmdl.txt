@@ -1,0 +1,246 @@
+Total parts: 23
+
+--- definition.pbism ---
+(166 chars)
+
+--- definition/tables/customer_knowledge_transformed.tmdl ---
+(3060 chars)
+
+--- definition/tables/marketing_campaigns.tmdl ---
+(3855 chars)
+
+--- definition/tables/crm_accounts.tmdl ---
+(2939 chars)
+
+--- definition/tables/marketing_events.tmdl ---
+(5508 chars)
+
+--- definition/tables/crm_interactions.tmdl ---
+(3702 chars)
+
+--- definition/tables/marketing_assets.tmdl ---
+(2369 chars)
+
+--- definition/tables/crm_customer_profile.tmdl ---
+/// Pre-computed customer analytics profile. Each row contains churn_risk_score (0-100, higher = riskier), CLV score, last NPS, total interactions, total orders, total spend in EUR, average order value, email open rate pct, and click rate pct. Foreign key: customer_id to crm_customers.
+table crm_customer_profile
+	lineageTag: dc89bc8b-2266-4292-80f1-119a344c9730
+	sourceLineageTag: [dbo].[crm_customer_profile]
+
+	/// Average Customer Lifetime Value score across all customer profiles.
+	measure 'Avg CLV' = AVERAGE(crm_customer_profile[clv_score])
+		lineageTag: 6edbdeaf-d51d-4632-b270-3862814a2570
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Average churn risk score across all customers. Scale: 0 (no risk) to 100 (highest risk).
+	measure 'Avg Churn Risk' = AVERAGE(crm_customer_profile[churn_risk_score])
+		lineageTag: 3aa029ec-231f-44af-96fb-657a55b5f086
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Average Net Promoter Score across all customers. Range: -100 to 100.
+	measure 'Avg NPS' = AVERAGE(crm_customer_profile[nps_last])
+		lineageTag: 3e83ce62-34ff-41ce-a9f7-0ef8d19b5b7d
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Foreign key to crm_customers.
+	column customer_id
+		dataType: string
+		lineageTag: cae62641-5f93-4535-a396-f72b795c7716
+		sourceLineageTag: customer_id
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Churn risk score from 0 (no risk) to 100 (highest risk). Pre-computed ML score.
+	column churn_risk_score
+		dataType: int64
+		formatString: 0
+		lineageTag: b90f8990-eb39-4032-a020-942bb01bb5b8
+		sourceLineageTag: churn_risk_score
+		summarizeBy: sum
+		sourceColumn: churn_risk_score
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Customer Lifetime Value score. Higher = more valuable customer.
+	column clv_score
+		dataType: double
+		lineageTag: 6abf271b-c705-4316-8edf-106a1c4e8abc
+		sou
+
+--- definition/tables/crm_customer_segments.tmdl ---
+/// Many-to-many bridge between customers and segments. Each row assigns one customer to one segment with validity period (start_date to end_date). Foreign keys: customer_id to crm_customers, segment_id to crm_segments.
+table crm_customer_segments
+	lineageTag: 77f62002-be47-406c-be3a-bd6981f727ac
+	sourceLineageTag: [dbo].[crm_customer_segments]
+
+	/// Foreign key to crm_customers.
+	column customer_id
+		dataType: string
+		lineageTag: bb37aab8-8250-423b-bde6-9d41f3ba01e4
+		sourceLineageTag: customer_id
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to crm_segments.
+	column segment_id
+		dataType: string
+		lineageTag: cc051beb-aa11-4359-863c-443d9b1b7041
+		sourceLineageTag: segment_id
+		summarizeBy: none
+		sourceColumn: segment_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Date when the customer was added to this segment.
+	column start_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 8e23a8f1-bc8d-460d-9e6f-6dc6b64fdf05
+		sourceLineageTag: start_date
+		summarizeBy: none
+		sourceColumn: start_date
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Date when the customer left this segment (null if still active).
+	column end_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 30591311-4e66-473d-8d90-0da6087e2835
+		sourceLineageTag: end_date
+		summarizeBy: none
+		sourceColumn: end_date
+
+		annotation SummarizationSetBy = Automatic
+
+	partition crm_customer_segments = entity
+		mode: directLake
+		source
+			entityName: crm_customer_segments
+			schemaName: dbo
+			expressionSource: 'DirectLake - Marketing360_Lakehouse'
+
+
+
+--- definition/tables/returns.tmdl ---
+(2836 chars)
+
+--- definition/tables/marketing_audiences.tmdl ---
+(1596 chars)
+
+--- definition/tables/crm_customers.tmdl ---
+/// Master customer dimension. Each row is one customer with lifecycle stage (prospect, active, churned), consent flags, locale, preferred channel, and link to B2B account. Primary key: customer_id. Status values: active, churned, prospect.
+table crm_customers
+	lineageTag: f31271cd-253d-4b32-8ca4-52221cf91683
+	sourceLineageTag: [dbo].[crm_customers]
+
+	/// Count of customers where status equals active.
+	measure 'Active Customers' =
+			
+			CALCULATE(
+			    [Total Customers],
+			    crm_customers[status] = "active"
+			)
+		formatString: 0
+		lineageTag: 438599ff-71d8-4df9-bb05-f9dd96e4ec35
+
+		changedProperty = Name
+
+	/// Count of customers where status equals churned.
+	measure 'Churned Customers' =
+			CALCULATE(
+			    [Total Customers],
+			    crm_customers[status] = "churned"
+			)
+		formatString: 0
+		lineageTag: 6281f04a-edcb-4123-a093-5d8dd554e4fd
+
+		changedProperty = Name
+
+	/// Count of all customers in crm_customers table.
+	measure 'Total Customers' = COUNTROWS(crm_customers)
+		formatString: 0
+		lineageTag: c7191452-b9c8-4c09-ab80-0e44804b7234
+
+		changedProperty = Name
+
+	/// Average revenue per customer: Total Revenue / Total Customers. In EUR.
+	measure 'Revenue per Customer' =
+			
+			DIVIDE(
+			    [Total Revenue],
+			    [Total Customers],
+			    0
+			)
+		lineageTag: ae951af5-9682-4381-b328-6308922adbbb
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Customer churn rate as percentage: (Churned Customers / Total Customers) * 100. Key retention KPI.
+	measure 'Churn Rate pourcentage' =
+			DIVIDE(
+			    [Churned Customers],
+			    [Total Customers],
+			    0
+			) * 100
+		lineageTag: 425746c1-2bb9-46f1-8144-520b451c116e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Unique customer identifier (string). Primary key.
+	column customer_id
+		dataType: string
+		lineageTag: b496cf98-f9ad-4794-82e0-b83e1d9efe4e
+		sourceLineageTag: customer_id
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetB
+
+--- definition/tables/orders.tmdl ---
+(4604 chars)
+
+--- definition/tables/order_lines.tmdl ---
+(3409 chars)
+
+--- definition/tables/marketing_sends.tmdl ---
+(2040 chars)
+
+--- definition/tables/products.tmdl ---
+(2574 chars)
+
+--- definition/tables/crm_segments.tmdl ---
+(1839 chars)
+
+--- definition/relationships.tmdl ---
+(1968 chars)
+
+--- definition/cultures/en-US.tmdl ---
+(569106 chars)
+
+--- definition/expressions.tmdl ---
+(360 chars)
+
+--- definition/model.tmdl ---
+(6783 chars)
+
+--- definition/database.tmdl ---
+(36 chars)
+
+--- .platform ---
+(309 chars)

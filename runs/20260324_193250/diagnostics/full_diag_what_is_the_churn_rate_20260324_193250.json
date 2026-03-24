@@ -1,0 +1,331 @@
+{
+  "downloaded_at": "2026-03-24T19:34:32.165119+00:00",
+  "rolloutEnvironment": "PROD",
+  "stage": "sandbox",
+  "artifactId": "e92e5867-213a-4a7d-8fac-af1711046527",
+  "workspaceId": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2",
+  "source": "full_diagnostic.py (Fabric REST API + Python Client SDK)",
+  "config": {
+    "status": "Succeeded",
+    "createdTimeUtc": "2026-03-24T19:33:01.2009832",
+    "lastUpdatedTimeUtc": "2026-03-24T19:33:02.1992285",
+    "percentComplete": 100,
+    "error": null
+  },
+  "datasources": {
+    "3d00aeaa-91b9-4567-9166-fa3fc8249e6f": {
+      "fewshots": {
+        "fewShots": [],
+        "parentId": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+        "type": "semantic_model"
+      },
+      "schema": {
+        "dataSourceInfo": {
+          "type": "semantic_model",
+          "semantic_model_id": "3d00aeaa-91b9-4567-9166-fa3fc8249e6f",
+          "semantic_model_name": "Marketing360_Model",
+          "semantic_model_workspace_id": "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
+        },
+        "elements": [],
+        "relationships": [],
+        "model_annotations": [],
+        "stats": {
+          "tables": 0,
+          "columns": 0,
+          "measures": 0,
+          "relationships": 0,
+          "annotations": 0,
+          "description_coverage": {
+            "tables": "0/0",
+            "columns": "0/0",
+            "measures": "0/0"
+          }
+        }
+      }
+    }
+  },
+  "thread": {
+    "question": "what is the churn rate",
+    "messages": {
+      "data": [
+        {
+          "id": "msg_OkNuoLQAZFO5WmSurKLIgh0E",
+          "assistant_id": null,
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "what is the churn rate"
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774380793,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "user",
+          "run_id": null,
+          "status": null,
+          "thread_id": "thread_olw7vhyw7ZTGq4px9cKm7beR"
+        },
+        {
+          "id": "msg_sQfmoTZ7Is53EwDMwq8xah3v",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "attachments": [],
+          "completed_at": null,
+          "content": [
+            {
+              "text": {
+                "annotations": [],
+                "value": "Churn Rate for 2025 (full year): 9.92%\nTarget Churn Rate: 15%\nDifference vs Target: -5.08 percentage points (better than target)\n\nSource table: crm_customers\n\nThere are no anomalies reported in churn data.\n\nNext step: Maintain the low churn trend by continuing targeted re-engagement for at-risk segments and monitoring churn risk scores monthly.\n\nNote: This data is synthetic/fictitious."
+              },
+              "type": "text"
+            }
+          ],
+          "created_at": 1774380868,
+          "incomplete_at": null,
+          "incomplete_details": null,
+          "metadata": {},
+          "object": "thread.message",
+          "role": "assistant",
+          "run_id": "run_fabyYOnT6AfKsAuJQrTuL0BATEOn",
+          "status": null,
+          "thread_id": "thread_olw7vhyw7ZTGq4px9cKm7beR"
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "msg_OkNuoLQAZFO5WmSurKLIgh0E",
+      "last_id": "msg_sQfmoTZ7Is53EwDMwq8xah3v"
+    },
+    "run_status": "completed",
+    "run_steps": {
+      "data": [
+        {
+          "id": "step_fabwBd5HiSAi3UluB90AZTQ4EHne",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380865,
+          "created_at": 1774380865,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabyYOnT6AfKsAuJQrTuL0BATEOn",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fab7Ylh2uYvs0Yf4pbCAXHe8lvUN",
+                "function": {
+                  "arguments": "{\"natural_language_description\":\"Calculate the customer churn rate for the full year 2025 and compare it to the target. Mention the source table and any anomalies.\"}",
+                  "name": "generate.filename",
+                  "output": "{\"generated_filename\":\"result_0.json\"}",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_olw7vhyw7ZTGq4px9cKm7beR",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381465
+        },
+        {
+          "id": "step_fabELKT0UanO4cgetBLNaUI9T9kU",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380865,
+          "created_at": 1774380865,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabyYOnT6AfKsAuJQrTuL0BATEOn",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_k007ZnAdcffzrKz5l03xN3VX",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"Calculate the customer churn rate for the full year 2025 and compare it to the target. Mention the source table and any anomalies.\",\"code\":\"```dax\\n// Customer churn rate for full year 2025 vs target, with source and anomaly notes\\nDEFINE\\n  // Target churn rate in percentage points (business objective)\\n  VAR _TargetChurnRatePct = 15.0\\n\\n  // Actual churn rate based on existing measure in 'crm_customers'\\n  VAR _ChurnRate2025 = [Churn Rate pourcentage]\\n\\n  // Difference to target in percentage points\\n  VAR _DiffVsTarget = _ChurnRate2025 - _TargetChurnRatePct\\n\\n  // Build anomaly text without table constructors\\n  VAR _Anomaly1 =\\n    IF(\\n      ISBLANK(_ChurnRate2025),\\n      \\\"Churn rate measure returned BLANK (check definition and filters).\\\",\\n      \\\"\\\"\\n    )\\n  VAR _Anomaly2 =\\n    IF(\\n      NOT ISBLANK(_ChurnRate2025)\\n        && (_ChurnRate2025 < 0 || _ChurnRate2025 > 100),\\n      \\\"Churn rate is outside expected 0-100% range.\\\",\\n      \\\"\\\"\\n    )\\n  VAR _Anomalies =\\n    TRIM(\\n      _Anomaly1\\n        & IF(\\n          AND(_Anomaly1 <> \\\"\\\", _Anomaly2 <> \\\"\\\"),\\n          \\\" \\\",\\n          \\\"\\\"\\n        )\\n        & _Anomaly2\\n    )\\n\\nEVALUATE\\n  // Apply 2025 period context via orders[order_at] (full year 2025)\\n  CALCULATETABLE(\\n    ROW(\\n      \\\"Analyzed Period\\\", \\\"2025-01-01 to 2025-12-31\\\",\\n      \\\"Source Table\\\", \\\"crm_customers\\\",\\n      \\\"Churn Rate 2025 (%)\\\", _ChurnRate2025,\\n      \\\"Target Churn Rate (%)\\\", _TargetChurnRatePct,\\n      \\\"Difference vs Target (pp)\\\", _DiffVsTarget,\\n      \\\"Anomalies\\\", _Anomalies\\n    ),\\n    FILTER(\\n      ALL('orders'[order_at]),\\n      YEAR('orders'[order_at]) == 2025\\n    )\\n  )\\nORDER BY\\n  [Analyzed Period] ASC\\n```\"}",
+                  "name": "analyze.database.execute",
+                  "output": "| Analyzed Period          | Source Table  | Churn Rate 2025 (%) | Target Churn Rate (%) | Difference vs Target (pp) | Anomalies |\r\n|:-------------------------|:--------------|--------------------:|----------------------:|--------------------------:|:----------|\r\n| 2025-01-01 to 2025-12-31 | crm_customers |                9.92 |                    15 |                     -5.08 |           |",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_olw7vhyw7ZTGq4px9cKm7beR",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381465
+        },
+        {
+          "id": "step_fabCQ0aU5RncnqBwlVhPXHTFExzS",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380865,
+          "created_at": 1774380799,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabyYOnT6AfKsAuJQrTuL0BATEOn",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_k007ZnAdcffzrKz5l03xN3VX",
+                "function": {
+                  "arguments": "{\"query\":\"Calculate the customer churn rate for the full year 2025 and compare it to the target. Mention the source table and any anomalies.\"}",
+                  "name": "trace.analyze_semantic_model",
+                  "output": "| Analyzed Period          | Source Table  | Churn Rate 2025 (%) | Target Churn Rate (%) | Difference vs Target (pp) | Anomalies |\r\n|:-------------------------|:--------------|--------------------:|----------------------:|--------------------------:|:----------|\r\n| 2025-01-01 to 2025-12-31 | crm_customers |                9.92 |                    15 |                     -5.08 |           |",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_olw7vhyw7ZTGq4px9cKm7beR",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381399
+        },
+        {
+          "id": "step_fabFAfgqTWVfd6uzKixpYMDH1HdL",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380865,
+          "created_at": 1774380799,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabyYOnT6AfKsAuJQrTuL0BATEOn",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_k007ZnAdcffzrKz5l03xN3VX",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\",\"natural_language_query\":\"Calculate the customer churn rate for the full year 2025 and compare it to the target. Mention the source table and any anomalies.\"}",
+                  "name": "analyze.database.nl2code",
+                  "output": "# Variation 1\n\n```dax\n// Customer churn rate for full year 2025 vs target, with source and anomaly notes\nDEFINE\n  // Target churn rate in percentage points (business objective)\n  VAR _TargetChurnRatePct = 15.0\n\n  // Actual churn rate based on existing measure in 'crm_customers'\n  VAR _ChurnRate2025 = [Churn Rate pourcentage]\n\n  // Difference to target in percentage points\n  VAR _DiffVsTarget = _ChurnRate2025 - _TargetChurnRatePct\n\n  // Build anomaly text without table constructors\n  VAR _Anomaly1 =\n    IF(\n      ISBLANK(_ChurnRate2025),\n      \"Churn rate measure returned BLANK (check definition and filters).\",\n      \"\"\n    )\n  VAR _Anomaly2 =\n    IF(\n      NOT ISBLANK(_ChurnRate2025)\n        && (_ChurnRate2025 < 0 || _ChurnRate2025 > 100),\n      \"Churn rate is outside expected 0-100% range.\",\n      \"\"\n    )\n  VAR _Anomalies =\n    TRIM(\n      _Anomaly1\n        & IF(\n          AND(_Anomaly1 <> \"\", _Anomaly2 <> \"\"),\n          \" \",\n          \"\"\n        )\n        & _Anomaly2\n    )\n\nEVALUATE\n  // Apply 2025 period context via orders[order_at] (full year 2025)\n  CALCULATETABLE(\n    ROW(\n      \"Analyzed Period\", \"2025-01-01 to 2025-12-31\",\n      \"Source Table\", \"crm_customers\",\n      \"Churn Rate 2025 (%)\", _ChurnRate2025,\n      \"Target Churn Rate (%)\", _TargetChurnRatePct,\n      \"Difference vs Target (pp)\", _DiffVsTarget,\n      \"Anomalies\", _Anomalies\n    ),\n    FILTER(\n      ALL('orders'[order_at]),\n      YEAR('orders'[order_at]) == 2025\n    )\n  )\nORDER BY\n  [Analyzed Period] ASC\n```",
+                  "diagnostic_details": {
+                    "natural_language_query": "Calculate the customer churn rate for the full year 2025 and compare it to the target. Mention the source table and any anomalies.",
+                    "few_shot_examples": null,
+                    "prompt_arguments": null,
+                    "nl2sa_request": "{\r\n  \"targetItem\": {\r\n    \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n    \"itemType\": \"SemanticModel\",\r\n    \"name\": \"Marketing360_Model\"\r\n  },\r\n  \"sourceContext\": {\r\n    \"itemContext\": {\r\n      \"itemId\": \"e92e5867-213a-4a7d-8fac-af1711046527\",\r\n      \"itemType\": \"LLMPlugin\",\r\n      \"name\": \"Marketing360_Agent\"\r\n    }\r\n  },\r\n  \"prompt\": {\r\n    \"parts\": [\r\n      {\r\n        \"partType\": \"text\",\r\n        \"id\": \"0\",\r\n        \"text\": {\r\n          \"type\": \"plain\",\r\n          \"spans\": [\r\n            {\r\n              \"content\": \"Calculate the customer churn rate for the full year 2025 and compare it to the target. Mention the source table and any anomalies.\"\r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"hints\": {\r\n      \"daxSchema\": null\r\n    },\r\n    \"options\": {\r\n      \"nl2dax_options\": {\r\n        \"includeTextualAnswer\": false,\r\n        \"includeQuery\": true,\r\n        \"includeDataTable\": true,\r\n        \"retryOnFailure\": true,\r\n        \"maxDataTableRows\": 25,\r\n        \"maxDataTableCols\": 25,\r\n        \"useCopilotTooling\": true\r\n      }\r\n    }\r\n  }\r\n}",
+                    "nl2sa_response": "{\r\n  \"answer\": {\r\n    \"nodes\": [\r\n      {\r\n        \"id\": \"root1\",\r\n        \"parts\": [\r\n          {\r\n            \"partType\": \"dataTable\",\r\n            \"id\": \"dataTable1\",\r\n            \"dataTable\": {\r\n              \"columns\": [\r\n                {\r\n                  \"name\": \"Analyzed Period\",\r\n                  \"type\": \"String\"\r\n                },\r\n                {\r\n                  \"name\": \"Source Table\",\r\n                  \"type\": \"String\"\r\n                },\r\n                {\r\n                  \"name\": \"Churn Rate 2025 (%)\",\r\n                  \"type\": \"Double\"\r\n                },\r\n                {\r\n                  \"name\": \"Target Churn Rate (%)\",\r\n                  \"type\": \"Double\"\r\n                },\r\n                {\r\n                  \"name\": \"Difference vs Target (pp)\",\r\n                  \"type\": \"Double\"\r\n                },\r\n                {\r\n                  \"name\": \"Anomalies\",\r\n                  \"type\": \"String\"\r\n                }\r\n              ],\r\n              \"rows\": [\r\n                [\r\n                  \"2025-01-01 to 2025-12-31\",\r\n                  \"crm_customers\",\r\n                  9.92,\r\n                  15.0,\r\n                  -5.08,\r\n                  \"\"\r\n                ]\r\n              ],\r\n              \"partRef\": {\r\n                \"partId\": \"daxQuery1\"\r\n              }\r\n            }\r\n          },\r\n          {\r\n            \"partType\": \"daxQuery\",\r\n            \"id\": \"daxQuery1\",\r\n            \"daxQuery\": {\r\n              \"query\": \"// Customer churn rate for full year 2025 vs target, with source and anomaly notes\\nDEFINE\\n  // Target churn rate in percentage points (business objective)\\n  VAR _TargetChurnRatePct = 15.0\\n\\n  // Actual churn rate based on existing measure in 'crm_customers'\\n  VAR _ChurnRate2025 = [Churn Rate pourcentage]\\n\\n  // Difference to target in percentage points\\n  VAR _DiffVsTarget = _ChurnRate2025 - _TargetChurnRatePct\\n\\n  // Build anomaly text without table constructors\\n  VAR _Anomaly1 =\\n    IF(\\n      ISBLANK(_ChurnRate2025),\\n      \\\"Churn rate measure returned BLANK (check definition and filters).\\\",\\n      \\\"\\\"\\n    )\\n  VAR _Anomaly2 =\\n    IF(\\n      NOT ISBLANK(_ChurnRate2025)\\n        && (_ChurnRate2025 < 0 || _ChurnRate2025 > 100),\\n      \\\"Churn rate is outside expected 0-100% range.\\\",\\n      \\\"\\\"\\n    )\\n  VAR _Anomalies =\\n    TRIM(\\n      _Anomaly1\\n        & IF(\\n          AND(_Anomaly1 <> \\\"\\\", _Anomaly2 <> \\\"\\\"),\\n          \\\" \\\",\\n          \\\"\\\"\\n        )\\n        & _Anomaly2\\n    )\\n\\nEVALUATE\\n  // Apply 2025 period context via orders[order_at] (full year 2025)\\n  CALCULATETABLE(\\n    ROW(\\n      \\\"Analyzed Period\\\", \\\"2025-01-01 to 2025-12-31\\\",\\n      \\\"Source Table\\\", \\\"crm_customers\\\",\\n      \\\"Churn Rate 2025 (%)\\\", _ChurnRate2025,\\n      \\\"Target Churn Rate (%)\\\", _TargetChurnRatePct,\\n      \\\"Difference vs Target (pp)\\\", _DiffVsTarget,\\n      \\\"Anomalies\\\", _Anomalies\\n    ),\\n    FILTER(\\n      ALL('orders'[order_at]),\\n      YEAR('orders'[order_at]) == 2025\\n    )\\n  )\\nORDER BY\\n  [Analyzed Period] ASC\",\r\n              \"modelRef\": {\r\n                \"partId\": \"modelRef1\"\r\n              }\r\n            }\r\n          },\r\n          {\r\n            \"partType\": \"itemReference\",\r\n            \"id\": \"modelRef1\",\r\n            \"role\": \"metadata\",\r\n            \"itemReference\": {\r\n              \"itemId\": \"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\r\n              \"itemType\": \"SemanticModel\",\r\n              \"name\": \"Marketing360_Model\"\r\n            }\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}",
+                    "nl2sa_request_id": "1fd3fb9e-e8ff-4484-a188-cfd5ce68d527",
+                    "choices": null,
+                    "choices_per_temperature": null,
+                    "clusters": null,
+                    "ranked_choices": null
+                  },
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_olw7vhyw7ZTGq4px9cKm7beR",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381399
+        },
+        {
+          "id": "step_fabAGUtfKhtrsvsW2b6XDGPpiQ1T",
+          "assistant_id": "asst_gyyLNNEh7yGYZOIiVjGFtx1O",
+          "cancelled_at": null,
+          "completed_at": 1774380795,
+          "created_at": 1774380795,
+          "expired_at": null,
+          "failed_at": null,
+          "last_error": null,
+          "metadata": null,
+          "object": "thread.run.step",
+          "run_id": "run_fabyYOnT6AfKsAuJQrTuL0BATEOn",
+          "status": "completed",
+          "step_details": {
+            "tool_calls": [
+              {
+                "id": "call_fabE5zAVxalH5E4htAjiywXbzQQN",
+                "function": {
+                  "arguments": "{\"datasource_name\":\"Marketing360_Model\",\"datasource_type\":\"SemanticModel\",\"datasource_artifact_id\":\"3d00aeaa-91b9-4567-9166-fa3fc8249e6f\",\"datasource_workspace_id\":\"5fa6b81d-fabe-4363-ad3d-b09ef82d16f2\"}",
+                  "name": "analyze.database.fewshots.loading",
+                  "output": "Loaded 0 fewshots",
+                  "diagnostic_details": null,
+                  "mcp_details": null
+                },
+                "type": "function"
+              }
+            ],
+            "type": "tool_calls"
+          },
+          "thread_id": "thread_olw7vhyw7ZTGq4px9cKm7beR",
+          "type": "tool_calls",
+          "usage": null,
+          "expires_at": 1774381395
+        }
+      ],
+      "has_more": false,
+      "object": "list",
+      "first_id": "step_fabwBd5HiSAi3UluB90AZTQ4EHne",
+      "last_id": "step_fabAGUtfKhtrsvsW2b6XDGPpiQ1T"
+    }
+  },
+  "timing": {
+    "total_seconds": 70,
+    "steps": [
+      {
+        "tool": "generate.filename",
+        "status": "completed",
+        "created_at": 1774380865,
+        "completed_at": 1774380865
+      },
+      {
+        "tool": "analyze.database.execute",
+        "status": "completed",
+        "created_at": 1774380865,
+        "completed_at": 1774380865
+      },
+      {
+        "tool": "trace.analyze_semantic_model",
+        "status": "completed",
+        "created_at": 1774380799,
+        "completed_at": 1774380865
+      },
+      {
+        "tool": "analyze.database.nl2code",
+        "status": "completed",
+        "created_at": 1774380799,
+        "completed_at": 1774380865
+      },
+      {
+        "tool": "analyze.database.fewshots.loading",
+        "status": "completed",
+        "created_at": 1774380795,
+        "completed_at": 1774380795
+      }
+    ]
+  }
+}
