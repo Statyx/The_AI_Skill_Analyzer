@@ -1,0 +1,44 @@
+relationship rel_gl_accounts
+	fromColumn: fact_general_ledger.account_id
+	toColumn: dim_chart_of_accounts.account_id
+
+relationship rel_gl_cc
+	fromColumn: fact_general_ledger.cost_center_id
+	toColumn: dim_cost_centers.cost_center_id
+
+relationship rel_budgets_accounts
+	fromColumn: fact_budgets.account_id
+	toColumn: dim_chart_of_accounts.account_id
+
+relationship rel_budgets_cc
+	fromColumn: fact_budgets.cost_center_id
+	toColumn: dim_cost_centers.cost_center_id
+
+relationship rel_forecasts_accounts
+	fromColumn: fact_forecasts.account_id
+	toColumn: dim_chart_of_accounts.account_id
+
+relationship rel_forecasts_cc
+	fromColumn: fact_forecasts.cost_center_id
+	toColumn: dim_cost_centers.cost_center_id
+
+relationship rel_alloc_cc
+	fromColumn: fact_allocations.to_cost_center_id
+	toColumn: dim_cost_centers.cost_center_id
+
+relationship rel_invoices_customers
+	fromColumn: fact_invoices.customer_id
+	toColumn: dim_customers.customer_id
+
+relationship rel_lines_invoices
+	fromColumn: fact_invoice_lines.invoice_id
+	toColumn: fact_invoices.invoice_id
+
+relationship rel_lines_products
+	fromColumn: fact_invoice_lines.product_id
+	toColumn: dim_products.product_id
+
+relationship rel_payments_invoices
+	fromColumn: fact_payments.invoice_id
+	toColumn: fact_invoices.invoice_id
+

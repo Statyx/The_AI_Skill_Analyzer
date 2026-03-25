@@ -1,0 +1,44 @@
+table dim_products
+
+	column product_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column product_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: product_name
+
+	column category
+		dataType: string
+		summarizeBy: none
+		sourceColumn: category
+
+	column unit_price_eur
+		dataType: double
+		summarizeBy: none
+		sourceColumn: unit_price_eur
+
+	column cogs_eur
+		dataType: double
+		summarizeBy: none
+		sourceColumn: cogs_eur
+
+	column gross_margin_pct
+		dataType: double
+		summarizeBy: none
+		sourceColumn: gross_margin_pct
+
+	column is_active
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_active
+
+	partition dim_products_partition = entity
+		mode: directLake
+		source
+			entityName: dim_products
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+

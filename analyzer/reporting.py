@@ -97,7 +97,7 @@ def save_run(results, agent_data, schema, cfg, total_wall, test_cases, interrupt
 
         diag = build_diagnostic(agent_data, schema, r, cfg, verdict_data=verdict_data)
         safe_q = re.sub(r"[^a-z0-9]+", "_", r["question"].lower())[:40].strip("_")
-        filename = f"full_diag_{safe_q}.json"
+        filename = f"Q{i+1}_full_diag_{safe_q}.json"
         with open(diag_dir / filename, "w", encoding="utf-8") as f:
             json.dump(diag, f, indent=2, default=str, ensure_ascii=False)
 
@@ -152,6 +152,557 @@ def save_run(results, agent_data, schema, cfg, total_wall, test_cases, interrupt
         yaml.dump({"test_cases": test_cases}, f, default_flow_style=False, allow_unicode=True)
 
     return ts, out
+
+
+# ══════════════════════════════════════════════════════════════
+#  DAX & ANSWER QUALITY ASSESSMENT
+# ══════════════════════════════════════════════════════════════
+
+def _assess_dax_quality(result):
+    """Rate the quality of the generated DAX query. Returns (stars 0-3, label, detail)."""
+    artifacts = result.get("grading", {}).get("artifacts", {})
+    query = artifacts.get("generated_query", "") or ""
+    tools = result.get("tools", [])
+    verdict = result.get("grading", {}).get("verdict", "?")
+    root_cause = result.get("grading", {}).get("root_cause")
+
+    # No query generated
+    if not query:
+        if not any(t for t in tools if t != "message_creation"):
+            return 0, "No query", "Agent answered without querying the model"
+        return 0, "No query", "No DAX captured in pipeline trace"
+
+    stars = 3
+    notes = []
+
+    # Query errors → poor
+    if root_cause == "QUERY_ERROR":
+        return 1, "Error", "Query failed to execute"
+
+    # Empty results
+    if root_cause == "EMPTY_RESULT":
+        stars = min(stars, 1)
+        notes.append("empty result")
+
+    # Complexity check
+    lines = [l for l in query.strip().split("\n") if l.strip()]
+    if len(lines) > 15:
+        stars = min(stars, 2)
+        notes.append(f"complex ({len(lines)} lines)")
+
+    # Problematic patterns
+    upper_q = query.upper()
+    if "__PBI_TIMEINTELLIGENCEENABLED" in upper_q or "TREATAS" in upper_q:
+        stars = min(stars, 2)
+        notes.append("auto-filters detected")
+
+    # Check if it references measures (good) vs raw columns only
+    measure_refs = re.findall(r'\[[A-Z][^\]]*\]', query)
+    if measure_refs:
+        notes.append(f"refs: {', '.join(measure_refs[:3])}")
+
+    # Verdict influence
+    if verdict == "pass":
+        notes.append("correct result")
+    elif verdict == "fail" and root_cause == "SYNTHESIS":
+        stars = min(stars, 2)
+        notes.append("wrong interpretation")
+
+    label = {3: "Good", 2: "Adequate", 1: "Poor", 0: "None"}.get(stars, "?")
+    return stars, label, "; ".join(notes) if notes else ""
+
+
+# ══════════════════════════════════════════════════════════════
+#  PER-QUESTION ACTION SUGGESTIONS
+# ══════════════════════════════════════════════════════════════
+
+def _suggest_actions(result):
+    """Analyze a failed result and return specific remediation actions.
+
+    Returns list of (action_type, suggestion) tuples where action_type is one of:
+    DESCRIPTION, INSTRUCTION, FEWSHOT, EXPECTED, MEASURE, DATA
+    """
+    g = result.get("grading", {})
+    verdict = g.get("verdict", "?")
+    if verdict != "fail":
+        return []
+
+    root_cause = g.get("root_cause", "UNKNOWN")
+    rca_detail = g.get("root_cause_detail", "")
+    artifacts = g.get("artifacts", {})
+    query = artifacts.get("generated_query", "") or ""
+    query_result = artifacts.get("query_result_preview", "") or ""
+    reformulated = artifacts.get("reformulated_question", "") or ""
+    expected = g.get("expected")
+    compare_detail = g.get("compare_detail", "")
+    answer = result.get("answer", "") or ""
+    question = result.get("question", "")
+
+    actions = []
+
+    # ── AGENT_ERROR ──────────────────────────────────────────
+    if root_cause == "AGENT_ERROR":
+        actions.append(("INSTRUCTION",
+                        "Check agent instructions for conflicting rules or missing permissions"))
+        if "error" in answer.lower() or not answer.strip():
+            actions.append(("DATA",
+                            "Verify the semantic model is accessible and the agent has read permissions"))
+        return actions
+
+    # ── QUERY_ERROR ──────────────────────────────────────────
+    if root_cause == "QUERY_ERROR":
+        if "no data" in query_result.lower() or "empty" in query_result.lower():
+            # Query ran but returned empty — likely wrong filter values
+            # Try to extract the bad filter from the query
+            filter_matches = re.findall(
+                r"""['"]([\w\s]+)['"]""", query)
+            if filter_matches:
+                actions.append(("DESCRIPTION",
+                    f"The query filtered on values {filter_matches[:3]} — "
+                    f"add column descriptions listing the actual valid values "
+                    f"(e.g., the category or type column that was filtered)"))
+            else:
+                actions.append(("DESCRIPTION",
+                    "Query returned no data. Add descriptions to filter columns "
+                    "with the list of valid values so the agent picks the right ones"))
+            actions.append(("FEWSHOT",
+                f"Add a fewshot example for: \"{question}\" showing the correct "
+                f"DAX with valid filter values"))
+        elif "unable to generate" in rca_detail.lower() or "unable to generate" in query_result.lower():
+            # Agent couldn't even generate a query
+            actions.append(("FEWSHOT",
+                f"Agent could not generate a query. Add a fewshot example "
+                f"for: \"{question}\" with a working DAX query"))
+            actions.append(("DESCRIPTION",
+                "Add descriptions to the tables/relationships involved so "
+                "the agent understands how to join them"))
+            actions.append(("INSTRUCTION",
+                "Add an instruction explaining how to build this type of "
+                "cross-domain query (which tables to join and how)"))
+        else:
+            # Generic query failure
+            if query:
+                actions.append(("FEWSHOT",
+                    f"Add a fewshot with corrected DAX for: \"{question}\""))
+            actions.append(("DESCRIPTION",
+                "Check that queried columns/measures exist and are visible. "
+                "Add descriptions to clarify naming"))
+        return actions
+
+    # ── EMPTY_RESULT ─────────────────────────────────────────
+    if root_cause == "EMPTY_RESULT":
+        actions.append(("DESCRIPTION",
+            "Query returned empty. Add descriptions to filter columns with "
+            "valid values (enum lists). The agent may be using wrong filter criteria"))
+        actions.append(("DATA",
+            "Verify the underlying data has rows matching the expected filters "
+            "and time range"))
+        if query:
+            actions.append(("FEWSHOT",
+                f"Add a fewshot example for: \"{question}\" with correct filters"))
+        return actions
+
+    # ── FILTER_CONTEXT ───────────────────────────────────────
+    if root_cause == "FILTER_CONTEXT":
+        if "TimeIntelligence" in query or "TREATAS" in query:
+            actions.append(("INSTRUCTION",
+                "Add instruction: 'Do not use __PBI_TimeIntelligenceEnabled or "
+                "TREATAS auto-filters. Use explicit CALCULATE with date filters'"))
+        actions.append(("FEWSHOT",
+            f"Add a fewshot for: \"{question}\" with clean DAX "
+            f"(no auto-filters)"))
+        return actions
+
+    # ── MEASURE_SELECTION ────────────────────────────────────
+    if root_cause == "MEASURE_SELECTION":
+        actions.append(("DESCRIPTION",
+            "Agent picked the wrong measure. Improve measure descriptions to "
+            "clarify when each should be used (e.g., YTD vs monthly, gross vs net)"))
+        actions.append(("INSTRUCTION",
+            "Add instruction mapping common financial terms to the correct "
+            "measure names in the model"))
+        return actions
+
+    # ── RELATIONSHIP ─────────────────────────────────────────
+    if root_cause == "RELATIONSHIP":
+        actions.append(("DESCRIPTION",
+            "Add relationship descriptions explaining how the tables connect. "
+            "Clarify foreign keys in column descriptions"))
+        actions.append(("FEWSHOT",
+            f"Add a fewshot for: \"{question}\" showing the correct "
+            f"join path between tables"))
+        return actions
+
+    # ── REFORMULATION ────────────────────────────────────────
+    if root_cause == "REFORMULATION":
+        actions.append(("INSTRUCTION",
+            f"Agent misunderstood the question. Add an instruction explaining "
+            f"what '{question}' means in terms of the model"))
+        if reformulated:
+            actions.append(("FEWSHOT",
+                f"Agent reformulated as: \"{reformulated[:80]}\" — add a "
+                f"fewshot with the correct interpretation"))
+        else:
+            actions.append(("FEWSHOT",
+                f"Add a fewshot example for: \"{question}\""))
+        return actions
+
+    # ── SYNTHESIS ────────────────────────────────────────────
+    if root_cause == "SYNTHESIS":
+        # Check if the answer actually contains the right data but
+        # the expected value needs updating
+        if expected is not None:
+            expected_str = str(expected).lower()
+
+            # Numeric mismatch — the agent might have the correct number
+            # but our expected is wrong
+            if g.get("match_type") == "numeric":
+                from .grading import _extract_numbers
+                expected_num = float(str(expected).replace(",", ""))
+
+                # First try abbreviated numbers (711.9M, 1.7B, etc.)
+                # — these are more meaningful than raw digits like "2025"
+                abbrev_matches = re.findall(
+                    r'([\d,.]+)\s*([KMBT])\b', answer, re.IGNORECASE)
+                if abbrev_matches:
+                    mult_map = {"K": 1e3, "M": 1e6, "B": 1e9, "T": 1e12}
+                    expanded = []
+                    for num_str, suffix in abbrev_matches:
+                        mult = mult_map.get(suffix.upper(), 1)
+                        expanded.append(
+                            float(num_str.replace(",", "")) * mult)
+                    closest = min(expanded,
+                                  key=lambda x: abs(x - expected_num))
+                    actions.append(("EXPECTED",
+                        f"Agent returned ~{closest:,.0f}. If correct, "
+                        f"update expected from {expected} to {closest:.0f} "
+                        f"in questions.yaml"))
+                else:
+                    # Fallback: raw numbers from answer
+                    answer_nums = _extract_numbers(answer)
+                    if answer_nums:
+                        closest = min(answer_nums,
+                                      key=lambda x: abs(x - expected_num))
+                        actions.append(("EXPECTED",
+                            f"Agent returned {closest:,.0f}. If correct, "
+                            f"update expected from {expected} to {closest:.0f} "
+                            f"in questions.yaml"))
+                    else:
+                        actions.append(("INSTRUCTION",
+                            "Agent answer has no extractable numbers. "
+                            "Add instruction to always include numeric "
+                            "values, not just labels"))
+
+            # Contains mismatch — keyword not found
+            elif g.get("match_type") == "contains":
+                if not query:
+                    actions.append(("INSTRUCTION",
+                        f"Agent answered without querying. Add instruction "
+                        f"to always query the model for: \"{question}\""))
+                    actions.append(("EXPECTED",
+                        f"Review if expected='{expected}' is the right keyword. "
+                        f"Agent answered: \"{answer[:80]}\""))
+                else:
+                    actions.append(("EXPECTED",
+                        f"Expected '{expected}' not in answer. "
+                        f"Check if the answer is actually correct with "
+                        f"different wording and update expected"))
+                    actions.append(("INSTRUCTION",
+                        f"Add instruction to include '{expected}' in answers "
+                        f"about {', '.join(g.get('tags', []))}"))
+
+        # Check if query was correct but answer interpretation failed
+        if query and "correct result" in (
+                _assess_dax_quality(result)[2] or ""):
+            actions.append(("INSTRUCTION",
+                "The DAX query was correct but the agent misinterpreted the "
+                "result. Add instruction on how to read and present this data"))
+        elif not query:
+            actions.append(("FEWSHOT",
+                f"Agent answered without generating DAX. Add a fewshot "
+                f"for: \"{question}\" to force model querying"))
+
+        # DSO-specific pattern
+        if "dso" in question.lower():
+            actions.append(("MEASURE",
+                "DSO measure may compute per-period. Add a [DSO Annual] "
+                "measure or add instruction explaining DSO = "
+                "Avg(Accounts Receivable) / Revenue * 365"))
+
+        return actions
+
+    # ── UNKNOWN ──────────────────────────────────────────────
+    actions.append(("DESCRIPTION",
+        "Root cause unclear. Start by adding descriptions to tables and "
+        "columns involved in this question"))
+    actions.append(("FEWSHOT",
+        f"Add a fewshot example for: \"{question}\""))
+    return actions
+
+
+def _assess_answer_quality(result):
+    """Rate the quality of the agent's answer. Returns (stars 0-3, label)."""
+    answer = result.get("answer", "") or ""
+    status = result.get("status", "")
+
+    if status != "completed" or not answer.strip():
+        return 0, "Error"
+
+    length = len(answer)
+    has_numbers = bool(re.findall(r'\d[\d,]*\.?\d*', answer))
+    has_structure = any(c in answer for c in ["\n", ":", "|", "*"])
+
+    stars = 1  # Base
+    if has_numbers:
+        stars += 1
+    if length > 100 and has_structure:
+        stars += 1
+    elif length > 200:
+        stars += 1
+
+    stars = min(stars, 3)
+    label = {3: "Data-rich", 2: "Adequate", 1: "Thin", 0: "Error"}.get(stars, "?")
+    return stars, label
+
+
+# ══════════════════════════════════════════════════════════════
+#  FIND PREVIOUS RUN
+# ══════════════════════════════════════════════════════════════
+
+def _find_previous_run_dir(current_ts, cfg):
+    """Find the run directory just before the current one (same profile)."""
+    runs_root = ROOT / cfg.get("output_dir", "runs")
+    profile = cfg.get("profile_name", "default")
+    profile_runs = runs_root / profile
+
+    if not profile_runs.exists():
+        return None
+
+    previous = sorted(
+        d.name for d in profile_runs.iterdir()
+        if d.is_dir() and d.name < current_ts
+    )
+    if not previous:
+        return None
+    return profile_runs / previous[-1]
+
+
+# ══════════════════════════════════════════════════════════════
+#  STAR RATING HELPER
+# ══════════════════════════════════════════════════════════════
+
+def _stars(n):
+    return "\u2605" * n + "\u2606" * (3 - n)   # ★☆
+
+
+# ══════════════════════════════════════════════════════════════
+#  POST-RUN REPORT (auto after each run)
+# ══════════════════════════════════════════════════════════════
+
+def print_post_run_report(results, ts, out, cfg, total_wall):
+    """Print comprehensive post-run analysis with quality ratings and comparison."""
+    lines = []
+
+    def emit(text=""):
+        print(text)
+        lines.append(text)
+
+    W = 72
+
+    n_pass = sum(1 for r in results if r.get("grading", {}).get("verdict") == "pass")
+    n_fail = sum(1 for r in results if r.get("grading", {}).get("verdict") == "fail")
+    n_ungraded = sum(1 for r in results
+                     if r.get("grading", {}).get("verdict") in ("no_expected", None))
+    n_error = sum(1 for r in results if r.get("status") != "completed")
+    pct = round(n_pass / max(n_pass + n_fail, 1) * 100) if (n_pass + n_fail) > 0 else None
+
+    # Load schema stats from saved summary
+    schema_line = ""
+    desc_line = ""
+    summary_file = out / "batch_summary.json"
+    if summary_file.exists():
+        with open(summary_file, "r", encoding="utf-8") as f:
+            saved = json.load(f)
+        stats = saved.get("schema_stats", {})
+        cov = stats.get("description_coverage", {})
+        schema_line = (f"{stats.get('tables', '?')}T / {stats.get('columns', '?')}C / "
+                       f"{stats.get('measures', '?')}M / {stats.get('relationships', '?')}R")
+        desc_line = (f"T={cov.get('tables', '?')} C={cov.get('columns', '?')} "
+                     f"M={cov.get('measures', '?')}")
+
+    # ═══ HEADER ═══
+    emit(f"\n{'=' * W}")
+    emit(f"  POST-RUN ANALYSIS")
+    emit(f"{'=' * W}")
+    emit(f"  Run ID  : {ts}")
+    emit(f"  Profile : {cfg.get('profile_name', 'default')}")
+    emit(f"  Model   : {cfg.get('semantic_model_name', '?')}")
+    if pct is not None:
+        emit(f"  Score   : {n_pass}/{n_pass + n_fail} = {pct}%")
+    emit(f"  Results : + Pass: {n_pass}  X Fail: {n_fail}  "
+         f"? Ungraded: {n_ungraded}  ! Error: {n_error}")
+    emit(f"  Wall    : {total_wall}s ({cfg.get('max_workers', 1)} workers)")
+    if schema_line:
+        emit(f"  Schema  : {schema_line}")
+    if desc_line:
+        emit(f"  Desc cov: {desc_line}")
+    emit(f"{'=' * W}")
+
+    # ═══ COMPARISON WITH PREVIOUS RUN ═══
+    prev_dir = _find_previous_run_dir(ts, cfg)
+    if prev_dir:
+        prev_summary = _load_summary(prev_dir)
+        if prev_summary:
+            prev_grading = prev_summary.get("grading", {})
+            prev_pct = prev_grading.get("score_pct", 0) or 0
+            delta = (pct or 0) - prev_pct
+            delta_str = f"+{delta}" if delta >= 0 else str(delta)
+
+            emit(f"\n  -- COMPARISON vs {prev_dir.name} --")
+            emit(f"  Score : {prev_pct}% -> {pct}% ({delta_str}%)")
+            emit(f"  Wall  : {prev_summary.get('total_wall_seconds', '?')}s -> {total_wall}s")
+
+            prev_by_q = {r["question"]: r for r in prev_summary.get("results", [])}
+            changes = []
+            for r in results:
+                q = r["question"]
+                prev_r = prev_by_q.get(q)
+                if prev_r:
+                    v_prev = prev_r.get("grading", {}).get("verdict", "?")
+                    v_curr = r.get("grading", {}).get("verdict", "?")
+                    if v_prev != v_curr:
+                        if v_prev == "fail" and v_curr == "pass":
+                            tag = "FIXED"
+                        elif v_prev == "pass" and v_curr == "fail":
+                            tag = "REGRESSED"
+                        else:
+                            tag = "CHANGED"
+                        changes.append((tag, r.get("index", "?"), q[:50], v_prev, v_curr))
+
+            if changes:
+                n_fixed = sum(1 for c in changes if c[0] == "FIXED")
+                n_regressed = sum(1 for c in changes if c[0] == "REGRESSED")
+                emit(f"  Changes: {len(changes)} "
+                     f"({n_fixed} fixed, {n_regressed} regressed)")
+                for tag, idx, q, v_prev, v_curr in changes:
+                    emit(f"    [{tag:10s}] Q{idx}: {v_prev} -> {v_curr}: {q}")
+            else:
+                emit(f"  Changes: none (same verdicts)")
+
+    # ═══ QUESTION DETAILS ═══
+    emit(f"\n{'-' * W}")
+    emit(f"  QUESTION DETAILS")
+    emit(f"{'-' * W}")
+
+    for r in results:
+        g = r.get("grading", {})
+        verdict = g.get("verdict", "?")
+        idx = r.get("index", "?")
+        dur = r.get("duration_wall", "?")
+
+        icon = {"pass": "+", "fail": "X"}.get(verdict, "?")
+        rca_tag = f"  [{g.get('root_cause')}]" if g.get("root_cause") else ""
+
+        # Quality ratings
+        dax_stars, dax_label, dax_note = _assess_dax_quality(r)
+        ans_stars, ans_label = _assess_answer_quality(r)
+
+        emit(f"\n  {icon} Q{idx}  [{dur}s]  {r['question']}{rca_tag}")
+
+        # Answer snippet
+        answer = (r.get("answer", "") or "")[:150]
+        if answer:
+            emit(f"    Answer  : {answer}{'...' if len(r.get('answer', '') or '') > 150 else ''}")
+
+        # Expected vs actual
+        if g.get("expected") is not None:
+            emit(f"    Expected: {g['expected']} ({g.get('match_type', '?')})")
+            emit(f"    Verdict : {verdict.upper()} -- {g.get('compare_detail', '')}")
+        elif verdict == "no_expected":
+            emit(f"    Expected: -- (ungraded)")
+
+        # Quality ratings
+        emit(f"    DAX     : {_stars(dax_stars)} {dax_label}"
+             + (f" -- {dax_note}" if dax_note else ""))
+        emit(f"    Quality : {_stars(ans_stars)} {ans_label}")
+
+        # Show generated query for every question
+        all_artifacts = g.get("artifacts", {})
+        gen_query = all_artifacts.get("generated_query", "")
+        if gen_query:
+            qp = gen_query.replace("\n", " ").strip()
+            if len(qp) > 300:
+                qp = qp[:300] + "..."
+            emit(f"    Query   : {qp}")
+
+        # Root cause detail (for failures)
+        if g.get("root_cause"):
+            emit(f"    +-- ROOT CAUSE: {g['root_cause']}")
+            emit(f"    |   {g.get('root_cause_detail', '')}")
+            artifacts = g.get("artifacts", {})
+            if artifacts.get("reformulated_question"):
+                emit(f"    |   Reformulated: "
+                     f"{artifacts['reformulated_question'][:100]}")
+            if artifacts.get("generated_query"):
+                qp = artifacts["generated_query"][:200].replace("\n", " ")
+                emit(f"    |   Query: {qp}")
+            if artifacts.get("query_result_preview"):
+                emit(f"    |   Result: "
+                     f"{artifacts['query_result_preview'][:120]}")
+            emit(f"    +--")
+
+    # ═══ ROOT CAUSE SUMMARY ═══
+    rca_counts = {}
+    for r in results:
+        rc = r.get("grading", {}).get("root_cause")
+        if rc:
+            rca_counts[rc] = rca_counts.get(rc, 0) + 1
+
+    if rca_counts:
+        emit(f"\n{'-' * W}")
+        emit(f"  ROOT CAUSE SUMMARY")
+        for cat, count in sorted(rca_counts.items(), key=lambda x: -x[1]):
+            desc = RCA_CATEGORIES.get(cat, cat)
+            emit(f"    {count}x {cat}: {desc}")
+
+    # ═══ RECOMMENDATIONS ═══
+    emit(f"\n{'-' * W}")
+    emit(f"  NEXT STEPS")
+
+    if n_fail > 0:
+        fail_idx = [str(r["index"]) for r in results
+                    if r.get("grading", {}).get("verdict") == "fail"]
+        emit(f"  -> Re-run failed: python -m analyzer rerun {ts} "
+             f"--questions {' '.join(fail_idx)}")
+    if "FILTER_CONTEXT" in rca_counts:
+        emit("  -> Filter issues. Check time intelligence / auto-filters.")
+    if "REFORMULATION" in rca_counts:
+        emit("  -> Agent misunderstood questions. Add descriptions or rephrase.")
+    if "QUERY_ERROR" in rca_counts:
+        emit("  -> Query errors. Check relationships and column visibility.")
+    if "SYNTHESIS" in rca_counts:
+        emit("  -> Wrong answers. Inspect DAX or add fewshot examples.")
+    if "EMPTY_RESULT" in rca_counts:
+        emit("  -> Empty results. Check data freshness and filter defaults.")
+    if n_ungraded > 0:
+        emit(f"  -> {n_ungraded} ungraded. Fill expected answers in questions.yaml.")
+    if n_pass > 0 and n_fail == 0 and n_error == 0:
+        emit("  -> All passed! Consider adding harder test cases.")
+
+    emit(f"\n  Full analysis : python -m analyzer analyze {ts}")
+    emit(f"  HTML report   : python -m analyzer analyze {ts} --html")
+    try:
+        diag_path = out.relative_to(ROOT)
+    except ValueError:
+        diag_path = out
+    emit(f"  Diagnostics   : {diag_path}/diagnostics/")
+    emit(f"{'=' * W}")
+
+    # ═══ SAVE REPORT TO FILE ═══
+    report_path = out / "report.txt"
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"  Report saved: {report_path}")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -225,6 +776,11 @@ def analyze_run(run_dir):
             icon = "!" if r.get("status") != "completed" else "?"
 
         tags_str = f"  [{', '.join(g.get('tags', []))}]" if g.get("tags") else ""
+
+        # Quality ratings
+        dax_stars, dax_label, dax_note = _assess_dax_quality(r)
+        ans_stars, ans_label = _assess_answer_quality(r)
+
         print(f"  {icon} Q{idx} [{dur}s]{tags_str}")
         print(f"     Question : {r['question']}")
         print(f"     Tools    : {' -> '.join(r.get('tools', []))}")
@@ -235,6 +791,11 @@ def analyze_run(run_dir):
         if g.get("expected") is not None:
             print(f"     Expected : {g['expected']} ({g.get('match_type', '?')})")
             print(f"     Verdict  : {verdict.upper()} -- {g.get('compare_detail', '')}")
+
+        # Quality ratings
+        print(f"     DAX      : {_stars(dax_stars)} {dax_label}"
+              + (f" -- {dax_note}" if dax_note else ""))
+        print(f"     Quality  : {_stars(ans_stars)} {ans_label}")
 
         if r.get("error"):
             print(f"     ERROR    : {r['error']}")
@@ -513,6 +1074,10 @@ def generate_html_report(run_dir, output_path=None):
   .rca {{ background: #fef2f2; border-radius: 0.25rem; padding: 0.5rem 0.75rem;
           margin-top: 0.5rem; border-left: 3px solid var(--fail); }}
   .rca code {{ font-size: 0.8rem; word-break: break-all; }}
+  .actions {{ background: #eff6ff; border-radius: 0.25rem; padding: 0.5rem 0.75rem;
+              margin-top: 0.5rem; border-left: 3px solid #3b82f6; }}
+  .actions ul {{ margin: 0.3rem 0 0 1.2rem; padding: 0; }}
+  .actions li {{ margin-bottom: 0.2rem; font-size: 0.85rem; }}
   table {{ border-collapse: collapse; width: 100%; margin-top: 0.5rem; }}
   th, td {{ text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; }}
   th {{ background: #f9fafb; font-weight: 600; font-size: 0.8rem; color: #6b7280; }}

@@ -1,0 +1,44 @@
+table dim_cost_centers
+
+	column cost_center_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cost_center_id
+
+	column cost_center_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cost_center_name
+
+	column cost_center_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cost_center_type
+
+	column region
+		dataType: string
+		summarizeBy: none
+		sourceColumn: region
+
+	column manager
+		dataType: string
+		summarizeBy: none
+		sourceColumn: manager
+
+	column budget_allocation_pct
+		dataType: double
+		summarizeBy: none
+		sourceColumn: budget_allocation_pct
+
+	column is_active
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_active
+
+	partition dim_cost_centers_partition = entity
+		mode: directLake
+		source
+			entityName: dim_cost_centers
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+

@@ -1,0 +1,49 @@
+table fact_allocations
+
+	column allocation_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: allocation_id
+
+	column fiscal_year
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: fiscal_year
+
+	column from_cost_center
+		dataType: string
+		summarizeBy: none
+		sourceColumn: from_cost_center
+
+	column to_cost_center_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: to_cost_center_id
+
+	column allocation_driver
+		dataType: string
+		summarizeBy: none
+		sourceColumn: allocation_driver
+
+	column driver_units
+		dataType: double
+		summarizeBy: none
+		sourceColumn: driver_units
+
+	column allocated_amount_eur
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: allocated_amount_eur
+
+	column allocation_month
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: allocation_month
+
+	partition fact_allocations_partition = entity
+		mode: directLake
+		source
+			entityName: fact_allocations
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+

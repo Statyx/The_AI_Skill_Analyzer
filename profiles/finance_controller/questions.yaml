@@ -2,40 +2,49 @@
 # Workspace: CDR - Demo Finance Fabric
 # Semantic Model: SM_Finance
 #
-# First run: all expected values are null (~) for discovery.
-# After reviewing answers, fill in expected values for regression grading.
+# Expected answers based on actual model data (FY2025).
+# Revenue ~1.7B EUR, OpEx ~712M, COGS ~692M, Gross Profit ~1B, EBITDA ~984M
 #
 # match_type options: contains, numeric, exact, regex, any_of
-# expected: null (~) means "no grading, manual review"
 # tolerance: for numeric only (absolute value)
 # tags: labels for --tag filtering and report grouping
 
 test_cases:
 
-  # ── Overview / KPIs ──
+  # ── P&L / KPIs ──
 
   - question: "what are the main financial KPIs"
-    expected: ~
+    expected: "Revenue"
     match_type: "contains"
-    tags: ["overview"]
+    tags: ["overview", "pnl"]
 
   - question: "what is the total revenue"
-    expected: ~
+    expected: "1695514236"
     match_type: "numeric"
-    tolerance: 100
+    tolerance: 1000000
     tags: ["kpi", "revenue"]
 
   - question: "what is the total expenses"
-    expected: ~
-    match_type: "numeric"
-    tolerance: 100
+    expected: "711"
+    match_type: "contains"
     tags: ["kpi", "expenses"]
 
   - question: "what is the net profit margin"
-    expected: ~
+    expected: "57"
     match_type: "numeric"
-    tolerance: 0.5
+    tolerance: 5
     tags: ["kpi", "profitability"]
+
+  - question: "what is the gross margin percentage"
+    expected: "59"
+    match_type: "numeric"
+    tolerance: 3
+    tags: ["kpi", "profitability"]
+
+  - question: "show the consolidated P&L"
+    expected: "Revenue"
+    match_type: "contains"
+    tags: ["pnl", "overview"]
 
   # ── Time Intelligence ──
 
@@ -52,7 +61,7 @@ test_cases:
   # ── Cost & Budget ──
 
   - question: "what are the top expense categories"
-    expected: ~
+    expected: "Achats"
     match_type: "contains"
     tags: ["expenses", "ranking"]
 
@@ -61,14 +70,51 @@ test_cases:
     match_type: "contains"
     tags: ["budget"]
 
+  - question: "which cost centers exceeded their budget"
+    expected: "Marketing"
+    match_type: "contains"
+    tags: ["budget", "cost_center"]
+
   # ── Rankings / Breakdowns ──
 
   - question: "top 5 departments by spend"
-    expected: ~
+    expected: "Professional Services"
     match_type: "contains"
     tags: ["ranking", "departments"]
 
   - question: "which cost center has the highest operating expenses"
-    expected: ~
+    expected: "Professional Services"
     match_type: "contains"
     tags: ["ranking", "cost_center"]
+
+  - question: "which product category generates the most revenue"
+    expected: "professional"
+    match_type: "contains"
+    tags: ["ranking", "products"]
+
+  # ── Cash Flow / DSO ──
+
+  - question: "what is the DSO"
+    expected: "32"
+    match_type: "numeric"
+    tolerance: 15
+    tags: ["cash", "dso"]
+
+  # ── Margin Analysis ──
+
+  - question: "what product category has the best gross margin"
+    expected: "margin"
+    match_type: "contains"
+    tags: ["margin", "products"]
+
+  - question: "compare gross margin by customer segment"
+    expected: "enterprise"
+    match_type: "contains"
+    tags: ["margin", "customers"]
+
+  # ── Cross-Domain ──
+
+  - question: "show profitability by cost center"
+    expected: "Sales"
+    match_type: "contains"
+    tags: ["cross_domain", "profitability"]

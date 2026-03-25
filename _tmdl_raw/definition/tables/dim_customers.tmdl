@@ -1,0 +1,59 @@
+table dim_customers
+
+	column customer_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: customer_id
+
+	column company_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: company_name
+
+	column segment
+		dataType: string
+		summarizeBy: none
+		sourceColumn: segment
+
+	column industry
+		dataType: string
+		summarizeBy: none
+		sourceColumn: industry
+
+	column country
+		dataType: string
+		summarizeBy: none
+		sourceColumn: country
+
+	column payment_terms_days
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: payment_terms_days
+
+	column credit_limit_eur
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: credit_limit_eur
+
+	column account_manager
+		dataType: string
+		summarizeBy: none
+		sourceColumn: account_manager
+
+	column created_date
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: created_date
+
+	column is_active
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_active
+
+	partition dim_customers_partition = entity
+		mode: directLake
+		source
+			entityName: dim_customers
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+

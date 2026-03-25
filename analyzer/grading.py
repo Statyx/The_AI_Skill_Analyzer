@@ -17,6 +17,12 @@ PIPELINE_STAGES = {
     "evaluate_sql":     "SQL_EXECUTION",
     "evaluate_query":   "QUERY_EXECUTION",
     "message_creation": "ANSWER_SYNTHESIS",
+    "analyze.database.nl2code":        "NL_TO_QUERY",
+    "analyze.database.execute":        "QUERY_EXECUTION",
+    "analyze.database.fewshots.matching": "FEWSHOT_MATCHING",
+    "analyze.database.fewshots.loading":  "FEWSHOT_LOADING",
+    "trace.analyze_semantic_model":    "QUERY_EXECUTION",
+    "generate.filename":               "FILE_GENERATION",
 }
 
 # ── Root cause categories ─────────────────────────────────────
@@ -136,9 +142,12 @@ def trace_pipeline(run_details):
                 if isinstance(output_raw, str) and output_raw.strip()[:1] in ("{", "["):
                     output = json.loads(output_raw)
                 else:
-                    output = {"_raw": str(output_raw)[:1000] if output_raw else ""}
+                    # Keep more output for code generation tools (DAX can be long)
+                    max_len = 3000 if "nl2code" in tool_name else 1000
+                    output = {"_raw": str(output_raw)[:max_len] if output_raw else ""}
             except (json.JSONDecodeError, TypeError):
-                output = {"_raw": str(output_raw)[:1000]}
+                max_len = 3000 if "nl2code" in tool_name else 1000
+                output = {"_raw": str(output_raw)[:max_len]}
 
             trace.append({
                 "stage": stage, "tool": tool_name, "status": status,
@@ -222,18 +231,35 @@ def extract_artifacts(pipeline_trace):
         output = step.get("output") or {}
 
         if isinstance(args, dict):
+            # Reformulated question: from trace.analyze_semantic_model or execute args
             if args.get("query") and not reformulated:
                 reformulated = args["query"]
+            if args.get("natural_language_description") and not reformulated:
+                reformulated = args["natural_language_description"]
+
+            # DAX from arguments (legacy tool formats)
             dax = args.get("dax") or args.get("expression") or args.get("query_text") or ""
             if dax and not generated_query:
                 generated_query = dax
 
+        # Extract DAX from nl2code output (Fabric agent: markdown fenced code)
+        if isinstance(output, dict) and "nl2code" in step.get("tool", ""):
+            raw = output.get("_raw", "")
+            if raw:
+                # Parse ```dax ... ``` fence from nl2code output
+                fence_match = re.search(r'```(?:dax|DAX)?\s*\n(.*?)```', raw, re.DOTALL)
+                if fence_match and not generated_query:
+                    generated_query = fence_match.group(1).strip()
+
+        # Query result: from execute/trace tools (not nl2code)
         if step["tool"] != "message_creation" and isinstance(output, dict):
             raw = output.get("_raw", "")
-            if raw and not query_result:
+            tool_name = step.get("tool", "")
+            if raw and not query_result and "nl2code" not in tool_name:
                 query_result = str(raw)[:500]
             if output and output != {"_raw": ""}:
-                tool_outputs.append({"tool": step["tool"], "output_preview": str(output)[:300]})
+                tool_outputs.append({"tool": step["tool"],
+                                     "output_preview": str(output)[:300]})
 
     return {
         "reformulated_question": reformulated,

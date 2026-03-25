@@ -19,7 +19,7 @@ from .config import ROOT, resolve_config, load_test_cases, list_profiles
 from .auth import FabricSession
 from .snapshot import snapshot_is_fresh, load_snapshot, take_snapshot
 from .runner import run_questions_parallel, run_questions_serial
-from .reporting import save_run, analyze_run, find_run_dir, diff_runs, generate_html_report
+from .reporting import save_run, analyze_run, find_run_dir, diff_runs, generate_html_report, print_post_run_report
 from .init import scaffold_profile
 from .validate import validate_profile
 
@@ -89,39 +89,8 @@ def cmd_run(args, cfg):
     if getattr(args, "html", False):
         generate_html_report(out)
 
-    # Summary
-    print(f"\n[4/4] Results\n")
-    n_pass = sum(1 for r in results if r.get("grading", {}).get("verdict") == "pass")
-    n_fail = sum(1 for r in results if r.get("grading", {}).get("verdict") == "fail")
-    n_ungraded = sum(1 for r in results if r.get("grading", {}).get("verdict") in ("no_expected", None))
-
-    print(f"{'=' * W}")
-    print(f"  Run ID : {ts}")
-    print(f"  Profile: {cfg.get('profile_name', 'default')}")
-    print(f"  Output : {out.relative_to(ROOT)}")
-    if interrupted:
-        print(f"  WARNING: Run was interrupted (partial results saved)")
-    if (n_pass + n_fail) > 0:
-        pct = round(n_pass / (n_pass + n_fail) * 100)
-        print(f"  Score  : {n_pass}/{n_pass + n_fail} = {pct}%")
-    print(f"  + Pass: {n_pass}  X Fail: {n_fail}  ? Ungraded: {n_ungraded}  | {total_wall}s")
-    print(f"{'=' * W}")
-
-    for r in results:
-        g = r.get("grading", {})
-        verdict = g.get("verdict", "?")
-        icon = {"pass": "+", "fail": "X"}.get(verdict, "?")
-        detail = ""
-        if verdict == "fail" and g.get("root_cause"):
-            detail = f" [{g['root_cause']}]"
-        print(f"  {icon} Q{r['index']} [{r['duration_wall']}s] {r['question']}{detail}")
-
-    if n_fail > 0:
-        fail_idx = [str(r["index"]) for r in results if r.get("grading", {}).get("verdict") == "fail"]
-        print(f"\n  Re-run failed: python -m analyzer rerun {ts} --questions {' '.join(fail_idx)}")
-
-    print(f"\n  Full analysis: python -m analyzer analyze {ts}")
-    print(f"  Detail files:  {out.relative_to(ROOT)}/diagnostics/")
+    # Post-run analysis report
+    print_post_run_report(results, ts, out, cfg, total_wall)
 
 
 def cmd_rerun(args, cfg):
@@ -182,11 +151,8 @@ def cmd_rerun(args, cfg):
     if getattr(args, "html", False):
         generate_html_report(out)
 
-    n_pass = sum(1 for r in results if r.get("grading", {}).get("verdict") == "pass")
-    n_fail = sum(1 for r in results if r.get("grading", {}).get("verdict") == "fail")
-    print(f"\n  RERUN: + {n_pass} pass  X {n_fail} fail  |  {total_wall}s  |  Run: {ts}")
-    print(f"  Output: {out.relative_to(ROOT)}")
-    print(f"  Full analysis: python -m analyzer analyze {ts}")
+    # Post-run analysis report
+    print_post_run_report(results, ts, out, cfg, total_wall)
 
 
 def cmd_analyze(args, cfg):

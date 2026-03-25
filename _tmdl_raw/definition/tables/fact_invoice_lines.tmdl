@@ -1,0 +1,49 @@
+table fact_invoice_lines
+
+	column line_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: line_id
+
+	column invoice_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: invoice_id
+
+	column product_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column quantity
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: quantity
+
+	column unit_price_eur
+		dataType: double
+		summarizeBy: none
+		sourceColumn: unit_price_eur
+
+	column discount_pct
+		dataType: double
+		summarizeBy: none
+		sourceColumn: discount_pct
+
+	column line_total_eur
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: line_total_eur
+
+	column cogs_eur
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: cogs_eur
+
+	partition fact_invoice_lines_partition = entity
+		mode: directLake
+		source
+			entityName: fact_invoice_lines
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+

@@ -1,0 +1,73 @@
+table fact_budgets
+
+	measure 'Budget Amount' = SUM(fact_budgets[budget_amount_eur])
+		formatString: #,##0.00
+
+	measure 'Actual Amount' = SUM(fact_general_ledger[debit_amount_eur])
+		formatString: #,##0.00
+
+	measure 'Variance Amount' = [Actual Amount] - [Budget Amount]
+		formatString: #,##0.00
+
+	measure 'Variance %' = DIVIDE([Variance Amount], [Budget Amount], 0)
+		formatString: 0.00%
+
+	measure 'Material Variance' =
+			IF(
+			    ABS([Variance %]) > 0.05,
+			    "Material (" & FORMAT([Variance %], "0.0%") & ")",
+			    "Within Budget"
+			)
+
+	column budget_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: budget_id
+
+	column fiscal_year
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: fiscal_year
+
+	column period_month
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: period_month
+
+	column period_date
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: period_date
+
+	column cost_center_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cost_center_id
+
+	column account_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: account_id
+
+	column budget_amount_eur
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: budget_amount_eur
+
+	column budget_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: budget_type
+
+	column version
+		dataType: string
+		summarizeBy: none
+		sourceColumn: version
+
+	partition fact_budgets_partition = entity
+		mode: directLake
+		source
+			entityName: fact_budgets
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+

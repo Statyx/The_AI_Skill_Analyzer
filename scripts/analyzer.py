@@ -1072,7 +1072,7 @@ def save_run(results, agent_data, schema, cfg, total_wall, test_cases):
         # Save per-question diagnostic (with grading + RCA)
         diag = build_diagnostic(agent_data, schema, r, cfg, verdict_data=verdict_data)
         safe_q = re.sub(r"[^a-z0-9]+", "_", r["question"].lower())[:40].strip("_")
-        filename = f"full_diag_{safe_q}.json"
+        filename = f"Q{i+1}_full_diag_{safe_q}.json"
         with open(diag_dir / filename, "w", encoding="utf-8") as f:
             json.dump(diag, f, indent=2, default=str, ensure_ascii=False)
 

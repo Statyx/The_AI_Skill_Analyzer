@@ -1,0 +1,110 @@
+table fact_general_ledger
+
+	measure 'Total Revenue' =
+			CALCULATE(
+			    SUM(fact_general_ledger[credit_amount_eur]),
+			    dim_chart_of_accounts[account_type] = "Revenue"
+			)
+		formatString: #,##0.00
+
+	measure 'Total COGS' =
+			CALCULATE(
+			    SUM(fact_general_ledger[debit_amount_eur]),
+			    dim_chart_of_accounts[account_type] = "Expense",
+			    dim_chart_of_accounts[sub_category] = "60 - Achats"
+			)
+		formatString: #,##0.00
+
+	measure 'Gross Profit' = [Total Revenue] - [Total COGS]
+		formatString: #,##0.00
+
+	measure 'Gross Margin %' = DIVIDE([Gross Profit], [Total Revenue], 0)
+		formatString: 0.00%
+
+	measure 'Operating Expenses' =
+			CALCULATE(
+			    SUM(fact_general_ledger[debit_amount_eur]),
+			    dim_chart_of_accounts[account_type] = "Expense"
+			)
+		formatString: #,##0.00
+
+	measure EBITDA = [Total Revenue] - [Operating Expenses]
+		formatString: #,##0.00
+
+	measure 'EBITDA Margin %' = DIVIDE([EBITDA], [Total Revenue], 0)
+		formatString: 0.00%
+
+	measure 'Net Income' =
+			CALCULATE(SUM(fact_general_ledger[credit_amount_eur])) -
+			CALCULATE(SUM(fact_general_ledger[debit_amount_eur]))
+		formatString: #,##0.00
+
+	measure 'YTD Revenue' =
+			CALCULATE(
+			    [Total Revenue],
+			    DATESYTD(fact_general_ledger[entry_date])
+			)
+		formatString: #,##0.00
+
+	column entry_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entry_id
+
+	column entry_date
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: entry_date
+
+	column period_month
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: period_month
+
+	column fiscal_year
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: fiscal_year
+
+	column account_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: account_id
+
+	column cost_center_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cost_center_id
+
+	column debit_amount_eur
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: debit_amount_eur
+
+	column credit_amount_eur
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: credit_amount_eur
+
+	column description
+		dataType: string
+		summarizeBy: none
+		sourceColumn: description
+
+	column reference
+		dataType: string
+		summarizeBy: none
+		sourceColumn: reference
+
+	column entry_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entry_type
+
+	partition fact_general_ledger_partition = entity
+		mode: directLake
+		source
+			entityName: fact_general_ledger
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+

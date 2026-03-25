@@ -1,0 +1,82 @@
+table fact_invoices
+
+	measure 'Total Invoices' = COUNTROWS(fact_invoices)
+		formatString: #,##0
+
+	measure 'Paid Invoices' = CALCULATE(COUNTROWS(fact_invoices), fact_invoices[status] = "Paid")
+		formatString: #,##0
+
+	measure 'Unpaid Invoices' = CALCULATE(COUNTROWS(fact_invoices), fact_invoices[status] <> "Paid")
+		formatString: #,##0
+
+	measure 'Total AR' =
+			CALCULATE(
+			    SUM(fact_invoices[total_amount_eur]),
+			    fact_invoices[status] <> "Paid"
+			)
+		formatString: #,##0.00
+
+	measure DSO = DIVIDE([Total AR], [Total Revenue], 0) * 365
+		formatString: #,##0
+
+	measure 'Overdue Invoices Amount' =
+			CALCULATE(
+			    SUM(fact_invoices[total_amount_eur]),
+			    fact_invoices[status] = "Overdue"
+			)
+		formatString: #,##0.00
+
+	measure 'Overdue Invoices Count' =
+			CALCULATE(
+			    COUNTROWS(fact_invoices),
+			    fact_invoices[status] = "Overdue"
+			)
+		formatString: #,##0
+
+	column invoice_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: invoice_id
+
+	column invoice_number
+		dataType: string
+		summarizeBy: none
+		sourceColumn: invoice_number
+
+	column customer_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: customer_id
+
+	column invoice_date
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: invoice_date
+
+	column due_date
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: due_date
+
+	column total_amount_eur
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: total_amount_eur
+
+	column status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: status
+
+	column payment_terms_days
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: payment_terms_days
+
+	partition fact_invoices_partition = entity
+		mode: directLake
+		source
+			entityName: fact_invoices
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+

@@ -1,0 +1,53 @@
+table fact_payments
+
+	measure 'Total Payments' = SUM(fact_payments[payment_amount_eur])
+		formatString: #,##0.00
+
+	measure 'Collection Rate' =
+			DIVIDE(
+			    SUM(fact_payments[payment_amount_eur]),
+			    SUM(fact_invoices[total_amount_eur]),
+			    0
+			)
+		formatString: 0.00%
+
+	measure 'Avg Days to Pay' = AVERAGE(fact_payments[days_overdue])
+		formatString: #,##0
+
+	column payment_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: payment_id
+
+	column invoice_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: invoice_id
+
+	column payment_date
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: payment_date
+
+	column payment_amount_eur
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: payment_amount_eur
+
+	column payment_method
+		dataType: string
+		summarizeBy: none
+		sourceColumn: payment_method
+
+	column days_overdue
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: days_overdue
+
+	partition fact_payments_partition = entity
+		mode: directLake
+		source
+			entityName: fact_payments
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+

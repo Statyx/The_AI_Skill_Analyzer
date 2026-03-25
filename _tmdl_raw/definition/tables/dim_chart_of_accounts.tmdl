@@ -1,0 +1,49 @@
+table dim_chart_of_accounts
+
+	column account_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: account_id
+
+	column account_number
+		dataType: string
+		summarizeBy: none
+		sourceColumn: account_number
+
+	column account_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: account_name
+
+	column account_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: account_type
+
+	column category
+		dataType: string
+		summarizeBy: none
+		sourceColumn: category
+
+	column sub_category
+		dataType: string
+		summarizeBy: none
+		sourceColumn: sub_category
+
+	column is_active
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_active
+
+	column currency
+		dataType: string
+		summarizeBy: none
+		sourceColumn: currency
+
+	partition dim_chart_of_accounts_partition = entity
+		mode: directLake
+		source
+			entityName: dim_chart_of_accounts
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
