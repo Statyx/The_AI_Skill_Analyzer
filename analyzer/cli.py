@@ -19,6 +19,17 @@ from .auth import FabricSession
 from .snapshot import snapshot_is_fresh, load_snapshot, take_snapshot
 from .runner import run_questions_parallel, run_questions_serial
 from .reporting import save_run, analyze_run, find_run_dir, diff_runs, generate_html_report
+from .init import scaffold_profile
+from .validate import validate_profile
+
+
+def cmd_init(args):
+    scaffold_profile(args.name)
+
+
+def cmd_validate(args, cfg):
+    session = FabricSession(cfg)
+    validate_profile(session, cfg)
 
 
 def cmd_snapshot(args, cfg):
@@ -227,8 +238,15 @@ def main():
                         help="Profile name (default: from config.yaml)")
     sub = parser.add_subparsers(dest="command")
 
+    # init
+    init_p = sub.add_parser("init", help="Scaffold a new profile (creates profile.yaml + questions.yaml)")
+    init_p.add_argument("name", help="Name for the new profile (e.g. sales_agent)")
+
     # profiles
     sub.add_parser("profiles", help="List available profiles")
+
+    # validate
+    sub.add_parser("validate", help="Check config + Fabric connectivity (no questions run)")
 
     # snapshot
     sub.add_parser("snapshot", help="Fetch & cache agent config + schema")
@@ -260,6 +278,10 @@ def main():
 
     args = parser.parse_args()
 
+    if args.command == "init":
+        cmd_init(args)
+        return
+
     if args.command == "profiles":
         # profiles doesn't need a resolved config
         from .config import load_global_config
@@ -272,7 +294,9 @@ def main():
     if getattr(args, "serial", False):
         cfg["max_workers"] = 1
 
-    if args.command == "snapshot":
+    if args.command == "validate":
+        cmd_validate(args, cfg)
+    elif args.command == "snapshot":
         cmd_snapshot(args, cfg)
     elif args.command == "run":
         cmd_run(args, cfg)

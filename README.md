@@ -6,6 +6,53 @@ End-to-end diagnostic and evaluation toolkit for **Fabric Data Agents** backed b
 
 ---
 
+## 5-Minute Quick Start
+
+```bash
+# 1. Install
+cd The_AI_Skill_Analyzer/
+pip install -r requirements.txt
+
+# 2. Edit config.yaml with your tenant ID
+#    (look in Azure portal → Entra ID → Overview → Tenant ID)
+
+# 3. Create a new profile (scaffolds template files for you)
+python -m analyzer init my_agent
+
+# 4. Edit the generated files:
+#    profiles/my_agent/profile.yaml  → fill in your 4 IDs (see "Where to find your IDs" below)
+#    profiles/my_agent/questions.yaml → customize questions for your model
+
+# 5. Validate connectivity (checks auth, workspace, agent, model)
+python -m analyzer -p my_agent validate
+
+# 6. First run (no expected answers yet — just check the agent works)
+python -m analyzer -p my_agent run
+
+# 7. Review results
+python -m analyzer -p my_agent analyze --latest
+
+# 8. Fill in expected answers in questions.yaml for answers you trust
+# 9. Re-run to get grading scores
+python -m analyzer -p my_agent run
+```
+
+### Where to Find Your IDs
+
+All 4 IDs are visible in the Fabric portal URL when you open each item:
+
+| ID | Where to find it |
+|----|------------------|
+| **workspace_id** | Open your workspace → URL: `app.fabric.microsoft.com/groups/`**`<workspace_id>`**`/...` |
+| **agent_id** | Open the Data Agent (AI Skill) → URL: `...aiskills/`**`<agent_id>`** |
+| **semantic_model_id** | Open the semantic model → Settings → URL: `...datasets/`**`<model_id>`** |
+| **semantic_model_name** | The display name of the model (e.g., `Sales_Model`) — used in reports only |
+| **tenant_id** | Azure portal → Entra ID → Overview → **Tenant ID** |
+
+> **Tip:** You can also get workspace items via REST: `GET https://api.fabric.microsoft.com/v1/workspaces/{ws}/items`
+
+---
+
 ## Table of Contents
 
 - [Installation](#installation)
@@ -19,6 +66,8 @@ End-to-end diagnostic and evaluation toolkit for **Fabric Data Agents** backed b
   - [Listing Profiles](#listing-profiles)
 - [Commands](#commands)
   - [Global Options](#global-options)
+  - [init — Scaffold a New Profile](#init--scaffold-a-new-profile)
+  - [validate — Check Connectivity](#validate--check-connectivity)
   - [profiles — List Profiles](#profiles--list-profiles)
   - [snapshot — Cache Agent Config + Schema](#snapshot--cache-agent-config--schema)
   - [run — Batch Run + Grading](#run--batch-run--grading)
@@ -40,6 +89,7 @@ End-to-end diagnostic and evaluation toolkit for **Fabric Data Agents** backed b
 - [Authentication](#authentication)
 - [Architecture](#architecture)
 - [Module Reference](#module-reference)
+- [Troubleshooting](#troubleshooting)
 - [Legacy (v2) Support](#legacy-v2-support)
 - [Run History (Marketing360_Agent)](#run-history-marketing360_agent)
 
@@ -86,6 +136,8 @@ The_AI_Skill_Analyzer/
 │   ├── config.py                  # Config loading + profile resolution
 │   ├── auth.py                    # Persistent Fabric auth (MSAL token cache)
 │   ├── api.py                     # Fabric REST API helpers (GET, POST, LRO)
+│   ├── init.py                    # Profile scaffolding (init command)
+│   ├── validate.py                # Connectivity checks (validate command)
 │   ├── snapshot.py                # Agent config + TMDL schema caching
 │   ├── tmdl.py                    # TMDL definition parser
 │   ├── grading.py                 # Answer comparison + pipeline trace + RCA
@@ -200,11 +252,22 @@ A **profile** = one Data Agent you want to test. Each profile is a folder under 
 
 ### Creating a New Profile
 
+The fastest way is to use the `init` command:
+
 ```bash
-mkdir profiles/sales_agent
+python -m analyzer init sales_agent
 ```
 
-**Step 1:** Create `profiles/sales_agent/profile.yaml`:
+This creates:
+```
+profiles/sales_agent/
+├── profile.yaml     # Template with placeholder IDs + instructions
+└── questions.yaml   # Starter questions (KPIs, counts, rankings)
+```
+
+Then:
+
+**Step 1:** Edit `profiles/sales_agent/profile.yaml` — fill in your 4 IDs (comments explain where to find each one):
 
 ```yaml
 workspace_id: "your-workspace-id"
@@ -214,26 +277,22 @@ semantic_model_name: "Sales_Model"
 stage: "sandbox"
 ```
 
-**Step 2:** Create `profiles/sales_agent/questions.yaml`:
+**Step 2:** Edit `profiles/sales_agent/questions.yaml` — customize questions for your model.
 
-```yaml
-test_cases:
-  - question: "what is total revenue"
-    expected: "1500000"
-    match_type: "numeric"
-    tolerance: 1000
-    tags: ["kpi"]
-
-  - question: "top 5 products by sales"
-    expected: ~
-    match_type: "contains"
-    tags: ["ranking"]
-```
-
-**Step 3:** Run it:
+**Step 3:** Validate + run:
 
 ```bash
-python -m analyzer --profile sales_agent run
+# Check connectivity (no questions sent)
+python -m analyzer -p sales_agent validate
+
+# First run (questions without expected → just check agent works)
+python -m analyzer -p sales_agent run
+
+# Review results
+python -m analyzer -p sales_agent analyze --latest
+
+# Fill in expected values in questions.yaml for answers you trust, then re-run
+python -m analyzer -p sales_agent run
 ```
 
 Or set it as default in `config.yaml`:
@@ -276,6 +335,76 @@ python scripts/run_test.py [--profile PROFILE] <command> [options]
 |--------|-------|-------------|
 | `--profile NAME` | `-p NAME` | Profile to use. Overrides `default_profile` from config.yaml |
 | `--help` | `-h` | Show help for any command |
+
+---
+
+### `init` — Scaffold a New Profile
+
+Create a new profile directory with template `profile.yaml` and `questions.yaml` files.
+
+```bash
+python -m analyzer init <NAME>
+```
+
+| Argument | Description |
+|----------|-------------|
+| `NAME` | Profile name (e.g., `sales_agent`). Converted to lowercase with underscores |
+
+**Does not require Fabric authentication.** Creates files only.
+
+The generated `profile.yaml` includes inline comments explaining where to find each ID in the Fabric portal. The generated `questions.yaml` includes starter questions that work with most models (KPIs, counts, rankings, time intelligence).
+
+**Example:**
+
+```bash
+python -m analyzer init hr_analytics
+# → profiles/hr_analytics/profile.yaml   (template with REPLACE_ME placeholders)
+# → profiles/hr_analytics/questions.yaml (5 starter questions)
+```
+
+---
+
+### `validate` — Check Connectivity
+
+Run pre-flight checks on a profile: config completeness, authentication, workspace access, agent existence, and semantic model existence.
+
+```bash
+python -m analyzer [-p PROFILE] validate
+```
+
+**No options.** Requires Fabric authentication (browser popup on first use).
+
+**Checks performed:**
+
+| Check | What it tests |
+|-------|---------------|
+| `config` | All required fields present and not `REPLACE_ME` |
+| `questions` | `questions.yaml` loads correctly, shows question count |
+| `auth` | Entra ID token acquisition works |
+| `workspace` | `GET /workspaces/{id}` returns 200 + name |
+| `agent` | `GET /workspaces/{ws}/items/{agent_id}` returns 200 |
+| `model` | `GET /workspaces/{ws}/items/{model_id}` returns 200 |
+| `sdk` | SDK client initializes successfully |
+
+**Example output:**
+
+```
+============================================================
+  VALIDATE: sales_agent
+============================================================
+  + config        All required fields present
+  + questions     8 questions loaded (2 with expected answers)
+  + auth          Token acquired (len=1847)
+  + workspace     'Sales Workspace' (capacity: a1b2c3d4...)
+  + agent         'Sales Agent' (type: AISkill)
+  + model         'Sales_Model' (type: SemanticModel)
+  + sdk           SDK client initialized
+============================================================
+  ALL CHECKS PASSED (7/7)
+
+  Ready to run: python -m analyzer -p sales_agent run
+============================================================
+```
 
 ---
 
@@ -755,12 +884,63 @@ The SDK client is initialized by injecting the pre-authenticated credential, byp
 | `analyzer/config.py` | Load `config.yaml`, resolve profiles, load test cases from `questions.yaml` |
 | `analyzer/auth.py` | `FabricSession` class: persistent MSAL cache, SDK client init, token refresh |
 | `analyzer/api.py` | `fabric_get()`, `fabric_post()`, LRO polling (30 attempts, 2s interval) |
+| `analyzer/init.py` | `scaffold_profile()` — creates template `profile.yaml` + `questions.yaml` |
+| `analyzer/validate.py` | `validate_profile()` — 7 connectivity checks (config, auth, workspace, agent, model, SDK) |
 | `analyzer/tmdl.py` | Parse TMDL definition parts into tables, columns, measures, relationships with `///` doc comments |
 | `analyzer/snapshot.py` | Take / load / check freshness of cached agent config + schema |
 | `analyzer/grading.py` | `_compare_answer()` (5 match types), `trace_pipeline()`, `identify_root_cause()` (8 categories), `grade_result()` |
 | `analyzer/runner.py` | `run_questions_parallel()`, `run_questions_serial()`, retry on 429/503/timeout, Ctrl+C saves partial |
 | `analyzer/reporting.py` | `save_run()`, `analyze_run()`, `generate_html_report()`, `diff_runs()`, `find_run_dir()` |
-| `analyzer/cli.py` | argparse setup, 6 commands: `profiles`, `snapshot`, `run`, `rerun`, `analyze`, `diff` |
+| `analyzer/cli.py` | argparse setup, 8 commands: `init`, `validate`, `profiles`, `snapshot`, `run`, `rerun`, `analyze`, `diff` |
+
+---
+
+## Troubleshooting
+
+### Browser popup doesn't appear / Authentication fails
+
+- Check that `tenant_id` in `config.yaml` is correct (Azure portal → Entra ID → Overview)
+- Try clearing the MSAL cache: delete `%LOCALAPPDATA%\.IdentityService\` or `~/.IdentityService/`
+- Ensure your account has access to the Fabric workspace
+
+### "Workspace not found" (404)
+
+- Run `python -m analyzer -p <profile> validate` — the workspace check will show the exact error
+- Verify `workspace_id` is a GUID, not the workspace name
+- Check you have at least Viewer role on the workspace
+
+### "Agent not found" (404)
+
+- The `agent_id` is the **item ID**, not the AI Skill name
+- Open the Data Agent in Fabric portal and copy the GUID from the URL
+- Ensure the Data Agent is created (not just the semantic model)
+
+### "XMLA endpoint not enabled"
+
+- Fabric Admin Portal → Tenant Settings → Integration Settings → "Allow XMLA endpoints..."
+- Requires F2+ capacity (PPU doesn't support XMLA)
+
+### "Capacity paused" / Slow responses
+
+- Fabric capacity may be paused or throttled — check app.fabric.microsoft.com
+- Try `--serial` to reduce parallel load: `python -m analyzer run --serial`
+
+### Questions return wrong answers
+
+1. Run `python -m analyzer analyze --latest` — check the root cause category
+2. Most common fixes by root cause:
+   - **MEASURE_SELECTION**: Improve measure descriptions in the semantic model
+   - **FILTER_CONTEXT**: Disable `__PBI_TimeIntelligenceEnabled` or add `REMOVEFILTERS`
+   - **RELATIONSHIP**: Check Many-to-One direction, run Calculate refresh
+   - **REFORMULATION**: Add verified answers to the Data Agent
+3. After fixing, run `python -m analyzer run --refresh` to pick up schema changes
+
+### First run — what to expect
+
+1. **All questions will be "ungraded"** (no expected values) — this is normal
+2. Review the answers: `python -m analyzer analyze --latest`
+3. For answers that look correct, copy the value into `questions.yaml` as `expected`
+4. Re-run: now you get pass/fail grading + root cause analysis for failures
 
 ---
 
