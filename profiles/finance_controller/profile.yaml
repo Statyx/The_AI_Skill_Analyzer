@@ -1,0 +1,32 @@
+# ── Profile: finance_controller ─────────────────────────────────────
+# Connection details for the finance_controller Data Agent.
+# These override global settings from config.yaml.
+#
+# HOW TO FIND THESE IDs:
+#
+# 1. workspace_id
+#    Fabric portal → open your workspace → look at the URL:
+#    https://app.fabric.microsoft.com/groups/<workspace_id>/...
+#
+# 2. agent_id (= AI Skill / Data Agent)
+#    Fabric portal → open the Data Agent item → URL:
+#    https://app.fabric.microsoft.com/groups/<ws>/aiskills/<agent_id>
+#    OR: Fabric REST → GET /v1/workspaces/<ws>/items?type=AISkill
+#
+# 3. semantic_model_id
+#    Fabric portal → open the semantic model → Settings → look at the URL
+#    OR: Fabric REST → GET /v1/workspaces/<ws>/items?type=SemanticModel
+#
+# 4. semantic_model_name
+#    The display name of the semantic model (human-readable, used in reports).
+
+workspace_id: "133c6c70-2e26-4d97-aac1-8ed423dbbf34"
+agent_id: "01668d9d-0963-46cd-85ac-ee344daf714b"
+semantic_model_id: "236080b8-3bea-4c14-86df-d1f9a14ac7a8"
+semantic_model_name: "SM_Finance"
+stage: "sandbox"
+
+# Optional overrides (uncomment to override config.yaml):
+# max_workers: 4             # parallel threads for this profile
+# max_workers: 4             # parallel threads for this profile
+# snapshot_ttl_hours: 24     # cache TTL for this profile

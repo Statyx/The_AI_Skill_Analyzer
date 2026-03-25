@@ -1,0 +1,74 @@
+# ── Test Cases for Finance_Controller Agent ───────────────────────────
+# Workspace: CDR - Demo Finance Fabric
+# Semantic Model: SM_Finance
+#
+# First run: all expected values are null (~) for discovery.
+# After reviewing answers, fill in expected values for regression grading.
+#
+# match_type options: contains, numeric, exact, regex, any_of
+# expected: null (~) means "no grading, manual review"
+# tolerance: for numeric only (absolute value)
+# tags: labels for --tag filtering and report grouping
+
+test_cases:
+
+  # ── Overview / KPIs ──
+
+  - question: "what are the main financial KPIs"
+    expected: ~
+    match_type: "contains"
+    tags: ["overview"]
+
+  - question: "what is the total revenue"
+    expected: ~
+    match_type: "numeric"
+    tolerance: 100
+    tags: ["kpi", "revenue"]
+
+  - question: "what is the total expenses"
+    expected: ~
+    match_type: "numeric"
+    tolerance: 100
+    tags: ["kpi", "expenses"]
+
+  - question: "what is the net profit margin"
+    expected: ~
+    match_type: "numeric"
+    tolerance: 0.5
+    tags: ["kpi", "profitability"]
+
+  # ── Time Intelligence ──
+
+  - question: "what is the revenue trend over the last 12 months"
+    expected: ~
+    match_type: "contains"
+    tags: ["time_intelligence", "revenue"]
+
+  - question: "compare revenue year over year"
+    expected: ~
+    match_type: "contains"
+    tags: ["time_intelligence", "yoy"]
+
+  # ── Cost & Budget ──
+
+  - question: "what are the top expense categories"
+    expected: ~
+    match_type: "contains"
+    tags: ["expenses", "ranking"]
+
+  - question: "what is the budget variance"
+    expected: ~
+    match_type: "contains"
+    tags: ["budget"]
+
+  # ── Rankings / Breakdowns ──
+
+  - question: "top 5 departments by spend"
+    expected: ~
+    match_type: "contains"
+    tags: ["ranking", "departments"]
+
+  - question: "which cost center has the highest operating expenses"
+    expected: ~
+    match_type: "contains"
+    tags: ["ranking", "cost_center"]

@@ -1,13 +1,18 @@
 """Persistent authentication for Fabric API.
 
-Uses a persistent MSAL token cache so the browser popup only appears once
-per ~24h (refresh token lifetime). Subsequent runs reuse the cached token.
+Tries AzureCliCredential first (if `az login` is active), then falls back
+to InteractiveBrowserCredential with a persistent MSAL token cache so the
+browser popup only appears once per ~24h.
 """
 
 import sys
 import os
 import time
-from azure.identity import InteractiveBrowserCredential, TokenCachePersistenceOptions
+from azure.identity import (
+    AzureCliCredential,
+    InteractiveBrowserCredential,
+    TokenCachePersistenceOptions,
+)
 
 # SDK bootstrap — the SDK is installed to a temp directory
 sys.path.insert(0, os.path.join(os.environ.get("TEMP", "/tmp"), "fabric_data_agent_client"))
@@ -16,13 +21,17 @@ from fabric_data_agent_client import FabricDataAgentClient
 FABRIC_SCOPE = "https://api.fabric.microsoft.com/.default"
 
 
-def _get_persistent_credential(tenant_id):
-    """Create an InteractiveBrowserCredential with a persistent MSAL token cache.
+def _get_credential(tenant_id):
+    """Try AzureCliCredential first, fall back to InteractiveBrowserCredential."""
+    cli_cred = AzureCliCredential(tenant_id=tenant_id)
+    try:
+        cli_cred.get_token(FABRIC_SCOPE)
+        print("  Auth: using Azure CLI credential")
+        return cli_cred
+    except Exception:
+        pass
 
-    On first run a browser popup appears. Subsequent runs within the token
-    lifetime (~1 h) or refresh-token lifetime (~24 h) reuse the cached
-    token silently.
-    """
+    print("  Auth: Azure CLI not available, using browser login")
     cache_opts = TokenCachePersistenceOptions(
         name="ai_skill_analyzer",
         allow_unencrypted_storage=True,
@@ -44,7 +53,7 @@ class FabricSession:
         self.cfg = cfg
         self._client = None
         self._token = None
-        self._credential = _get_persistent_credential(cfg["tenant_id"])
+        self._credential = _get_credential(cfg["tenant_id"])
 
     def _ensure_token(self):
         if self._token is None or self._token.expires_on <= time.time() + 300:
