@@ -1,12 +1,13 @@
 """CLI — command-line interface with --profile support.
 
 Usage:
-    python -m analyzer --profile marketing360 run
-    python -m analyzer --profile marketing360 run --refresh --serial --tag kpi
-    python -m analyzer --profile marketing360 rerun 20260325_080433 --questions 3 5
-    python -m analyzer --profile marketing360 analyze --latest --html
-    python -m analyzer --profile marketing360 snapshot
-    python -m analyzer diff RUN_A RUN_B --profile marketing360
+    python -m analyzer init my_agent
+    python -m analyzer -p my_agent validate
+    python -m analyzer -p my_agent run
+    python -m analyzer -p my_agent run --refresh --serial --tag kpi
+    python -m analyzer -p my_agent rerun 20260325_080433 --questions 3 5
+    python -m analyzer -p my_agent analyze --latest --html
+    python -m analyzer diff RUN_A RUN_B
 
 If --profile is omitted, uses default_profile from config.yaml,
 or falls back to legacy mode (all IDs in config.yaml).

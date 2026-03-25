@@ -91,7 +91,7 @@ All 4 IDs are visible in the Fabric portal URL when you open each item:
 - [Module Reference](#module-reference)
 - [Troubleshooting](#troubleshooting)
 - [Legacy (v2) Support](#legacy-v2-support)
-- [Run History (Marketing360_Agent)](#run-history-marketing360_agent)
+- [Typical Iteration Workflow](#typical-iteration-workflow)
 
 ---
 
@@ -125,7 +125,7 @@ The_AI_Skill_Analyzer/
 ├── .gitignore                     # Ignore runs/, snapshots/, debug/, *.txt
 │
 ├── profiles/                      # One folder per Data Agent ← add new agents here
-│   └── marketing360/
+│   └── <your_agent>/
 │       ├── profile.yaml           # Agent/workspace/model IDs + stage
 │       └── questions.yaml         # Test cases + expected answers for this agent
 │
@@ -181,12 +181,12 @@ Located at project root. Contains tenant-wide settings shared across all profile
 
 ```yaml
 # Tenant ID (required — shared across all profiles)
-tenant_id: "92701a21-ddea-4028-ba85-4c1f91fab881"
+tenant_id: "<your-tenant-guid>"
 
 # Default profile (folder name under profiles/).
 # Override per-run with: python -m analyzer --profile <name> run
 # Set to null or remove to require explicit --profile flag.
-default_profile: "marketing360"
+default_profile: "my_agent"
 
 # Snapshot cache TTL in hours.
 # 0 = always refresh. Cached snapshots avoid ~15-30s Fabric API calls.
@@ -219,10 +219,10 @@ Located at `profiles/<name>/profile.yaml`. Agent-specific connection details.
 
 ```yaml
 # Required — identifies which Fabric agent to test
-workspace_id: "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
-agent_id: "e92e5867-213a-4a7d-8fac-af1711046527"
-semantic_model_id: "3d00aeaa-91b9-4567-9166-fa3fc8249e6f"
-semantic_model_name: "Marketing360_Model"
+workspace_id: "<your-workspace-guid>"
+agent_id: "<your-agent-guid>"
+semantic_model_id: "<your-model-guid>"
+semantic_model_name: "My_Model"
 
 # Optional — overrides global config.yaml value
 stage: "sandbox"
@@ -309,7 +309,7 @@ python -m analyzer profiles
 Output:
 ```
 Available profiles:
-  - marketing360 (default)
+  - my_agent (default)
   - sales_agent
 ```
 
@@ -473,7 +473,7 @@ python -m analyzer run [--refresh] [--serial] [--tag TAG] [--html] [--dry-run]
 python -m analyzer run
 
 # Specific profile, sequential, only KPI questions, with HTML
-python -m analyzer -p marketing360 run --serial --tag kpi --html
+python -m analyzer -p my_agent run --serial --tag kpi --html
 
 # Check everything is wired correctly without hitting Fabric
 python -m analyzer run --dry-run
@@ -487,9 +487,9 @@ python -m analyzer run --refresh
 ========================================================================
   THE AI SKILL ANALYZER -- BATCH RUN + GRADING
 ========================================================================
-  Profile  : marketing360
-  Agent    : e92e5867-213a-4a7d-8fac-af1711046527
-  Model    : Marketing360_Model
+  Profile  : my_agent
+  Agent    : <agent-guid>
+  Model    : My_Model
   Questions: 8  (2 with expected answers)
   Workers  : 4
   Stage    : sandbox
@@ -498,7 +498,7 @@ python -m analyzer run --refresh
 [1/4] Using cached snapshot (< 24h old)
 [2/4] Running questions...
   + [1/8] (12.3s) what is the churn rate
-  + [2/8] (8.7s) what is the total revenue for 2025
+  + [2/8] (8.7s) what is the total revenue
   ...
 
 [3/4] Grading answers + root cause analysis...
@@ -507,12 +507,12 @@ python -m analyzer run --refresh
 
 ========================================================================
   Run ID : 20260325_143022
-  Profile: marketing360
+  Profile: my_agent
   Score  : 2/2 = 100%
   + Pass: 2  X Fail: 0  ? Ungraded: 6  | 24.5s
 ========================================================================
   + Q1 [12.3s] what is the churn rate
-  ? Q2 [8.7s] what is the total revenue for 2025
+  ? Q2 [8.7s] what is the total revenue
   ...
 
   Full analysis: python -m analyzer analyze 20260325_143022
@@ -741,14 +741,13 @@ Each step includes:
 Each run creates a timestamped folder under `runs/<profile>/`:
 
 ```
-runs/marketing360/20260325_143022/
+runs/<profile>/20260325_143022/
 ├── batch_summary.json              # Aggregated results + grading stats
 ├── test_cases.yaml                 # Frozen copy of questions used in this run
 ├── report.html                     # Self-contained HTML report (if --html)
 └── diagnostics/
-    ├── full_diag_what_is_the_churn_rate.json
-    ├── full_diag_how_many_active_customers_do_we_have.json
-    └── ...                         # One file per question
+    ├── full_diag_<question_slug>.json
+    └── ...                         # One JSON file per question
 ```
 
 ### batch_summary.json
@@ -961,26 +960,26 @@ The `run_test.py` wrapper now calls the v3 package (`python -m analyzer`) by def
 
 ---
 
-## Run History (Marketing360_Agent)
+## Typical Iteration Workflow
 
-| Run | Timestamp | Questions | Passed | Notes |
-|-----|-----------|-----------|--------|-------|
-| **7** | `20260324_202817` | 8 | **8/8** | Final — all fixes applied, Calculate refresh done |
-| 6 | `20260324_201734` | 8 | 8/8 | Intermediate — relationship hydrated |
-| 5 | `20260324_201601` | 8 | 6/8 | Q4+Q5 fail — relationship not yet hydrated |
-| 4 | `20260324_201519` | 8 | 6/8 | Post-relationship fix, pre-Calculate refresh |
-| 3 | `20260324_201325` | 2 | 2/2 | Debug: churn_rate + revenue only |
-| 2 | `20260324_195159` | 1 | 1/1 | Debug: churn_rate only |
-| 1b | `20260324_194852` | 1 | 1/1 | Debug: churn_rate only |
-| **1** | `20260324_193250` | 8 | **6/8** | First full run — exposed relationship bug |
+After your first batch run, the typical improvement cycle looks like this:
 
-### Key Fixes Applied Between Run 1 and Run 7
+1. **Run** → `python -m analyzer run`
+2. **Analyze** → `python -m analyzer analyze --latest` — read RCA for failures
+3. **Fix** the semantic model or agent (descriptions, relationships, verified answers)
+4. **Re-run** → `python -m analyzer run --refresh` (picks up schema changes)
+5. **Diff** → `python -m analyzer diff <old_run> <new_run>` — confirm regressions fixed
+6. Repeat until score reaches target
 
-1. **Reversed relationship**: `marketing_events[send_id] → marketing_sends[send_id]` (was backwards)
-2. **Calculate refresh**: Hydrated new relationship metadata on DirectLake model
-3. **15 verified answers** (was 12): added active customers, top campaigns, segment churn
-4. **CopilotInstructions**: Added critical disambiguation rules
-5. **Measure descriptions**: Updated `[Active Customers]` to explicitly say no date filter
+Common fixes by root cause:
+
+| Root Cause | Fix |
+|------------|-----|
+| `MEASURE_SELECTION` | Improve measure descriptions, add `/// summary:` TMDL doc comments |
+| `FILTER_CONTEXT` | Disable `__PBI_TimeIntelligenceEnabled`, add `REMOVEFILTERS` |
+| `RELATIONSHIP` | Check direction (Many→One), run Calculate refresh |
+| `REFORMULATION` | Add verified answers to the Data Agent, rephrase questions |
+| `SYNTHESIS` | Inspect generated DAX in diagnostic JSON |
 
 ---
 
