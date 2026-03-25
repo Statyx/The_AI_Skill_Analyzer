@@ -35,6 +35,7 @@ import yaml
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from azure.identity import InteractiveBrowserCredential, TokenCachePersistenceOptions
 
 # ── Paths ─────────────────────────────────────────────────────
 ROOT = Path(__file__).resolve().parent.parent
@@ -103,32 +104,70 @@ def load_test_cases(tag_filter=None):
 
 
 # ══════════════════════════════════════════════════════════════
-#  AUTH (single browser popup, reused everywhere)
+#  AUTH (persistent token cache — no browser popup on repeat runs)
 # ══════════════════════════════════════════════════════════════
 
+FABRIC_SCOPE = "https://api.fabric.microsoft.com/.default"
+
+
+def _get_persistent_credential(tenant_id):
+    """Create an InteractiveBrowserCredential with a persistent MSAL token cache.
+
+    On first run a browser popup appears. Subsequent runs within the token
+    lifetime (~1 h) or refresh-token lifetime (~24 h) reuse the cached
+    token silently — no popup needed.
+    """
+    cache_opts = TokenCachePersistenceOptions(
+        name="ai_skill_analyzer",     # unique cache name on disk
+        allow_unencrypted_storage=True # fallback if OS keyring unavailable
+    )
+    return InteractiveBrowserCredential(
+        tenant_id=tenant_id,
+        cache_persistence_options=cache_opts,
+    )
+
+
 class FabricSession:
-    """Wraps SDK client + REST token. Created once per invocation."""
+    """Wraps SDK client + REST token. Created once per invocation.
+
+    Uses a shared persistent credential so the browser popup only appears
+    once (or when the refresh token expires, typically after 24 h).
+    """
 
     def __init__(self, cfg):
         self.cfg = cfg
         self._client = None
         self._token = None
+        self._credential = _get_persistent_credential(cfg["tenant_id"])
+
+    def _ensure_token(self):
+        """Get / refresh a Fabric API token silently from cache."""
+        if self._token is None or self._token.expires_on <= time.time() + 300:
+            self._token = self._credential.get_token(FABRIC_SCOPE)
+            print(f"  Token valid until {time.ctime(self._token.expires_on)}")
 
     @property
     def client(self):
         if self._client is None:
-            self._client = FabricDataAgentClient(
-                tenant_id=self.cfg["tenant_id"],
-                data_agent_url=self.cfg["data_agent_url"],
-            )
-            self._token = self._client.token.token
+            # Pre-authenticate so the SDK doesn't open its own browser popup
+            self._ensure_token()
+
+            self._client = FabricDataAgentClient.__new__(FabricDataAgentClient)
+            self._client.tenant_id = self.cfg["tenant_id"]
+            self._client.data_agent_url = self.cfg["data_agent_url"]
+            self._client.credential = self._credential
+            self._client.token = self._token
+            print(f"Fabric Data Agent Client ready (cached auth)")
+            print(f"  Data Agent URL: {self.cfg['data_agent_url']}")
+        # Keep the SDK's token reference fresh
+        self._ensure_token()
+        self._client.token = self._token
         return self._client
 
     @property
     def token(self):
-        if self._token is None:
-            _ = self.client  # triggers auth
-        return self._token
+        self._ensure_token()
+        return self._token.token
 
     @property
     def headers(self):
@@ -156,13 +195,16 @@ def _poll_lro(session, initial_response):
     loc = initial_response.headers.get("Location") or initial_response.headers.get("Operation-Location")
     if not loc:
         return {"_error": 202, "_note": "LRO with no Location header"}
-    for _ in range(30):
+    print(f"  LRO polling: {loc[:80]}...")
+    for attempt in range(30):
         time.sleep(2)
         r = requests.get(loc, headers=session.headers)
         if not r.ok:
+            print(f"  LRO poll #{attempt+1}: HTTP {r.status_code}")
             continue
         data = r.json()
         status = data.get("status", "")
+        print(f"  LRO poll #{attempt+1}: status={status}")
         if status in ("Succeeded", "Completed"):
             result_url = data.get("resourceLocation")
             if result_url:
@@ -401,7 +443,16 @@ def _empty_schema(cfg):
 
 def _extract_numbers(text):
     """Extract all numbers (int or float) from a text string."""
-    return [float(x.replace(",", "")) for x in re.findall(r'-?[\d,]+\.?\d*', text)]
+    raw = re.findall(r'-?\d[\d,]*\.?\d*', text)
+    nums = []
+    for x in raw:
+        cleaned = x.replace(",", "")
+        if cleaned and cleaned != "-":
+            try:
+                nums.append(float(cleaned))
+            except ValueError:
+                pass
+    return nums
 
 
 def _compare_answer(actual, test_case):

@@ -1,0 +1,63 @@
+# ── Test Cases for the Marketing360 Data Agent ─────────────────
+# Each test case has a question and optionally an expected answer for grading.
+#
+# match_type options:
+#   contains  — expected text appears somewhere in the answer (case-insensitive)
+#   numeric   — extract number from answer, compare within tolerance
+#   exact     — exact match after lowercasing and trimming
+#   regex     — Python regex pattern match
+#   any_of    — expected is a list; any match counts as pass
+#
+# expected: null means "no grading" — the question will only be checked for
+#           agent completion status (completed vs error).
+#           Fill in expected values after your first successful run.
+#
+# tolerance: for numeric match_type only. Absolute tolerance in the same unit.
+#            Example: expected 21.65, tolerance 0.5 → range [21.15, 22.15]
+#
+# tags: optional labels for filtering and grouping in reports.
+
+test_cases:
+
+  - question: "what is the churn rate"
+    expected: ~
+    match_type: "contains"
+    tags: ["kpi", "measures"]
+
+  - question: "what is the total revenue for 2025"
+    expected: ~
+    match_type: "numeric"
+    tolerance: 100
+    tags: ["revenue", "time_intelligence"]
+
+  - question: "how many active customers do we have"
+    expected: "18016"
+    match_type: "numeric"
+    tolerance: 50
+    tags: ["customers", "time_intelligence"]
+
+  - question: "what is the email open rate"
+    expected: "21.65"
+    match_type: "numeric"
+    tolerance: 0.5
+    tags: ["email", "measures"]
+
+  - question: "top 5 campaigns by revenue"
+    expected: ~
+    match_type: "contains"
+    tags: ["campaigns", "ranking"]
+
+  - question: "what is the average order value"
+    expected: ~
+    match_type: "numeric"
+    tags: ["kpi"]
+
+  - question: "show me the return rate"
+    expected: ~
+    match_type: "contains"
+    tags: ["kpi"]
+
+  - question: "which customer segments have the highest churn risk"
+    expected: ~
+    match_type: "contains"
+    tags: ["segmentation"]

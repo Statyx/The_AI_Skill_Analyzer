@@ -1,0 +1,24 @@
+# ── Python ──
+__pycache__/
+*.pyc
+*.pyo
+
+# ── Run outputs (large, per-run) ──
+runs/
+snapshots/
+
+# ── Debug & scratch ──
+debug/
+*.txt
+!requirements.txt
+
+# ── Portal exports ──
+portal_exports/
+
+# ── OS ──
+Thumbs.db
+.DS_Store
+
+# ── IDE ──
+.vscode/
+.idea/

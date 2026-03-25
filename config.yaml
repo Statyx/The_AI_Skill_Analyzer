@@ -1,21 +1,25 @@
-# ── The AI Skill Analyzer — Configuration ─────────────────────
-# All connection details in one place. No more editing Python code.
+# ── The AI Skill Analyzer — Global Configuration ──────────────
+# Shared settings across all profiles.
+# Agent-specific IDs are in profiles/<name>/profile.yaml.
+# Legacy: if no default_profile is set, agent_id etc. below are used directly.
 
 tenant_id: "92701a21-ddea-4028-ba85-4c1f91fab881"
+
+# Default profile (folder name under profiles/).
+# Override per-run with: python -m analyzer --profile <name> run
+default_profile: "marketing360"
+
+# ── Legacy IDs (kept for backward compat with scripts/analyzer.py) ──
 workspace_id: "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
 agent_id: "e92e5867-213a-4a7d-8fac-af1711046527"
 semantic_model_id: "3d00aeaa-91b9-4567-9166-fa3fc8249e6f"
 semantic_model_name: "Marketing360_Model"
-
-# Stage: "sandbox" or "production"
 stage: "sandbox"
 
 # Snapshot cache TTL in hours. Set to 0 to always refresh.
-# Agent config + schema are cached locally and reused across runs.
 snapshot_ttl_hours: 24
 
-# Max parallel questions. Each question = 1 SDK call (~5-15s).
-# Fabric may throttle above 4-5 concurrent calls.
+# Max parallel questions. Fabric may throttle above 4-5.
 max_workers: 4
 
 # Output directory for runs (relative to project root)

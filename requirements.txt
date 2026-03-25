@@ -1,0 +1,5 @@
+# ── The AI Skill Analyzer — Dependencies ──────────────────────
+azure-identity>=1.15.0
+requests>=2.31.0
+pyyaml>=6.0
+# SDK: fabric-data-agent-client (installed separately to %TEMP%)

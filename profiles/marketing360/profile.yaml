@@ -1,0 +1,9 @@
+# ── Profile: Marketing360 ─────────────────────────────────────
+# Connection details for the Marketing360 Data Agent.
+# These override global settings from config.yaml.
+
+workspace_id: "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
+agent_id: "e92e5867-213a-4a7d-8fac-af1711046527"
+semantic_model_id: "3d00aeaa-91b9-4567-9166-fa3fc8249e6f"
+semantic_model_name: "Marketing360_Model"
+stage: "sandbox"
