@@ -5,6 +5,7 @@ __pycache__/
 
 # ── Run outputs (large, per-run) ──
 runs/
+results/
 snapshots/
 
 # ── Debug & scratch ──

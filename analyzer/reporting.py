@@ -62,7 +62,7 @@ def build_diagnostic(agent_data, schema, question_result, cfg, verdict_data=None
         diag["grading"] = {
             "verdict": verdict_data.get("verdict"),
             "expected": verdict_data.get("expected"),
-            "actual_answer": question_result.get("answer", "")[:300],
+            "actual_answer": question_result.get("answer", ""),
             "match_type": verdict_data.get("match_type"),
             "compare_detail": verdict_data.get("compare_detail"),
             "tags": verdict_data.get("tags", []),
@@ -124,10 +124,15 @@ def save_run(results, agent_data, schema, cfg, total_wall, test_cases, interrupt
         if rc:
             rca_dist[rc] = rca_dist.get(rc, 0) + 1
 
+    # Extract agent display name
+    agent_name = (agent_data.get("meta", {}).get("displayName", "")
+                  or cfg.get("semantic_model_name", "Agent"))
+
     summary = {
         "timestamp": ts,
         "profile": profile,
         "agent_id": cfg["agent_id"],
+        "agent_name": agent_name,
         "model_id": cfg["semantic_model_id"],
         "model_name": cfg.get("semantic_model_name", "?"),
         "stage": cfg.get("stage", "sandbox"),
@@ -440,6 +445,164 @@ def _suggest_actions(result):
     return actions
 
 
+# ══════════════════════════════════════════════════════════════
+#  DAX IMPROVEMENT SUGGESTIONS (works for ALL questions)
+# ══════════════════════════════════════════════════════════════
+
+def _load_snapshot_measures(cfg):
+    """Load measures from the profile snapshot if available."""
+    profile = cfg.get("profile_name", "default")
+    schema_path = ROOT / "snapshots" / profile / "schema.json"
+    if not schema_path.exists():
+        return []
+    with open(schema_path, "r", encoding="utf-8") as f:
+        schema = json.load(f)
+    measures = []
+    for table in schema.get("elements", []):
+        tname = table.get("display_name", "")
+        for child in table.get("children", []):
+            if child.get("type") == "semantic_model.measure":
+                measures.append({
+                    "table": tname,
+                    "name": child["display_name"],
+                    "description": child.get("description", ""),
+                })
+    return measures
+
+
+def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=None):
+    """Suggest concrete improvements for any question with imperfect DAX.
+
+    Returns list of (fix_type, suggestion) tuples where fix_type is one of:
+    MEASURE, INSTRUCTION, SIMPLIFY, FEWSHOT
+    """
+    artifacts = result.get("grading", {}).get("artifacts", {})
+    query = artifacts.get("generated_query", "") or ""
+    question = result.get("question", "")
+    verdict = result.get("grading", {}).get("verdict", "?")
+    root_cause = result.get("grading", {}).get("root_cause")
+    suggestions = []
+
+    if not query:
+        # No query at all
+        if verdict == "fail":
+            suggestions.append(("FEWSHOT",
+                f"Add a fewshot example for \"{question}\" with a working "
+                f"DAX query so the agent learns to query the model"))
+        suggestions.append(("INSTRUCTION",
+            "Add instruction: 'Always query the semantic model. "
+            "Never answer from general knowledge.'"))
+        return suggestions
+
+    upper_q = query.upper()
+    query_lines = [l for l in query.strip().split("\n") if l.strip()]
+
+    # ── AUTO-FILTERS ─────────────────────────────────────────
+    if "__PBI_TIMEINTELLIGENCEENABLED" in upper_q or "TREATAS" in upper_q:
+        suggestions.append(("INSTRUCTION",
+            "Add instruction: 'Never use __PBI_TimeIntelligenceEnabled or "
+            "TREATAS auto-filter patterns. Use explicit CALCULATE with "
+            "date column filters instead.'"))
+        suggestions.append(("FEWSHOT",
+            f"Add a fewshot for \"{question}\" with clean DAX "
+            f"(no auto-filters, explicit date filters)"))
+
+    # ── COMPLEXITY → SUGGEST NEW MEASURE ─────────────────────
+    if len(query_lines) > 15:
+        # Try to identify what the query computes
+        define_measures = re.findall(
+            r'MEASURE\s+[\'"]?(\w+)[\'"]?\[([^\]]+)\]', query, re.IGNORECASE)
+        if define_measures:
+            for tbl, mname in define_measures:
+                suggestions.append(("MEASURE",
+                    f"The agent had to DEFINE a local measure [{mname}] "
+                    f"inline. Create this as a permanent measure in the "
+                    f"semantic model to simplify future queries."))
+        else:
+            # Complex but no DEFINE — agent is using raw aggregations
+            raw_aggs = re.findall(
+                r'\b(SUM|AVERAGE|COUNT|COUNTROWS|MIN|MAX|DIVIDE)\s*\(',
+                query, re.IGNORECASE)
+            if raw_aggs:
+                agg_list = list(set(a.upper() for a in raw_aggs))
+                suggestions.append(("MEASURE",
+                    f"Query uses raw aggregations ({', '.join(agg_list[:4])}) "
+                    f"across {len(query_lines)} lines. Create a dedicated "
+                    f"measure in the model to encapsulate this logic."))
+            else:
+                suggestions.append(("SIMPLIFY",
+                    f"Query is {len(query_lines)} lines. Consider adding a "
+                    f"fewshot with a simpler approach or a new measure."))
+
+    # ── RAW COLUMNS vs EXISTING MEASURES ─────────────────────
+    if snapshot_measures:
+        # Find raw aggregations on columns
+        raw_patterns = re.findall(
+            r'\b(?:SUM|AVERAGE|COUNT|MIN|MAX)\s*\(\s*[\'"]?(\w+)[\'"]?\[([^\]]+)\]\s*\)',
+            query, re.IGNORECASE)
+        for tbl, col in raw_patterns:
+            # Check if there's an existing measure that covers this
+            matching = [m for m in snapshot_measures
+                        if (col.lower() in m["name"].lower()
+                            or col.lower().replace("_", " ") in m["description"].lower())
+                        and tbl.lower() in m["table"].lower()]
+            if matching:
+                m = matching[0]
+                suggestions.append(("INSTRUCTION",
+                    f"Agent used raw aggregation on '{tbl}'[{col}] instead "
+                    f"of measure [{m['name']}] ('{m['table']}'). "
+                    f"Add instruction: 'For {col.replace('_', ' ')}, "
+                    f"use the [{m['name']}] measure.'"))
+
+    # ── QUERY ERROR ──────────────────────────────────────────
+    if root_cause == "QUERY_ERROR":
+        suggestions.append(("FEWSHOT",
+            f"Add a fewshot with corrected DAX for \"{question}\". "
+            f"The current query has syntax or reference errors."))
+        # Check for common issues
+        if "CALCULATETABLE" in upper_q and "==" in query:
+            suggestions.append(("INSTRUCTION",
+                "DAX uses '=' for equality, not '=='. "
+                "Add instruction: 'In DAX, use single = for comparison.'"))
+
+    # ── EMPTY RESULT ─────────────────────────────────────────
+    if root_cause == "EMPTY_RESULT":
+        suggestions.append(("INSTRUCTION",
+            "Query returned no rows. Add instruction listing valid filter "
+            "values for commonly filtered columns (dates, categories)."))
+        suggestions.append(("DESCRIPTION",
+            "Add column descriptions with valid enum values so the agent "
+            "knows what filter criteria to use."))
+
+    # ── WRONG MEASURE SELECTION ──────────────────────────────
+    if root_cause == "MEASURE_SELECTION" and snapshot_measures:
+        # List relevant measures the agent should have used
+        q_words = set(question.lower().split())
+        relevant = [m for m in snapshot_measures
+                    if any(w in m["name"].lower() or w in m["description"].lower()
+                           for w in q_words if len(w) > 3)]
+        if relevant:
+            measure_list = ", ".join(f"[{m['name']}]" for m in relevant[:5])
+            suggestions.append(("INSTRUCTION",
+                f"For \"{question}\", relevant measures are: {measure_list}. "
+                f"Add instruction mapping this question type to the correct measure."))
+
+    # ── SYNTHESIS (correct data, wrong interpretation) ───────
+    if root_cause == "SYNTHESIS" and dax_stars >= 2:
+        suggestions.append(("INSTRUCTION",
+            "DAX query was good but the agent misinterpreted the result. "
+            "Add instruction on how to read and present this type of data."))
+
+    # Deduplicate by suggestion text
+    seen = set()
+    unique = []
+    for fix_type, text in suggestions:
+        if text not in seen:
+            seen.add(text)
+            unique.append((fix_type, text))
+    return unique
+
+
 def _assess_answer_quality(result):
     """Rate the quality of the agent's answer. Returns (stars 0-3, label)."""
     answer = result.get("answer", "") or ""
@@ -530,6 +693,9 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
         desc_line = (f"T={cov.get('tables', '?')} C={cov.get('columns', '?')} "
                      f"M={cov.get('measures', '?')}")
 
+    # Load snapshot measures for DAX improvement suggestions
+    snapshot_measures = _load_snapshot_measures(cfg)
+
     # ═══ HEADER ═══
     emit(f"\n{'=' * W}")
     emit(f"  POST-RUN ANALYSIS")
@@ -594,6 +760,8 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
     emit(f"  QUESTION DETAILS")
     emit(f"{'-' * W}")
 
+    all_fixes = []  # Accumulate (question_idx, fix_type, text) for summary
+
     for r in results:
         g = r.get("grading", {})
         verdict = g.get("verdict", "?")
@@ -610,9 +778,9 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
         emit(f"\n  {icon} Q{idx}  [{dur}s]  {r['question']}{rca_tag}")
 
         # Answer snippet
-        answer = (r.get("answer", "") or "")[:150]
+        answer = (r.get("answer", "") or "")
         if answer:
-            emit(f"    Answer  : {answer}{'...' if len(r.get('answer', '') or '') > 150 else ''}")
+            emit(f"    Answer  : {answer}")
 
         # Expected vs actual
         if g.get("expected") is not None:
@@ -630,10 +798,11 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
         all_artifacts = g.get("artifacts", {})
         gen_query = all_artifacts.get("generated_query", "")
         if gen_query:
-            qp = gen_query.replace("\n", " ").strip()
-            if len(qp) > 300:
-                qp = qp[:300] + "..."
-            emit(f"    Query   : {qp}")
+            # Preserve full multi-line DAX query with indentation
+            query_lines = gen_query.strip().split("\n")
+            emit(f"    Query   : {query_lines[0]}")
+            for ql in query_lines[1:]:
+                emit(f"              {ql}")
 
         # Root cause detail (for failures)
         if g.get("root_cause"):
@@ -641,15 +810,28 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
             emit(f"    |   {g.get('root_cause_detail', '')}")
             artifacts = g.get("artifacts", {})
             if artifacts.get("reformulated_question"):
-                emit(f"    |   Reformulated: "
-                     f"{artifacts['reformulated_question'][:100]}")
-            if artifacts.get("generated_query"):
-                qp = artifacts["generated_query"][:200].replace("\n", " ")
-                emit(f"    |   Query: {qp}")
+                emit(f"    |   Reformulated: {artifacts['reformulated_question']}")
             if artifacts.get("query_result_preview"):
                 emit(f"    |   Result: "
                      f"{artifacts['query_result_preview'][:120]}")
             emit(f"    +--")
+
+        # DAX improvement suggestions (for imperfect DAX or failures)
+        fixes = _suggest_dax_improvements(r, dax_stars, dax_note, snapshot_measures)
+        if verdict == "fail":
+            fixes.extend(_suggest_actions(r))
+        if fixes:
+            # Deduplicate across both sources
+            seen_texts = set()
+            unique_fixes = []
+            for fix_type, text in fixes:
+                if text not in seen_texts:
+                    seen_texts.add(text)
+                    unique_fixes.append((fix_type, text))
+            emit(f"    >> Fixes:")
+            for fix_type, text in unique_fixes[:5]:
+                emit(f"       [{fix_type:11s}] {text}")
+            all_fixes.extend((idx, fix_type, text) for fix_type, text in unique_fixes)
 
     # ═══ ROOT CAUSE SUMMARY ═══
     rca_counts = {}
@@ -664,6 +846,46 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
         for cat, count in sorted(rca_counts.items(), key=lambda x: -x[1]):
             desc = RCA_CATEGORIES.get(cat, cat)
             emit(f"    {count}x {cat}: {desc}")
+
+    # ═══ FIX SUMMARY (grouped by type) ═══
+    if all_fixes:
+        emit(f"\n{'-' * W}")
+        emit(f"  FIX SUMMARY")
+        emit(f"{'-' * W}")
+        # Group by fix_type
+        by_type = {}
+        for qidx, fix_type, text in all_fixes:
+            by_type.setdefault(fix_type, []).append((qidx, text))
+        # Priority order
+        type_order = ["MEASURE", "INSTRUCTION", "FEWSHOT", "DESCRIPTION",
+                       "SIMPLIFY", "EXPECTED", "DATA"]
+        for ft in type_order:
+            items = by_type.pop(ft, [])
+            if items:
+                emit(f"\n  [{ft}] ({len(items)} suggestion{'s' if len(items)>1 else ''})")
+                # Deduplicate by text, keep question refs
+                seen = {}
+                for qidx, text in items:
+                    if text in seen:
+                        seen[text].append(qidx)
+                    else:
+                        seen[text] = [qidx]
+                for text, qids in seen.items():
+                    q_ref = ", ".join(f"Q{q}" for q in qids)
+                    emit(f"    ({q_ref}) {text}")
+        # Any remaining types not in priority list
+        for ft, items in by_type.items():
+            if items:
+                emit(f"\n  [{ft}] ({len(items)} suggestion{'s' if len(items)>1 else ''})")
+                seen = {}
+                for qidx, text in items:
+                    if text in seen:
+                        seen[text].append(qidx)
+                    else:
+                        seen[text] = [qidx]
+                for text, qids in seen.items():
+                    q_ref = ", ".join(f"Q{q}" for q in qids)
+                    emit(f"    ({q_ref}) {text}")
 
     # ═══ RECOMMENDATIONS ═══
     emit(f"\n{'-' * W}")
@@ -703,6 +925,89 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
     with open(report_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
     print(f"  Report saved: {report_path}")
+
+    # ═══ SAVE TO RESULTS FOLDER (by agent name) ═══
+    _save_results_export(results, ts, cfg, lines, all_fixes)
+
+
+def _save_results_export(results, ts, cfg, report_lines, all_fixes):
+    """Save a clean results export organized by agent name.
+
+    Structure: results/<AgentName>/<timestamp>/
+      - report.txt        (full report)
+      - summary.json      (compact: metadata + per-question verdicts + fixes)
+    """
+    # Load agent name from batch summary or snapshot
+    summary_file = ROOT / cfg.get("output_dir", "runs") / cfg.get("profile_name", "default") / ts / "batch_summary.json"
+    agent_name = cfg.get("semantic_model_name", "Agent")
+    if summary_file.exists():
+        with open(summary_file, "r", encoding="utf-8") as f:
+            saved = json.load(f)
+        agent_name = saved.get("agent_name", agent_name)
+
+    # Sanitize agent name for folder
+    safe_name = re.sub(r"[^a-zA-Z0-9_\-]", "_", agent_name)
+
+    results_dir = ROOT / "results" / safe_name / ts
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Copy report.txt
+    with open(results_dir / "report.txt", "w", encoding="utf-8") as f:
+        f.write("\n".join(report_lines) + "\n")
+
+    # 2. Build compact summary
+    n_pass = sum(1 for r in results if r.get("grading", {}).get("verdict") == "pass")
+    n_fail = sum(1 for r in results if r.get("grading", {}).get("verdict") == "fail")
+    n_ungraded = sum(1 for r in results
+                     if r.get("grading", {}).get("verdict") in ("no_expected", None))
+
+    questions_summary = []
+    for r in results:
+        g = r.get("grading", {})
+        dax_stars, dax_label, dax_note = _assess_dax_quality(r)
+        ans_stars, ans_label = _assess_answer_quality(r)
+        artifacts = g.get("artifacts", {})
+        questions_summary.append({
+            "index": r.get("index"),
+            "question": r.get("question"),
+            "verdict": g.get("verdict"),
+            "expected": g.get("expected"),
+            "match_type": g.get("match_type"),
+            "answer_snippet": (r.get("answer", "") or "")[:200],
+            "duration": r.get("duration_wall"),
+            "dax_quality": {"stars": dax_stars, "label": dax_label, "note": dax_note},
+            "answer_quality": {"stars": ans_stars, "label": ans_label},
+            "root_cause": g.get("root_cause"),
+            "generated_query": artifacts.get("generated_query", ""),
+        })
+
+    # Group fixes by type for summary
+    fix_summary = {}
+    for qidx, fix_type, text in all_fixes:
+        fix_summary.setdefault(fix_type, []).append({
+            "question": f"Q{qidx}", "suggestion": text
+        })
+
+    export = {
+        "agent_name": agent_name,
+        "profile": cfg.get("profile_name", "default"),
+        "model_name": cfg.get("semantic_model_name", "?"),
+        "timestamp": ts,
+        "score": {
+            "pass": n_pass,
+            "fail": n_fail,
+            "ungraded": n_ungraded,
+            "total_graded": n_pass + n_fail,
+            "pct": round(n_pass / max(n_pass + n_fail, 1) * 100) if (n_pass + n_fail) > 0 else None,
+        },
+        "questions": questions_summary,
+        "fixes": fix_summary,
+    }
+
+    with open(results_dir / "summary.json", "w", encoding="utf-8") as f:
+        json.dump(export, f, indent=2, default=str, ensure_ascii=False)
+
+    print(f"  Results export: {results_dir}")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -760,6 +1065,12 @@ def analyze_run(run_dir):
         print(f"    Completed: {passed}/{total}  (no grading data -- re-run for verdicts)")
 
     print(f"\n{'-' * W}")
+
+    # Load snapshot measures for suggestions
+    _cfg_for_snapshot = {"profile_name": summary.get("profile", "default")}
+    _snapshot_measures = _load_snapshot_measures(_cfg_for_snapshot)
+    all_fixes = []
+
     for r in results:
         g = r.get("grading", {})
         verdict = g.get("verdict", "?")
@@ -785,7 +1096,7 @@ def analyze_run(run_dir):
         print(f"     Question : {r['question']}")
         print(f"     Tools    : {' -> '.join(r.get('tools', []))}")
 
-        ans = r.get("answer", "")[:150]
+        ans = r.get("answer", "")
         print(f"     Answer   : {ans}")
 
         if g.get("expected") is not None:
@@ -812,6 +1123,23 @@ def analyze_run(run_dir):
             if artifacts.get("query_result_preview"):
                 print(f"     |  Result: {artifacts['query_result_preview'][:150]}")
             print(f"     +--")
+
+        # DAX improvement suggestions
+        fixes = _suggest_dax_improvements(r, dax_stars, dax_note, _snapshot_measures)
+        if verdict == "fail":
+            fixes.extend(_suggest_actions(r))
+        if fixes:
+            seen_texts = set()
+            unique_fixes = []
+            for fix_type, text in fixes:
+                if text not in seen_texts:
+                    seen_texts.add(text)
+                    unique_fixes.append((fix_type, text))
+            print(f"     >> Fixes:")
+            for fix_type, text in unique_fixes[:5]:
+                print(f"        [{fix_type:11s}] {text}")
+            all_fixes.extend((idx, fix_type, text) for fix_type, text in unique_fixes)
+
         print()
 
     rca_counts = {}
@@ -826,6 +1154,42 @@ def analyze_run(run_dir):
         for cat, count in sorted(rca_counts.items(), key=lambda x: -x[1]):
             desc = RCA_CATEGORIES.get(cat, cat)
             print(f"    {count}x {cat}: {desc}")
+
+    # ═══ FIX SUMMARY (grouped by type) ═══
+    if all_fixes:
+        print(f"\n{'-' * W}")
+        print(f"  FIX SUMMARY")
+        print(f"{'-' * W}")
+        by_type = {}
+        for qidx, fix_type, text in all_fixes:
+            by_type.setdefault(fix_type, []).append((qidx, text))
+        type_order = ["MEASURE", "INSTRUCTION", "FEWSHOT", "DESCRIPTION",
+                       "SIMPLIFY", "EXPECTED", "DATA"]
+        for ft in type_order:
+            items = by_type.pop(ft, [])
+            if items:
+                print(f"\n  [{ft}] ({len(items)} suggestion{'s' if len(items)>1 else ''})")
+                seen = {}
+                for qidx, text in items:
+                    if text in seen:
+                        seen[text].append(qidx)
+                    else:
+                        seen[text] = [qidx]
+                for text, qids in seen.items():
+                    q_ref = ", ".join(f"Q{q}" for q in qids)
+                    print(f"    ({q_ref}) {text}")
+        for ft, items in by_type.items():
+            if items:
+                print(f"\n  [{ft}] ({len(items)} suggestion{'s' if len(items)>1 else ''})")
+                seen = {}
+                for qidx, text in items:
+                    if text in seen:
+                        seen[text].append(qidx)
+                    else:
+                        seen[text] = [qidx]
+                for text, qids in seen.items():
+                    q_ref = ", ".join(f"Q{q}" for q in qids)
+                    print(f"    ({q_ref}) {text}")
 
     print(f"\n{'-' * W}")
     print("  RECOMMENDATIONS:")
