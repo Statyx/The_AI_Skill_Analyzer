@@ -163,6 +163,188 @@ def save_run(results, agent_data, schema, cfg, total_wall, test_cases, interrupt
 #  DAX & ANSWER QUALITY ASSESSMENT
 # ══════════════════════════════════════════════════════════════
 
+def _detect_bpa_violations(query):
+    """Detect Best Practice Analyzer violations in a DAX query.
+
+    Based on Tabular Editor BPA rules adapted for agent-generated DAX.
+    Returns list of (rule_id, severity, description) tuples.
+    Severity: 'error' (deduct 2 stars), 'warning' (deduct 1 star), 'info' (no deduction).
+    """
+    if not query:
+        return []
+
+    violations = []
+    upper_q = query.upper()
+
+    # ── PERFORMANCE RULES ────────────────────────────────────
+
+    # BPA-PERF-001: Avoid FILTER() with ALL() inside CALCULATE — use REMOVEFILTERS
+    if "CALCULATE" in upper_q and "FILTER" in upper_q and "ALL(" in upper_q:
+        # Detect CALCULATE(..., FILTER(ALL(Table), ...)) — use looser match
+        # since CALCULATE args can contain nested parens
+        if re.search(r'CALCULATE\s*\(.*FILTER\s*\(\s*ALL\s*\(', upper_q, re.DOTALL):
+            violations.append(("BPA-PERF-001", "warning",
+                "Use REMOVEFILTERS() or KEEPFILTERS() instead of FILTER(ALL(...),...) "
+                "inside CALCULATE for better performance"))
+
+    # BPA-PERF-002: Avoid FILTER on large tables — use column filters in CALCULATE
+    filter_table_matches = re.findall(
+        r'FILTER\s*\(\s*([\'"]?\w+[\'"]?)\s*,', query, re.IGNORECASE)
+    for tbl in filter_table_matches:
+        tbl_clean = tbl.strip("'\"")
+        if not tbl_clean.upper().startswith("ALL") and not tbl_clean.upper().startswith("VALUES"):
+            violations.append(("BPA-PERF-002", "warning",
+                f"FILTER('{tbl_clean}',...) iterates entire table. "
+                f"Prefer column predicates in CALCULATE: "
+                f"CALCULATE([Measure], '{tbl_clean}'[Column] = value)"))
+            break  # one warning is enough
+
+    # BPA-PERF-003: Avoid nested CALCULATE
+    calc_count = len(re.findall(r'\bCALCULATE\s*\(', upper_q))
+    if calc_count >= 3:
+        violations.append(("BPA-PERF-003", "warning",
+            f"Query has {calc_count} nested CALCULATE calls. "
+            f"Simplify by combining filter arguments or using variables"))
+
+    # BPA-PERF-004: Use DISTINCTCOUNT instead of COUNTROWS(DISTINCT())
+    if re.search(r'COUNTROWS\s*\(\s*DISTINCT\s*\(', upper_q):
+        violations.append(("BPA-PERF-004", "info",
+            "Use DISTINCTCOUNT() instead of COUNTROWS(DISTINCT()) — "
+            "same result, better readability and potential optimization"))
+
+    # BPA-PERF-005: Use DIVIDE instead of / for division (avoids divide-by-zero)
+    if re.search(r'[^/]\s*/\s*[^/\*]', query) and "DIVIDE" not in upper_q:
+        # Only flag if there's no DIVIDE at all — agent should use safe DIVIDE
+        div_count = len(re.findall(r'(?<![/\*])/(?![/\*])', query))
+        if div_count > 0:
+            violations.append(("BPA-PERF-005", "warning",
+                "Use DIVIDE(numerator, denominator) instead of '/' operator — "
+                "handles division by zero gracefully"))
+
+    # BPA-PERF-006: Avoid IFERROR / ISERROR — usually masks real problems
+    if "IFERROR" in upper_q or "ISERROR" in upper_q:
+        violations.append(("BPA-PERF-006", "warning",
+            "Avoid IFERROR/ISERROR — they force double evaluation of the expression. "
+            "Use DIVIDE for safe division or handle specific conditions explicitly"))
+
+    # BPA-PERF-007: Avoid SELECTEDVALUE — use HASONEVALUE + VALUES
+    # Actually: SELECTEDVALUE is fine. The BPA rule is about IF(HASONEVALUE) patterns
+    # being replaceable with SELECTEDVALUE. Skip this for agent context.
+
+    # BPA-PERF-008: Avoid SUMMARIZE for adding calculated columns — use ADDCOLUMNS
+    if re.search(r'SUMMARIZE\s*\([^,]+,.*,\s*"[^"]+"\s*,', upper_q):
+        violations.append(("BPA-PERF-008", "warning",
+            "SUMMARIZE with added columns is unreliable. Use "
+            "ADDCOLUMNS(SUMMARIZE(Table, GroupByCol), \"Name\", expression) instead"))
+
+    # BPA-PERF-009: Use KEEPFILTERS in CALCULATE to preserve existing filters
+    # (info-level for generated queries — agent may legitimately need to override)
+
+    # ── CORRECTNESS RULES ────────────────────────────────────
+
+    # BPA-CORR-001: Avoid comparing with BLANK using = or <>
+    if re.search(r'=\s*BLANK\s*\(\s*\)', upper_q) or re.search(r'<>\s*BLANK\s*\(\s*\)', upper_q):
+        violations.append(("BPA-CORR-001", "warning",
+            "Comparing with BLANK() using = or <> can give unexpected results. "
+            "Use ISBLANK() for null checks"))
+
+    # BPA-CORR-002: Avoid using VALUES() where a single value is expected
+    if re.search(r'VALUES\s*\([^)]+\)\s*[+\-\*/]', upper_q):
+        violations.append(("BPA-CORR-002", "info",
+            "VALUES() can return multiple rows. If a scalar is expected, "
+            "use SELECTEDVALUE() or wrap in a CALCULATE/MAXX"))
+
+    # BPA-CORR-003: SWITCH TRUE pattern — ensure ELSE clause
+    switch_true = re.search(r'SWITCH\s*\(\s*TRUE\s*\(\s*\)', upper_q)
+    if switch_true:
+        # Check if there's likely a default/else value
+        # Hard to parse accurately, so just flag as info
+        violations.append(("BPA-CORR-003", "info",
+            "SWITCH(TRUE(),...) detected — ensure a default (ELSE) value "
+            "is provided to avoid returning BLANK unexpectedly"))
+
+    # BPA-CORR-004: == comparison (DAX uses single =)
+    if "==" in query:
+        # Check it's not inside a string literal
+        code_only = re.sub(r'"[^"]*"', '', query)
+        if "==" in code_only:
+            violations.append(("BPA-CORR-004", "error",
+                "DAX uses single '=' for equality comparison, not '=='. "
+                "This will cause a syntax error"))
+
+    # ── TIME INTELLIGENCE RULES ──────────────────────────────
+
+    # BPA-TIME-001: Avoid __PBI_TimeIntelligenceEnabled auto-filters
+    if "__PBI_TIMEINTELLIGENCEENABLED" in upper_q:
+        violations.append(("BPA-TIME-001", "warning",
+            "Auto time-intelligence filter __PBI_TimeIntelligenceEnabled "
+            "detected. Use explicit date CALCULATE filters instead"))
+
+    # BPA-TIME-002: TREATAS for date binding — often unneeded in direct queries
+    if "TREATAS" in upper_q and ("CALENDAR" in upper_q or "DATE" in upper_q):
+        violations.append(("BPA-TIME-002", "warning",
+            "TREATAS with date tables detected. Use direct "
+            "relationships or explicit date column filters"))
+
+    # BPA-TIME-003: DATESYTD/DATESBETWEEN vs CALCULATE with date filters
+    if "DATESYTD" in upper_q or "DATESBETWEEN" in upper_q or "DATESINPERIOD" in upper_q:
+        # These are OK but flag as info when combined with CALCULATE complexity
+        if calc_count >= 2:
+            violations.append(("BPA-TIME-003", "info",
+                "Time intelligence functions (DATESYTD/DATESBETWEEN/DATESINPERIOD) "
+                "with nested CALCULATE — consider pre-defining as a model measure"))
+
+    # ── READABILITY / MAINTENANCE RULES ──────────────────────
+
+    # BPA-READ-001: Use VAR/RETURN for complex expressions
+    lines = [l for l in query.strip().split("\n") if l.strip()]
+    if len(lines) > 8 and "VAR" not in upper_q:
+        violations.append(("BPA-READ-001", "info",
+            "Complex query without VARiables. Use VAR/RETURN to break "
+            "down logic for better readability and potential performance gain"))
+
+    # BPA-READ-002: DEFINE MEASURE without clear naming
+    define_measures = re.findall(
+        r'MEASURE\s+[\'"]?(\w+)[\'"]?\[([^\]]+)\]', query, re.IGNORECASE)
+    for tbl, mname in define_measures:
+        if mname.startswith("_") or len(mname) < 3:
+            violations.append(("BPA-READ-002", "info",
+                f"DEFINE MEASURE [{mname}] uses cryptic naming. "
+                f"Use descriptive names for inline measures"))
+            break
+
+    # BPA-READ-003: Hardcoded values in filters
+    hardcoded_years = re.findall(
+        r'(?:YEAR|Calendar)\w*\[?\w*\]?\s*=\s*(20\d{2})', query, re.IGNORECASE)
+    if hardcoded_years:
+        violations.append(("BPA-READ-003", "info",
+            f"Hardcoded year values ({', '.join(hardcoded_years[:3])}) detected. "
+            f"Consider using dynamic date references like TODAY(), NOW(), or MAX(Date[Year])"))
+
+    # ── MEASURE USAGE RULES ──────────────────────────────────
+
+    # BPA-MEAS-001: Raw column aggregation instead of existing measures
+    raw_aggs = re.findall(
+        r'\b(SUM|AVERAGE|COUNT|COUNTROWS|MIN|MAX)\s*\(\s*[\'"]?\w+[\'"]?\[[^\]]+\]\s*\)',
+        query, re.IGNORECASE)
+    if len(raw_aggs) > 2:
+        violations.append(("BPA-MEAS-001", "info",
+            f"Query aggregates {len(raw_aggs)} raw columns directly. "
+            f"If corresponding measures exist, reference them for consistency "
+            f"with report calculations and potentially better perf"))
+
+    # BPA-MEAS-002: CALCULATE should reference a measure, not a raw aggregation
+    calc_raw = re.findall(
+        r'CALCULATE\s*\(\s*(SUM|AVERAGE|COUNT|COUNTROWS|MIN|MAX)\s*\(',
+        query, re.IGNORECASE)
+    if calc_raw:
+        violations.append(("BPA-MEAS-002", "info",
+            f"CALCULATE wraps raw {calc_raw[0].upper()}() instead of a measure. "
+            f"If a measure exists for this aggregation, reference it directly"))
+
+    return violations
+
+
 def _assess_dax_quality(result):
     """Rate the quality of the generated DAX query. Returns (stars 0-3, label, detail)."""
     artifacts = result.get("grading", {}).get("artifacts", {})
@@ -200,6 +382,21 @@ def _assess_dax_quality(result):
     if "__PBI_TIMEINTELLIGENCEENABLED" in upper_q or "TREATAS" in upper_q:
         stars = min(stars, 2)
         notes.append("auto-filters detected")
+
+    # ── BPA violations ───────────────────────────────────────
+    bpa_violations = _detect_bpa_violations(query)
+    n_errors = sum(1 for _, sev, _ in bpa_violations if sev == "error")
+    n_warnings = sum(1 for _, sev, _ in bpa_violations if sev == "warning")
+    n_info = sum(1 for _, sev, _ in bpa_violations if sev == "info")
+
+    if n_errors > 0:
+        stars = min(stars, 1)
+        notes.append(f"BPA: {n_errors} error(s)")
+    if n_warnings > 0:
+        stars = min(stars, 2)
+        notes.append(f"BPA: {n_warnings} warning(s)")
+    if n_info > 0:
+        notes.append(f"BPA: {n_info} info")
 
     # Check if it references measures (good) vs raw columns only
     measure_refs = re.findall(r'\[[A-Z][^\]]*\]', query)
@@ -593,6 +790,68 @@ def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=Non
             "DAX query was good but the agent misinterpreted the result. "
             "Add instruction on how to read and present this type of data."))
 
+    # ── BPA VIOLATIONS → actionable fixes ────────────────────
+    bpa_violations = _detect_bpa_violations(query)
+    bpa_fix_map = {
+        "BPA-PERF-001": ("INSTRUCTION",
+            "Add instruction: 'In CALCULATE, use REMOVEFILTERS() instead of "
+            "FILTER(ALL(...),...). Example: CALCULATE([Measure], "
+            "REMOVEFILTERS(Table[Column]))'"),
+        "BPA-PERF-002": ("FEWSHOT",
+            f"Add a fewshot for \"{question}\" using column predicates in "
+            f"CALCULATE instead of FILTER(Table,...). E.g., "
+            f"CALCULATE([Measure], Table[Col] = \"value\")"),
+        "BPA-PERF-003": ("SIMPLIFY",
+            "Reduce nested CALCULATE calls. Combine filter arguments into "
+            "a single CALCULATE or use VAR to store intermediate results"),
+        "BPA-PERF-004": ("INSTRUCTION",
+            "Add instruction: 'Use DISTINCTCOUNT(Table[Column]) instead of "
+            "COUNTROWS(DISTINCT(Table[Column]))'"),
+        "BPA-PERF-005": ("INSTRUCTION",
+            "Add instruction: 'Always use DIVIDE(numerator, denominator, 0) "
+            "instead of the / operator to handle division by zero'"),
+        "BPA-PERF-006": ("INSTRUCTION",
+            "Add instruction: 'Avoid IFERROR/ISERROR. Use DIVIDE for safe "
+            "division. Handle specific conditions explicitly (IF + ISBLANK)'"),
+        "BPA-PERF-008": ("INSTRUCTION",
+            "Add instruction: 'Never add calculated columns inside SUMMARIZE. "
+            "Use ADDCOLUMNS(SUMMARIZE(Table, GroupBy), \"Name\", Expr)'"),
+        "BPA-CORR-001": ("INSTRUCTION",
+            "Add instruction: 'Use ISBLANK(expression) instead of comparing "
+            "with = BLANK() or <> BLANK()'"),
+        "BPA-CORR-002": ("INSTRUCTION",
+            "Add instruction: 'When a single value is needed from a column, "
+            "use SELECTEDVALUE() instead of VALUES()'"),
+        "BPA-CORR-004": ("INSTRUCTION",
+            "Add instruction: 'DAX uses single = for equality. Never use ==.'"),
+        "BPA-TIME-001": ("INSTRUCTION",
+            "Add instruction: 'Do not use __PBI_TimeIntelligenceEnabled. "
+            "Use explicit date filters in CALCULATE'"),
+        "BPA-TIME-002": ("INSTRUCTION",
+            "Add instruction: 'Avoid TREATAS with date tables. Use direct "
+            "relationships or explicit date column filters'"),
+        "BPA-TIME-003": ("MEASURE",
+            "Time intelligence logic (DATESYTD/DATESBETWEEN) is complex inline. "
+            "Create a dedicated measure in the semantic model"),
+        "BPA-READ-001": ("SIMPLIFY",
+            "Add instruction: 'For complex calculations, use VAR/RETURN "
+            "to define intermediate variables for clarity and performance'"),
+        "BPA-READ-003": ("INSTRUCTION",
+            "Add instruction: 'Do not hardcode year values. Use "
+            "MAX(DateTable[Year]) or YEAR(TODAY()) for dynamic date logic'"),
+        "BPA-MEAS-001": ("MEASURE",
+            "Agent aggregates raw columns repeatedly. Create reusable "
+            "measures in the semantic model to ensure consistency"),
+        "BPA-MEAS-002": ("INSTRUCTION",
+            "Add instruction: 'Always reference existing measures inside "
+            "CALCULATE instead of wrapping raw SUM/AVERAGE/COUNT'"),
+    }
+
+    for rule_id, severity, description in bpa_violations:
+        if rule_id in bpa_fix_map:
+            fix_type, fix_text = bpa_fix_map[rule_id]
+            suggestions.append((fix_type, f"[{rule_id}] {fix_text}"))
+
     # Deduplicate by suggestion text
     seen = set()
     unique = []
@@ -626,6 +885,182 @@ def _assess_answer_quality(result):
     stars = min(stars, 3)
     label = {3: "Data-rich", 2: "Adequate", 1: "Thin", 0: "Error"}.get(stars, "?")
     return stars, label
+
+
+# ══════════════════════════════════════════════════════════════
+#  ACTION PLAN — group fixes by target (what to touch)
+# ══════════════════════════════════════════════════════════════
+
+# Maps fix_type → (target_key, target_label, emoji)
+_TARGET_MAP = {
+    "INSTRUCTION": ("agent_instructions", "Data Agent Instructions",   "Agent"),
+    "FEWSHOT":     ("agent_fewshots",     "Data Agent Few-shot Examples", "Agent"),
+    "MEASURE":     ("semantic_model",     "Semantic Model (DAX Measures)", "Model"),
+    "DESCRIPTION": ("model_descriptions", "Model Descriptions (Tables/Columns/Measures)", "Model"),
+    "SIMPLIFY":    ("semantic_model",     "Semantic Model (DAX Measures)", "Model"),
+    "EXPECTED":    ("test_cases",         "Test Cases (questions.yaml)",  "Tests"),
+    "DATA":        ("data_source",        "Data Source / Permissions",    "Data"),
+}
+
+_TARGET_ORDER = [
+    "agent_instructions",
+    "agent_fewshots",
+    "semantic_model",
+    "model_descriptions",
+    "test_cases",
+    "data_source",
+]
+
+_TARGET_LABELS = {
+    "agent_instructions": "DATA AGENT INSTRUCTIONS",
+    "agent_fewshots":     "DATA AGENT FEW-SHOT EXAMPLES",
+    "semantic_model":     "SEMANTIC MODEL (DAX MEASURES)",
+    "model_descriptions": "MODEL DESCRIPTIONS",
+    "test_cases":         "TEST CASES (questions.yaml)",
+    "data_source":        "DATA SOURCE / PERMISSIONS",
+}
+
+_TARGET_HOW = {
+    "agent_instructions": "Edit the Data Agent instructions in Fabric portal or push via API",
+    "agent_fewshots":     "Add worked examples in the Data Agent's few-shot section",
+    "semantic_model":     "Add/modify measures in Tabular Editor, TMDL, or Fabric portal",
+    "model_descriptions": "Update table/column/measure descriptions via TMDL or portal",
+    "test_cases":         "Update profiles/<profile>/questions.yaml",
+    "data_source":        "Check data pipeline, permissions, and freshness",
+}
+
+
+def _build_action_plan(all_fixes):
+    """Group fixes by target (what to touch) and deduplicate.
+
+    Returns:
+        by_target: dict[str, list[(set_of_qidx, fix_type, text)]]
+        stats: dict with counts per target
+    """
+    by_target = {}
+    for qidx, fix_type, text in all_fixes:
+        target_key = _TARGET_MAP.get(fix_type, ("other", "Other", "?"))[0]
+        by_target.setdefault(target_key, []).append((qidx, fix_type, text))
+
+    # Deduplicate by text within each target, accumulate question refs
+    deduped = {}
+    for target_key, items in by_target.items():
+        seen = {}
+        for qidx, fix_type, text in items:
+            if text in seen:
+                seen[text][0].add(qidx)
+            else:
+                seen[text] = (set([qidx]), fix_type, text)
+        deduped[target_key] = list(seen.values())
+
+    stats = {t: len(deduped.get(t, [])) for t in _TARGET_ORDER if t in deduped}
+    return deduped, stats
+
+
+def _render_action_plan(all_fixes, emit_fn):
+    """Render the ACTION PLAN grouped by target. Works with both print and emit."""
+    W = 72
+    deduped, stats = _build_action_plan(all_fixes)
+
+    if not stats:
+        return
+
+    total_actions = sum(stats.values())
+
+    emit_fn(f"\n{'=' * W}")
+    emit_fn(f"  ACTION PLAN ({total_actions} actions across {len(stats)} targets)")
+    emit_fn(f"{'=' * W}")
+
+    # Overview bar
+    emit_fn(f"  Targets to modify:")
+    for target_key in _TARGET_ORDER:
+        if target_key in stats:
+            count = stats[target_key]
+            label = _TARGET_LABELS[target_key]
+            affected_qs = set()
+            for qids, _, _ in deduped[target_key]:
+                affected_qs.update(qids)
+            q_str = f"Q{','.join(str(q) for q in sorted(affected_qs))}"
+            emit_fn(f"    [{count:2d} fix{'es' if count > 1 else ' '}] {label} ({q_str})")
+
+    # Detailed actions per target
+    for target_key in _TARGET_ORDER:
+        items = deduped.get(target_key)
+        if not items:
+            continue
+
+        label = _TARGET_LABELS[target_key]
+        how = _TARGET_HOW[target_key]
+
+        emit_fn(f"\n  {'-' * (W - 2)}")
+        emit_fn(f"  >> {label}")
+        emit_fn(f"     How: {how}")
+
+        for i, (qids, fix_type, text) in enumerate(items, 1):
+            q_ref = ", ".join(f"Q{q}" for q in sorted(qids))
+            # Tag BPA rules distinctly
+            bpa_tag = ""
+            bpa_match = re.search(r'\[(BPA-\w+-\d+)\]', text)
+            if bpa_match:
+                bpa_tag = f" {bpa_match.group(1)}"
+            emit_fn(f"     {i}. [{fix_type}]{bpa_tag} ({q_ref})")
+            # Wrap long text
+            clean_text = text
+            if bpa_match:
+                clean_text = text.replace(f"[{bpa_match.group(1)}] ", "")
+            emit_fn(f"        {clean_text}")
+
+    # Handle any unmapped types
+    other_items = deduped.get("other")
+    if other_items:
+        emit_fn(f"\n  {'-' * (W - 2)}")
+        emit_fn(f"  >> OTHER")
+        for i, (qids, fix_type, text) in enumerate(other_items, 1):
+            q_ref = ", ".join(f"Q{q}" for q in sorted(qids))
+            emit_fn(f"     {i}. [{fix_type}] ({q_ref})")
+            emit_fn(f"        {text}")
+
+    emit_fn(f"{'=' * W}")
+
+
+def _build_action_plan_json(all_fixes):
+    """Build a structured action plan for JSON export."""
+    deduped, stats = _build_action_plan(all_fixes)
+    targets = []
+
+    for target_key in _TARGET_ORDER:
+        items = deduped.get(target_key)
+        if not items:
+            continue
+
+        actions_list = []
+        for qids, fix_type, text in items:
+            bpa_match = re.search(r'\[(BPA-\w+-\d+)\]', text)
+            actions_list.append({
+                "fix_type": fix_type,
+                "bpa_rule": bpa_match.group(1) if bpa_match else None,
+                "questions": sorted(qids),
+                "suggestion": text.replace(f"[{bpa_match.group(1)}] ", "") if bpa_match else text,
+            })
+
+        affected_qs = set()
+        for qids, _, _ in items:
+            affected_qs.update(qids)
+
+        targets.append({
+            "target": target_key,
+            "label": _TARGET_LABELS[target_key],
+            "how": _TARGET_HOW[target_key],
+            "action_count": len(actions_list),
+            "affected_questions": sorted(affected_qs),
+            "actions": actions_list,
+        })
+
+    return {
+        "total_actions": sum(stats.values()),
+        "targets_count": len(stats),
+        "targets": targets,
+    }
 
 
 # ══════════════════════════════════════════════════════════════
@@ -847,45 +1282,9 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
             desc = RCA_CATEGORIES.get(cat, cat)
             emit(f"    {count}x {cat}: {desc}")
 
-    # ═══ FIX SUMMARY (grouped by type) ═══
+    # ═══ ACTION PLAN (grouped by target) ═══
     if all_fixes:
-        emit(f"\n{'-' * W}")
-        emit(f"  FIX SUMMARY")
-        emit(f"{'-' * W}")
-        # Group by fix_type
-        by_type = {}
-        for qidx, fix_type, text in all_fixes:
-            by_type.setdefault(fix_type, []).append((qidx, text))
-        # Priority order
-        type_order = ["MEASURE", "INSTRUCTION", "FEWSHOT", "DESCRIPTION",
-                       "SIMPLIFY", "EXPECTED", "DATA"]
-        for ft in type_order:
-            items = by_type.pop(ft, [])
-            if items:
-                emit(f"\n  [{ft}] ({len(items)} suggestion{'s' if len(items)>1 else ''})")
-                # Deduplicate by text, keep question refs
-                seen = {}
-                for qidx, text in items:
-                    if text in seen:
-                        seen[text].append(qidx)
-                    else:
-                        seen[text] = [qidx]
-                for text, qids in seen.items():
-                    q_ref = ", ".join(f"Q{q}" for q in qids)
-                    emit(f"    ({q_ref}) {text}")
-        # Any remaining types not in priority list
-        for ft, items in by_type.items():
-            if items:
-                emit(f"\n  [{ft}] ({len(items)} suggestion{'s' if len(items)>1 else ''})")
-                seen = {}
-                for qidx, text in items:
-                    if text in seen:
-                        seen[text].append(qidx)
-                    else:
-                        seen[text] = [qidx]
-                for text, qids in seen.items():
-                    q_ref = ", ".join(f"Q{q}" for q in qids)
-                    emit(f"    ({q_ref}) {text}")
+        _render_action_plan(all_fixes, emit)
 
     # ═══ RECOMMENDATIONS ═══
     emit(f"\n{'-' * W}")
@@ -981,12 +1380,15 @@ def _save_results_export(results, ts, cfg, report_lines, all_fixes):
             "generated_query": artifacts.get("generated_query", ""),
         })
 
-    # Group fixes by type for summary
+    # Group fixes by type for summary (legacy)
     fix_summary = {}
     for qidx, fix_type, text in all_fixes:
         fix_summary.setdefault(fix_type, []).append({
             "question": f"Q{qidx}", "suggestion": text
         })
+
+    # Build structured action plan grouped by target
+    action_plan = _build_action_plan_json(all_fixes)
 
     export = {
         "agent_name": agent_name,
@@ -1002,6 +1404,7 @@ def _save_results_export(results, ts, cfg, report_lines, all_fixes):
         },
         "questions": questions_summary,
         "fixes": fix_summary,
+        "action_plan": action_plan,
     }
 
     with open(results_dir / "summary.json", "w", encoding="utf-8") as f:
@@ -1155,41 +1558,9 @@ def analyze_run(run_dir):
             desc = RCA_CATEGORIES.get(cat, cat)
             print(f"    {count}x {cat}: {desc}")
 
-    # ═══ FIX SUMMARY (grouped by type) ═══
+    # ═══ ACTION PLAN (grouped by target) ═══
     if all_fixes:
-        print(f"\n{'-' * W}")
-        print(f"  FIX SUMMARY")
-        print(f"{'-' * W}")
-        by_type = {}
-        for qidx, fix_type, text in all_fixes:
-            by_type.setdefault(fix_type, []).append((qidx, text))
-        type_order = ["MEASURE", "INSTRUCTION", "FEWSHOT", "DESCRIPTION",
-                       "SIMPLIFY", "EXPECTED", "DATA"]
-        for ft in type_order:
-            items = by_type.pop(ft, [])
-            if items:
-                print(f"\n  [{ft}] ({len(items)} suggestion{'s' if len(items)>1 else ''})")
-                seen = {}
-                for qidx, text in items:
-                    if text in seen:
-                        seen[text].append(qidx)
-                    else:
-                        seen[text] = [qidx]
-                for text, qids in seen.items():
-                    q_ref = ", ".join(f"Q{q}" for q in qids)
-                    print(f"    ({q_ref}) {text}")
-        for ft, items in by_type.items():
-            if items:
-                print(f"\n  [{ft}] ({len(items)} suggestion{'s' if len(items)>1 else ''})")
-                seen = {}
-                for qidx, text in items:
-                    if text in seen:
-                        seen[text].append(qidx)
-                    else:
-                        seen[text] = [qidx]
-                for text, qids in seen.items():
-                    q_ref = ", ".join(f"Q{q}" for q in qids)
-                    print(f"    ({q_ref}) {text}")
+        _render_action_plan(all_fixes, print)
 
     print(f"\n{'-' * W}")
     print("  RECOMMENDATIONS:")
