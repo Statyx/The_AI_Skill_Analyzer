@@ -346,7 +346,7 @@ def _detect_bpa_violations(query):
 
 
 def _assess_dax_quality(result):
-    """Rate the quality of the generated DAX query. Returns (stars 0-3, label, detail)."""
+    """Rate the quality of the generated DAX query. Returns (score 0-5, label, detail)."""
     artifacts = result.get("grading", {}).get("artifacts", {})
     query = artifacts.get("generated_query", "") or ""
     tools = result.get("tools", [])
@@ -359,7 +359,7 @@ def _assess_dax_quality(result):
             return 0, "No query", "Agent answered without querying the model"
         return 0, "No query", "No DAX captured in pipeline trace"
 
-    stars = 3
+    score = 5
     notes = []
 
     # Query errors → poor
@@ -368,19 +368,19 @@ def _assess_dax_quality(result):
 
     # Empty results
     if root_cause == "EMPTY_RESULT":
-        stars = min(stars, 1)
+        score = min(score, 2)
         notes.append("empty result")
 
     # Complexity check
     lines = [l for l in query.strip().split("\n") if l.strip()]
     if len(lines) > 15:
-        stars = min(stars, 2)
+        score = min(score, 3)
         notes.append(f"complex ({len(lines)} lines)")
 
     # Problematic patterns
     upper_q = query.upper()
     if "__PBI_TIMEINTELLIGENCEENABLED" in upper_q or "TREATAS" in upper_q:
-        stars = min(stars, 2)
+        score = min(score, 3)
         notes.append("auto-filters detected")
 
     # ── BPA violations ───────────────────────────────────────
@@ -390,12 +390,14 @@ def _assess_dax_quality(result):
     n_info = sum(1 for _, sev, _ in bpa_violations if sev == "info")
 
     if n_errors > 0:
-        stars = min(stars, 1)
+        score = min(score, 2)
         notes.append(f"BPA: {n_errors} error(s)")
     if n_warnings > 0:
-        stars = min(stars, 2)
+        score = min(score, 3)
         notes.append(f"BPA: {n_warnings} warning(s)")
     if n_info > 0:
+        score -= 1
+        score = max(score, 0)
         notes.append(f"BPA: {n_info} info")
 
     # Check if it references measures (good) vs raw columns only
@@ -407,11 +409,11 @@ def _assess_dax_quality(result):
     if verdict == "pass":
         notes.append("correct result")
     elif verdict == "fail" and root_cause == "SYNTHESIS":
-        stars = min(stars, 2)
+        score = min(score, 3)
         notes.append("wrong interpretation")
 
-    label = {3: "Good", 2: "Adequate", 1: "Poor", 0: "None"}.get(stars, "?")
-    return stars, label, "; ".join(notes) if notes else ""
+    label = {5: "Excellent", 4: "Good", 3: "Adequate", 2: "Poor", 1: "Bad", 0: "None"}.get(score, "?")
+    return score, label, "; ".join(notes) if notes else ""
 
 
 # ══════════════════════════════════════════════════════════════
@@ -696,10 +698,8 @@ def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=Non
 
     # ── AUTO-FILTERS ─────────────────────────────────────────
     if "__PBI_TIMEINTELLIGENCEENABLED" in upper_q or "TREATAS" in upper_q:
-        suggestions.append(("INSTRUCTION",
-            "Add instruction: 'Never use __PBI_TimeIntelligenceEnabled or "
-            "TREATAS auto-filter patterns. Use explicit CALCULATE with "
-            "date column filters instead.'"))
+        # BPA-TIME-001/BPA-TIME-002 will add the INSTRUCTION if detected;
+        # only add a fewshot here to avoid duplicate instructions.
         suggestions.append(("FEWSHOT",
             f"Add a fewshot for \"{question}\" with clean DAX "
             f"(no auto-filters, explicit date filters)"))
@@ -727,9 +727,9 @@ def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=Non
                     f"across {len(query_lines)} lines. Create a dedicated "
                     f"measure in the model to encapsulate this logic."))
             else:
-                suggestions.append(("SIMPLIFY",
-                    f"Query is {len(query_lines)} lines. Consider adding a "
-                    f"fewshot with a simpler approach or a new measure."))
+                suggestions.append(("FEWSHOT",
+                    f"Query is {len(query_lines)} lines. Add a fewshot "
+                    f"with a simpler DAX approach for this question."))
 
     # ── RAW COLUMNS vs EXISTING MEASURES ─────────────────────
     if snapshot_measures:
@@ -785,7 +785,7 @@ def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=Non
                 f"Add instruction mapping this question type to the correct measure."))
 
     # ── SYNTHESIS (correct data, wrong interpretation) ───────
-    if root_cause == "SYNTHESIS" and dax_stars >= 2:
+    if root_cause == "SYNTHESIS" and dax_stars >= 3:
         suggestions.append(("INSTRUCTION",
             "DAX query was good but the agent misinterpreted the result. "
             "Add instruction on how to read and present this type of data."))
@@ -801,9 +801,9 @@ def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=Non
             f"Add a fewshot for \"{question}\" using column predicates in "
             f"CALCULATE instead of FILTER(Table,...). E.g., "
             f"CALCULATE([Measure], Table[Col] = \"value\")"),
-        "BPA-PERF-003": ("SIMPLIFY",
-            "Reduce nested CALCULATE calls. Combine filter arguments into "
-            "a single CALCULATE or use VAR to store intermediate results"),
+        "BPA-PERF-003": ("INSTRUCTION",
+            "Add instruction: 'Reduce nested CALCULATE calls. Combine filter arguments into "
+            "a single CALCULATE or use VAR to store intermediate results'"),
         "BPA-PERF-004": ("INSTRUCTION",
             "Add instruction: 'Use DISTINCTCOUNT(Table[Column]) instead of "
             "COUNTROWS(DISTINCT(Table[Column]))'"),
@@ -833,7 +833,7 @@ def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=Non
         "BPA-TIME-003": ("MEASURE",
             "Time intelligence logic (DATESYTD/DATESBETWEEN) is complex inline. "
             "Create a dedicated measure in the semantic model"),
-        "BPA-READ-001": ("SIMPLIFY",
+        "BPA-READ-001": ("INSTRUCTION",
             "Add instruction: 'For complex calculations, use VAR/RETURN "
             "to define intermediate variables for clarity and performance'"),
         "BPA-READ-003": ("INSTRUCTION",
@@ -863,7 +863,7 @@ def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=Non
 
 
 def _assess_answer_quality(result):
-    """Rate the quality of the agent's answer. Returns (stars 0-3, label)."""
+    """Rate the quality of the agent's answer. Returns (score 0-5, label)."""
     answer = result.get("answer", "") or ""
     status = result.get("status", "")
 
@@ -874,17 +874,19 @@ def _assess_answer_quality(result):
     has_numbers = bool(re.findall(r'\d[\d,]*\.?\d*', answer))
     has_structure = any(c in answer for c in ["\n", ":", "|", "*"])
 
-    stars = 1  # Base
+    score = 1  # Base
     if has_numbers:
-        stars += 1
+        score += 1
+    if length > 50:
+        score += 1
     if length > 100 and has_structure:
-        stars += 1
-    elif length > 200:
-        stars += 1
+        score += 1
+    if length > 200:
+        score += 1
 
-    stars = min(stars, 3)
-    label = {3: "Data-rich", 2: "Adequate", 1: "Thin", 0: "Error"}.get(stars, "?")
-    return stars, label
+    score = min(score, 5)
+    label = {5: "Excellent", 4: "Data-rich", 3: "Good", 2: "Adequate", 1: "Thin", 0: "Error"}.get(score, "?")
+    return score, label
 
 
 # ══════════════════════════════════════════════════════════════
@@ -897,7 +899,7 @@ _TARGET_MAP = {
     "FEWSHOT":     ("agent_fewshots",     "Data Agent Few-shot Examples", "Agent"),
     "MEASURE":     ("semantic_model",     "Semantic Model (DAX Measures)", "Model"),
     "DESCRIPTION": ("model_descriptions", "Model Descriptions (Tables/Columns/Measures)", "Model"),
-    "SIMPLIFY":    ("semantic_model",     "Semantic Model (DAX Measures)", "Model"),
+    "SIMPLIFY":    ("agent_instructions", "Data Agent Instructions",   "Agent"),
     "EXPECTED":    ("test_cases",         "Test Cases (questions.yaml)",  "Tests"),
     "DATA":        ("data_source",        "Data Source / Permissions",    "Data"),
 }
@@ -943,6 +945,7 @@ def _build_action_plan(all_fixes):
         by_target.setdefault(target_key, []).append((qidx, fix_type, text))
 
     # Deduplicate by text within each target, accumulate question refs
+    # Then merge semantically overlapping items (same keywords)
     deduped = {}
     for target_key, items in by_target.items():
         seen = {}
@@ -951,7 +954,33 @@ def _build_action_plan(all_fixes):
                 seen[text][0].add(qidx)
             else:
                 seen[text] = (set([qidx]), fix_type, text)
-        deduped[target_key] = list(seen.values())
+
+        # Semantic merge: collapse items sharing key DAX keywords
+        _MERGE_KEYWORDS = [
+            "TREATAS", "TimeIntelligenceEnabled", "REMOVEFILTERS",
+            "FILTER(ALL", "IFERROR", "ISERROR", "DISTINCTCOUNT",
+            "SELECTEDVALUE", "VALUES()", "== ",
+        ]
+        merged = list(seen.values())
+        final = []
+        absorbed = set()
+        for i, (qs_a, ft_a, txt_a) in enumerate(merged):
+            if i in absorbed:
+                continue
+            for j in range(i + 1, len(merged)):
+                if j in absorbed:
+                    continue
+                _, ft_b, txt_b = merged[j]
+                if ft_a != ft_b:
+                    continue
+                # Check if they share a merge keyword
+                for kw in _MERGE_KEYWORDS:
+                    if kw.lower() in txt_a.lower() and kw.lower() in txt_b.lower():
+                        qs_a.update(merged[j][0])
+                        absorbed.add(j)
+                        break
+            final.append((qs_a, ft_a, txt_a))
+        deduped[target_key] = final
 
     stats = {t: len(deduped.get(t, [])) for t in _TARGET_ORDER if t in deduped}
     return deduped, stats
@@ -1086,11 +1115,11 @@ def _find_previous_run_dir(current_ts, cfg):
 
 
 # ══════════════════════════════════════════════════════════════
-#  STAR RATING HELPER
+#  SCORE RATING HELPER
 # ══════════════════════════════════════════════════════════════
 
-def _stars(n):
-    return "\u2605" * n + "\u2606" * (3 - n)   # ★☆
+def _score(n):
+    return f"{n}/5"
 
 
 # ══════════════════════════════════════════════════════════════
@@ -1225,9 +1254,9 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
             emit(f"    Expected: -- (ungraded)")
 
         # Quality ratings
-        emit(f"    DAX     : {_stars(dax_stars)} {dax_label}"
+        emit(f"    DAX     : {_score(dax_stars)} {dax_label}"
              + (f" -- {dax_note}" if dax_note else ""))
-        emit(f"    Quality : {_stars(ans_stars)} {ans_label}")
+        emit(f"    Quality : {_score(ans_stars)} {ans_label}")
 
         # Show generated query for every question
         all_artifacts = g.get("artifacts", {})
@@ -1350,8 +1379,9 @@ def _save_results_export(results, ts, cfg, report_lines, all_fixes):
     results_dir = ROOT / "results" / safe_name / ts
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Copy report.txt
-    with open(results_dir / "report.txt", "w", encoding="utf-8") as f:
+    # 1. Save report with agent name and timestamp in filename
+    report_filename = f"result_{safe_name}_{ts}.txt"
+    with open(results_dir / report_filename, "w", encoding="utf-8") as f:
         f.write("\n".join(report_lines) + "\n")
 
     # 2. Build compact summary
@@ -1374,8 +1404,8 @@ def _save_results_export(results, ts, cfg, report_lines, all_fixes):
             "match_type": g.get("match_type"),
             "answer_snippet": (r.get("answer", "") or "")[:200],
             "duration": r.get("duration_wall"),
-            "dax_quality": {"stars": dax_stars, "label": dax_label, "note": dax_note},
-            "answer_quality": {"stars": ans_stars, "label": ans_label},
+            "dax_quality": {"score": dax_stars, "label": dax_label, "note": dax_note},
+            "answer_quality": {"score": ans_stars, "label": ans_label},
             "root_cause": g.get("root_cause"),
             "generated_query": artifacts.get("generated_query", ""),
         })
@@ -1507,9 +1537,9 @@ def analyze_run(run_dir):
             print(f"     Verdict  : {verdict.upper()} -- {g.get('compare_detail', '')}")
 
         # Quality ratings
-        print(f"     DAX      : {_stars(dax_stars)} {dax_label}"
+        print(f"     DAX      : {_score(dax_stars)} {dax_label}"
               + (f" -- {dax_note}" if dax_note else ""))
-        print(f"     Quality  : {_stars(ans_stars)} {ans_label}")
+        print(f"     Quality  : {_score(ans_stars)} {ans_label}")
 
         if r.get("error"):
             print(f"     ERROR    : {r['error']}")

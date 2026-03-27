@@ -15,6 +15,12 @@ CRITICAL RULES:
 2. If you cannot find the data in the model, say so. Do not invent results.
 3. Use existing DAX measures whenever possible instead of raw column calculations.
 
+DAX BEST PRACTICES (follow these in every query):
+- In CALCULATE, use REMOVEFILTERS() instead of FILTER(ALL(...),...). Example: CALCULATE([Measure], REMOVEFILTERS(Table[Column]))
+- For complex calculations, use VAR/RETURN to define intermediate variables for clarity and performance.
+- DAX uses single = for equality. Never use ==.
+- Always use DIVIDE(numerator, denominator, 0) instead of the / operator to handle division by zero.
+
 CONTEXT:
 - 20,000 customers, 2,000 B2B accounts, 40 segments
 - 20 marketing campaigns (email), 200,000 sends, 12 months of data (2025)
