@@ -7,6 +7,8 @@ Usage:
     python -m analyzer -p my_agent run --refresh --serial --tag kpi
     python -m analyzer -p my_agent rerun 20260325_080433 --questions 3 5
     python -m analyzer -p my_agent analyze --latest --html
+    python -m analyzer -p my_agent generate
+    python -m analyzer -p my_agent generate --out questions.yaml --max 30
     python -m analyzer diff RUN_A RUN_B
 
 If --profile is omitted, uses default_profile from config.yaml,
@@ -22,6 +24,7 @@ from .runner import run_questions_parallel, run_questions_serial
 from .reporting import save_run, analyze_run, find_run_dir, diff_runs, generate_html_report, print_post_run_report
 from .init import scaffold_profile
 from .validate import validate_profile
+from .generate import generate_questions, write_questions_yaml
 
 
 def cmd_init(args):
@@ -38,6 +41,33 @@ def cmd_snapshot(args, cfg):
     session = FabricSession(cfg)
     take_snapshot(session, cfg, force=True)
     print("\nDone.")
+
+
+def cmd_generate(args, cfg):
+    out_file = getattr(args, "out", None)
+    profile_dir = ROOT / "profiles" / cfg["profile_name"]
+    if out_file:
+        output_path = profile_dir / out_file
+    else:
+        output_path = profile_dir / "questions_generated.yaml"
+
+    max_total = getattr(args, "max", 40)
+
+    print(f"\n[GENERATE] Scanning schema for profile '{cfg['profile_name']}'...")
+    try:
+        test_cases, stats = generate_questions(cfg, max_total=max_total)
+    except FileNotFoundError as e:
+        print(f"ERROR: {e}")
+        return
+
+    write_questions_yaml(test_cases, output_path, cfg, stats)
+
+    print(f"  Tables scanned : {stats['tables_scanned']}")
+    print(f"  Questions made : {stats['questions_generated']}")
+    print(f"  Output         : {output_path.relative_to(ROOT)}")
+    print(f"\n  Review the file and fill in expected answers.")
+    if output_path.name != "questions.yaml":
+        print(f"  When ready, rename to questions.yaml or merge into your existing one.")
 
 
 def cmd_run(args, cfg):
@@ -218,6 +248,13 @@ def main():
     # snapshot
     sub.add_parser("snapshot", help="Fetch & cache agent config + schema")
 
+    # generate
+    gen_p = sub.add_parser("generate", help="Auto-generate starter questions from cached schema")
+    gen_p.add_argument("--out", type=str, default=None,
+                       help="Output filename (default: questions_generated.yaml)")
+    gen_p.add_argument("--max", type=int, default=40,
+                       help="Max questions to generate (default: 40)")
+
     # run
     run_p = sub.add_parser("run", help="Run all questions, grade answers, trace pipeline")
     run_p.add_argument("--refresh", action="store_true", help="Force refresh snapshot before run")
@@ -265,6 +302,8 @@ def main():
         cmd_validate(args, cfg)
     elif args.command == "snapshot":
         cmd_snapshot(args, cfg)
+    elif args.command == "generate":
+        cmd_generate(args, cfg)
     elif args.command == "run":
         cmd_run(args, cfg)
     elif args.command == "rerun":

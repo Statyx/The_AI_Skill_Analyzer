@@ -93,7 +93,7 @@ def save_run(results, agent_data, schema, cfg, total_wall, test_cases, interrupt
         tc = test_cases[i] if i < len(test_cases) else {
             "expected": None, "match_type": "contains", "tags": []
         }
-        verdict_data = grade_result(r, tc)
+        verdict_data = grade_result(r, tc, schema=schema)
 
         diag = build_diagnostic(agent_data, schema, r, cfg, verdict_data=verdict_data)
         safe_q = re.sub(r"[^a-z0-9]+", "_", r["question"].lower())[:40].strip("_")

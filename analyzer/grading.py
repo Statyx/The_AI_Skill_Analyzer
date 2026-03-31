@@ -40,25 +40,65 @@ RCA_CATEGORIES = {
 }
 
 
+# ── Magnitude suffixes ────────────────────────────────────────
+
+_MAGNITUDE = {"k": 1e3, "m": 1e6, "b": 1e9, "bn": 1e9, "t": 1e12}
+
 # ── Number extraction ─────────────────────────────────────────
 
 def _extract_numbers(text):
-    raw = re.findall(r'-?\d[\d,]*\.?\d*', text)
+    """Extract numbers from text, handling commas, currency symbols,
+    percentage signs, and magnitude suffixes (K/M/B/T).
+
+    Examples:
+        "23.5M" -> [23_500_000]
+        "$1,234.56" -> [1234.56]
+        "57%" -> [57]
+        "1.7B" -> [1_700_000_000]
+    """
+    # Match optional minus, digits with optional commas/decimals,
+    # followed by optional magnitude suffix or %
+    pattern = r'(?<![a-zA-Z])-?\$?\d[\d,]*\.?\d*\s*(?:bn|[kmbt%])?(?![a-zA-Z])'
+    raw = re.findall(pattern, text, re.IGNORECASE)
     nums = []
-    for x in raw:
-        cleaned = x.replace(",", "")
-        if cleaned and cleaned != "-":
-            try:
-                nums.append(float(cleaned))
-            except ValueError:
-                pass
+    for token in raw:
+        cleaned = token.strip().lstrip("$").replace(",", "").replace(" ", "")
+        if not cleaned or cleaned == "-":
+            continue
+        # Check for percent
+        if cleaned.endswith("%"):
+            cleaned = cleaned[:-1]
+        # Check for magnitude suffix
+        suffix = ""
+        for sfx in ("bn", "b", "m", "k", "t"):
+            if cleaned.lower().endswith(sfx):
+                suffix = sfx
+                cleaned = cleaned[:-len(sfx)]
+                break
+        try:
+            val = float(cleaned)
+            if suffix:
+                val *= _MAGNITUDE[suffix.lower()]
+            nums.append(val)
+        except ValueError:
+            pass
     return nums
 
 
 # ── Answer comparison ─────────────────────────────────────────
 
 def _compare_answer(actual, test_case):
-    """Compare agent answer vs expected. Returns (verdict, detail)."""
+    """Compare agent answer vs expected. Returns (verdict, detail).
+
+    Supported match_type values:
+        exact          Exact string match (case-insensitive)
+        contains       Expected substring found in answer
+        numeric        Number comparison within tolerance (magnitude-aware)
+        numeric_pct    Like numeric but also treats 0.57 and 57% as equivalent
+        regex          Python regex match on answer
+        any_of         Any item from expected list found in answer
+        list_contains  All items from expected list found in answer (for rankings)
+    """
     expected = test_case.get("expected")
     if expected is None or str(expected).strip() == "":
         return "no_expected", "No expected answer provided -- manual review required"
@@ -77,17 +117,36 @@ def _compare_answer(actual, test_case):
             return "pass", f"Answer contains '{expected}'"
         return "fail", f"Expected answer to contain '{expected}', not found in: '{actual[:120]}'"
 
-    elif match_type == "numeric":
+    elif match_type in ("numeric", "numeric_pct"):
         actual_nums = _extract_numbers(actual)
-        expected_num = float(str(expected).replace(",", ""))
+        expected_num = _extract_numbers(str(expected))
+        if not expected_num:
+            expected_num = [float(str(expected).replace(",", ""))]
+        else:
+            expected_num = [expected_num[0]]
+        expected_val = expected_num[0]
         tolerance = float(test_case.get("tolerance") or 0)
+
+        # For numeric_pct, also try percentage equivalence:
+        # e.g. expected 57 should match 0.57 (and vice versa)
+        candidates = [expected_val]
+        if match_type == "numeric_pct":
+            if expected_val > 1:
+                candidates.append(expected_val / 100)  # 57 -> 0.57
+            elif 0 < expected_val < 1:
+                candidates.append(expected_val * 100)   # 0.57 -> 57
+
         for num in actual_nums:
-            if abs(num - expected_num) <= tolerance:
-                return "pass", f"Numeric match: {num} ~ {expected_num} (+/-{tolerance})"
+            for exp in candidates:
+                # Scale tolerance proportionally for the divided/multiplied candidate
+                adj_tol = tolerance if exp == expected_val else tolerance / 100
+                if abs(num - exp) <= adj_tol:
+                    return "pass", f"Numeric match: {num} ~ {exp} (+/-{adj_tol})"
+
         if actual_nums:
-            closest = min(actual_nums, key=lambda x: abs(x - expected_num))
-            return "fail", f"Expected ~{expected_num} (+/-{tolerance}), closest found: {closest}"
-        return "fail", f"Expected ~{expected_num}, no numbers found in answer"
+            closest = min(actual_nums, key=lambda x: abs(x - expected_val))
+            return "fail", f"Expected ~{expected_val} (+/-{tolerance}), closest found: {closest}"
+        return "fail", f"Expected ~{expected_val}, no numbers found in answer"
 
     elif match_type == "regex":
         if re.search(str(expected), actual, re.IGNORECASE):
@@ -100,6 +159,14 @@ def _compare_answer(actual, test_case):
             if str(exp).lower() in actual_lower:
                 return "pass", f"Found '{exp}' in answer"
         return "fail", f"None of {expected_list} found in answer"
+
+    elif match_type == "list_contains":
+        expected_list = expected if isinstance(expected, list) else [expected]
+        found = [str(e) for e in expected_list if str(e).lower() in actual_lower]
+        missing = [str(e) for e in expected_list if str(e).lower() not in actual_lower]
+        if not missing:
+            return "pass", f"All {len(expected_list)} expected items found in answer"
+        return "fail", f"Missing {len(missing)}/{len(expected_list)}: {missing[:5]}"
 
     return "no_expected", f"Unknown match_type: {match_type}"
 
@@ -160,8 +227,12 @@ def trace_pipeline(run_details):
 
 # ── Root cause analysis ───────────────────────────────────────
 
-def identify_root_cause(test_case, result, pipeline_trace, verdict):
-    """Analyze failed result to identify root cause. Returns (category, detail)."""
+def identify_root_cause(test_case, result, pipeline_trace, verdict, schema=None):
+    """Analyze failed result to identify root cause. Returns (category, detail).
+
+    When schema is provided, cross-references generated queries against known
+    measure/column names to detect MEASURE_SELECTION and RELATIONSHIP issues.
+    """
     if verdict in ("pass", "no_expected"):
         return None, None
 
@@ -169,6 +240,21 @@ def identify_root_cause(test_case, result, pipeline_trace, verdict):
         return "AGENT_ERROR", f"Agent error: {result.get('error', 'unknown')}"
     if result.get("status") not in ("completed",):
         return "AGENT_ERROR", f"Agent status: {result.get('status')}"
+
+    # Build lookup sets from schema for measure/column cross-referencing
+    known_measures = set()       # exact names
+    known_columns = set()        # exact names
+    hidden_columns = set()       # hidden column names
+    if schema and isinstance(schema, dict):
+        for elem in schema.get("elements", []):
+            for child in elem.get("children", []):
+                name = child.get("display_name", "")
+                if child.get("type") == "semantic_model.measure":
+                    known_measures.add(name)
+                elif child.get("type") == "semantic_model.column":
+                    known_columns.add(name)
+                    if child.get("is_hidden"):
+                        hidden_columns.add(name)
 
     signals = []
     for step in pipeline_trace:
@@ -198,6 +284,44 @@ def identify_root_cause(test_case, result, pipeline_trace, verdict):
                 if "CALCULATETABLE" in query.upper() and "FILTER" in query.upper():
                     signals.append(("FILTER_CONTEXT",
                                     "Complex filter context (CALCULATETABLE + FILTER) in DAX", step))
+
+                # Measure selection: cross-reference query against known measures
+                if known_measures:
+                    # Extract bracketed identifiers from DAX query (e.g. [Revenue])
+                    bracketed = re.findall(r'\[([^\]]+)\]', query)
+                    for ident in bracketed:
+                        if ident in known_measures:
+                            continue
+                        # Case-insensitive check to detect case mismatches
+                        match = [m for m in known_measures if m.lower() == ident.lower()]
+                        if match:
+                            signals.append(("MEASURE_SELECTION",
+                                            f"Measure case mismatch: query uses '[{ident}]' "
+                                            f"but model defines '{match[0]}'", step))
+                        # Check if query references a non-existent measure
+                        elif ident not in known_columns and ident not in hidden_columns:
+                            col_match = [c for c in known_columns | hidden_columns
+                                         if c.lower() == ident.lower()]
+                            if not col_match:
+                                signals.append(("MEASURE_SELECTION",
+                                                f"Unknown identifier '[{ident}]' -- "
+                                                f"not found in model measures or columns", step))
+
+                # Hidden column usage
+                if hidden_columns:
+                    for hcol in hidden_columns:
+                        if f"[{hcol}]" in query or f"'{hcol}'" in query:
+                            signals.append(("MEASURE_SELECTION",
+                                            f"Query references hidden column '{hcol}'", step))
+
+                # Relationship signals: missing USERELATIONSHIP or cross-filter direction hints
+                if "USERELATIONSHIP" in query.upper():
+                    signals.append(("RELATIONSHIP",
+                                    "Explicit USERELATIONSHIP in DAX — may indicate "
+                                    "inactive relationship traversal", step))
+                if "CROSSFILTER" in query.upper():
+                    signals.append(("RELATIONSHIP",
+                                    "CROSSFILTER direction override in DAX query", step))
 
     tool_steps = [s for s in pipeline_trace if s["tool"] != "message_creation"]
     if not tool_steps:
@@ -271,11 +395,15 @@ def extract_artifacts(pipeline_trace):
 
 # ── Grade single result ──────────────────────────────────────
 
-def grade_result(result, test_case):
-    """Grade a single result: compare answer + trace pipeline + identify root cause."""
+def grade_result(result, test_case, schema=None):
+    """Grade a single result: compare answer + trace pipeline + identify root cause.
+
+    When schema is provided, enables richer RCA signals (measure cross-referencing,
+    hidden column detection, relationship direction analysis).
+    """
     verdict, compare_detail = _compare_answer(result.get("answer", ""), test_case)
     pipeline = trace_pipeline(result.get("run_details", {}))
-    root_cause, rca_detail = identify_root_cause(test_case, result, pipeline, verdict)
+    root_cause, rca_detail = identify_root_cause(test_case, result, pipeline, verdict, schema=schema)
     artifacts = extract_artifacts(pipeline)
 
     return {
