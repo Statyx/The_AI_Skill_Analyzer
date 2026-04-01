@@ -98,6 +98,7 @@ def _compare_answer(actual, test_case):
         regex          Python regex match on answer
         any_of         Any item from expected list found in answer
         list_contains  All items from expected list found in answer (for rankings)
+        ordered_list   Like list_contains but also validates rank order in answer
     """
     expected = test_case.get("expected")
     if expected is None or str(expected).strip() == "":
@@ -167,6 +168,29 @@ def _compare_answer(actual, test_case):
         if not missing:
             return "pass", f"All {len(expected_list)} expected items found in answer"
         return "fail", f"Missing {len(missing)}/{len(expected_list)}: {missing[:5]}"
+
+    elif match_type == "ordered_list":
+        expected_list = expected if isinstance(expected, list) else [expected]
+        # Check presence first
+        missing = [str(e) for e in expected_list if str(e).lower() not in actual_lower]
+        if missing:
+            return "fail", f"Missing {len(missing)}/{len(expected_list)}: {missing[:5]}"
+        # Check order: each item must appear after the previous one
+        positions = []
+        for e in expected_list:
+            pos = actual_lower.find(str(e).lower())
+            positions.append(pos)
+        out_of_order = []
+        for i in range(1, len(positions)):
+            if positions[i] <= positions[i - 1]:
+                out_of_order.append(
+                    f"'{expected_list[i]}' (pos {positions[i]}) before "
+                    f"'{expected_list[i-1]}' (pos {positions[i-1]})"
+                )
+        if out_of_order:
+            return "fail", (f"All items present but wrong order: "
+                            f"{out_of_order[0]}")
+        return "pass", f"All {len(expected_list)} items found in correct order"
 
     return "no_expected", f"Unknown match_type: {match_type}"
 
