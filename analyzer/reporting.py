@@ -423,8 +423,14 @@ def _assess_dax_quality(result):
 def _suggest_actions(result):
     """Analyze a failed result and return specific remediation actions.
 
+    Combines RCA category + artifact signals + the 3-layer instruction model
+    to point the user to the exact fix location:
+      Layer 1 — Agent Instructions (orchestrator: decides WHETHER to call DAX)
+      Layer 2 — Prep for AI (DAX tool: decides WHAT DAX to generate)
+      Layer 3 — Agent Instructions (formatting: decides HOW to present)
+
     Returns list of (action_type, suggestion) tuples where action_type is one of:
-    DESCRIPTION, INSTRUCTION, FEWSHOT, EXPECTED, MEASURE, DATA
+    DESCRIPTION, INSTRUCTION, FEWSHOT, EXPECTED, MEASURE, DATA, PREP_FOR_AI
     """
     g = result.get("grading", {})
     verdict = g.get("verdict", "?")
@@ -441,120 +447,214 @@ def _suggest_actions(result):
     compare_detail = g.get("compare_detail", "")
     answer = result.get("answer", "") or ""
     question = result.get("question", "")
+    query_upper = query.upper()
 
     actions = []
 
     # ── AGENT_ERROR ──────────────────────────────────────────
     if root_cause == "AGENT_ERROR":
-        actions.append(("INSTRUCTION",
-                        "Check agent instructions for conflicting rules or missing permissions"))
         if "error" in answer.lower() or not answer.strip():
             actions.append(("DATA",
-                            "Verify the semantic model is accessible and the agent has read permissions"))
+                "Verify the semantic model is accessible and the agent has "
+                "read permissions to the workspace"))
+        if "timeout" in rca_detail.lower() or "429" in rca_detail:
+            actions.append(("DATA",
+                "Agent hit a throttle or timeout. Retry later or reduce "
+                "query complexity"))
+        else:
+            actions.append(("INSTRUCTION",
+                "[Layer 1 — Agent Instructions] Check for conflicting rules. "
+                "Simplify instructions if >6000 chars"))
         return actions
 
     # ── QUERY_ERROR ──────────────────────────────────────────
     if root_cause == "QUERY_ERROR":
+        # Sub-case: query ran but returned empty → wrong filter values
         if "no data" in query_result.lower() or "empty" in query_result.lower():
-            # Query ran but returned empty — likely wrong filter values
-            # Try to extract the bad filter from the query
-            filter_matches = re.findall(
-                r"""['"]([\w\s]+)['"]""", query)
+            filter_matches = re.findall(r"""['"]([\w\s]+)['"]""", query)
             if filter_matches:
-                actions.append(("DESCRIPTION",
-                    f"The query filtered on values {filter_matches[:3]} — "
-                    f"add column descriptions listing the actual valid values "
-                    f"(e.g., the category or type column that was filtered)"))
+                actions.append(("PREP_FOR_AI",
+                    f"[Layer 2 — Prep for AI] Query filtered on "
+                    f"{filter_matches[:3]} — open Prep for AI and add "
+                    f"column descriptions listing the actual valid values "
+                    f"(enum lists) so the DAX tool picks correct filters"))
             else:
-                actions.append(("DESCRIPTION",
-                    "Query returned no data. Add descriptions to filter columns "
-                    "with the list of valid values so the agent picks the right ones"))
+                actions.append(("PREP_FOR_AI",
+                    "[Layer 2 — Prep for AI] Query returned no data. Add "
+                    "descriptions to filter columns with valid value lists "
+                    "in Prep for AI → AI Data Schema"))
             actions.append(("FEWSHOT",
-                f"Add a fewshot example for: \"{question}\" showing the correct "
-                f"DAX with valid filter values"))
-        elif "unable to generate" in rca_detail.lower() or "unable to generate" in query_result.lower():
-            # Agent couldn't even generate a query
+                f"[Layer 2 — Verified Answers] Add a verified answer for: "
+                f"\"{question}\" with the correct DAX + filter values"))
+
+        # Sub-case: agent couldn't generate query at all
+        elif ("unable to generate" in rca_detail.lower()
+              or "unable to generate" in query_result.lower()):
             actions.append(("FEWSHOT",
-                f"Agent could not generate a query. Add a fewshot example "
-                f"for: \"{question}\" with a working DAX query"))
-            actions.append(("DESCRIPTION",
-                "Add descriptions to the tables/relationships involved so "
-                "the agent understands how to join them"))
+                f"[Layer 2 — Verified Answers] Add a verified answer for: "
+                f"\"{question}\" with a working DAX query"))
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI] Add table/column descriptions and "
+                "relationship context so the DAX tool understands how to "
+                "join the required tables"))
             actions.append(("INSTRUCTION",
-                "Add an instruction explaining how to build this type of "
-                "cross-domain query (which tables to join and how)"))
+                "[Layer 1 — Agent Instructions] Add instruction explaining "
+                "the cross-domain query pattern (which tables to join)"))
+
+        # Sub-case: unknown column/measure reference
+        elif "unknown identifier" in rca_detail.lower():
+            actions.append(("PREP_FOR_AI",
+                f"[Layer 2 — Prep for AI] DAX references a non-existent "
+                f"column or measure. Check AI Data Schema visibility — "
+                f"the needed column may be deselected or hidden"))
+        elif "case mismatch" in rca_detail.lower():
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI] Measure name case mismatch. "
+                "Check exact casing in the semantic model — DAX is "
+                "case-sensitive for measure references"))
         else:
-            # Generic query failure
             if query:
                 actions.append(("FEWSHOT",
-                    f"Add a fewshot with corrected DAX for: \"{question}\""))
-            actions.append(("DESCRIPTION",
-                "Check that queried columns/measures exist and are visible. "
-                "Add descriptions to clarify naming"))
+                    f"[Layer 2 — Verified Answers] Add a verified answer "
+                    f"with corrected DAX for: \"{question}\""))
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI] Check that queried columns/measures "
+                "are visible in AI Data Schema. Add descriptions to clarify "
+                "naming conventions"))
         return actions
 
     # ── EMPTY_RESULT ─────────────────────────────────────────
     if root_cause == "EMPTY_RESULT":
-        actions.append(("DESCRIPTION",
-            "Query returned empty. Add descriptions to filter columns with "
-            "valid values (enum lists). The agent may be using wrong filter criteria"))
-        actions.append(("DATA",
-            "Verify the underlying data has rows matching the expected filters "
-            "and time range"))
-        if query:
-            actions.append(("FEWSHOT",
-                f"Add a fewshot example for: \"{question}\" with correct filters"))
+        # Detect time filter → Prep for AI AI Instructions
+        has_time_filter = any(kw in query_upper for kw in
+                             ("DATEADD", "SAMEPERIODLASTYEAR", "DATESYTD",
+                              "DATESBETWEEN", "LASTDATE", "FIRSTDATE",
+                              "YEAR", "MONTH", "QUARTER"))
+        if has_time_filter:
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI → AI Instructions] Query uses time "
+                "filters that returned empty. Add AI Instruction: 'Default "
+                "time period is FY2025. Use ALL dates unless the user "
+                "specifies a period'"))
+        # Detect value filter → column descriptions
+        filter_vals = re.findall(r"""['"]([\w\s]+)['"]""", query)
+        if filter_vals:
+            actions.append(("PREP_FOR_AI",
+                f"[Layer 2 — Prep for AI] Query filtered on "
+                f"{filter_vals[:3]} and got no results. Add column "
+                f"descriptions with the valid enum values (e.g., actual "
+                f"category names, region codes)"))
+        if not has_time_filter and not filter_vals:
+            actions.append(("DATA",
+                "Query returned empty with no obvious bad filters. Verify "
+                "the underlying data has rows and the model is refreshed"))
+        actions.append(("FEWSHOT",
+            f"[Layer 2 — Verified Answers] Add a verified answer for: "
+            f"\"{question}\" with correct DAX filters"))
         return actions
 
     # ── FILTER_CONTEXT ───────────────────────────────────────
     if root_cause == "FILTER_CONTEXT":
-        if "TimeIntelligence" in query or "TREATAS" in query:
-            actions.append(("INSTRUCTION",
-                "Add instruction: 'Do not use __PBI_TimeIntelligenceEnabled or "
-                "TREATAS auto-filters. Use explicit CALCULATE with date filters'"))
-        actions.append(("FEWSHOT",
-            f"Add a fewshot for: \"{question}\" with clean DAX "
-            f"(no auto-filters)"))
+        if "__PBI_TIMEINTELLIGENCEENABLED" in query_upper:
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI → AI Instructions] Time intelligence "
+                "auto-filter detected (__PBI_TimeIntelligenceEnabled). Add "
+                "AI Instruction: 'Never inject automatic time filters. "
+                "Use explicit CALCULATE with date columns only when the "
+                "user requests a specific period'"))
+        if "TREATAS" in query_upper:
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI → AI Instructions] TREATAS "
+                "auto-filter overrides query context. Add AI Instruction "
+                "to avoid TREATAS for date filtering"))
+        if "CALCULATETABLE" in query_upper and "FILTER" in query_upper:
+            actions.append(("FEWSHOT",
+                f"[Layer 2 — Verified Answers] Complex filter context. "
+                f"Add a verified answer for \"{question}\" with clean "
+                f"CALCULATE (no nested FILTER/CALCULATETABLE)"))
+        else:
+            actions.append(("FEWSHOT",
+                f"[Layer 2 — Verified Answers] Add a verified answer for "
+                f"\"{question}\" with clean DAX (no auto-filters)"))
         return actions
 
     # ── MEASURE_SELECTION ────────────────────────────────────
     if root_cause == "MEASURE_SELECTION":
-        actions.append(("DESCRIPTION",
-            "Agent picked the wrong measure. Improve measure descriptions to "
-            "clarify when each should be used (e.g., YTD vs monthly, gross vs net)"))
+        if "hidden column" in rca_detail.lower():
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI] Query references a hidden column. "
+                "Either unhide it in the model, or create a visible measure "
+                "that wraps this column. Check AI Data Schema visibility"))
+        elif "case mismatch" in rca_detail.lower():
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI] Measure name casing mismatch. "
+                "Add a description or verified answer using the exact "
+                "measure name from the model"))
+        elif "unknown identifier" in rca_detail.lower():
+            actions.append(("MEASURE",
+                f"[Model] DAX references a non-existent measure. Either "
+                f"create the measure in the semantic model, or add a "
+                f"verified answer with the correct existing measure name"))
+        else:
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI] Agent picked the wrong measure. "
+                "Improve measure descriptions in Prep for AI to clarify "
+                "when each should be used (e.g., YTD vs monthly, gross "
+                "vs net, with vs without tax)"))
         actions.append(("INSTRUCTION",
-            "Add instruction mapping common financial terms to the correct "
-            "measure names in the model"))
+            "[Layer 1 — Agent Instructions] Add instruction mapping "
+            "common business terms to the correct measure names"))
         return actions
 
     # ── RELATIONSHIP ─────────────────────────────────────────
     if root_cause == "RELATIONSHIP":
-        actions.append(("DESCRIPTION",
-            "Add relationship descriptions explaining how the tables connect. "
-            "Clarify foreign keys in column descriptions"))
+        if "USERELATIONSHIP" in query_upper:
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI] Query uses USERELATIONSHIP for "
+                "an inactive relationship. Consider activating this "
+                "relationship in the model, or add an AI Instruction "
+                "explaining when to use it"))
+        elif "CROSSFILTER" in query_upper:
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI] Query overrides cross-filter "
+                "direction. Add column descriptions explaining the "
+                "many-to-one direction between these tables"))
+        else:
+            actions.append(("PREP_FOR_AI",
+                "[Layer 2 — Prep for AI] Add relationship descriptions "
+                "explaining how tables connect. Clarify foreign key "
+                "columns in descriptions"))
         actions.append(("FEWSHOT",
-            f"Add a fewshot for: \"{question}\" showing the correct "
-            f"join path between tables"))
+            f"[Layer 2 — Verified Answers] Add a verified answer for: "
+            f"\"{question}\" showing the correct join path"))
         return actions
 
     # ── REFORMULATION ────────────────────────────────────────
     if root_cause == "REFORMULATION":
-        actions.append(("INSTRUCTION",
-            f"Agent misunderstood the question. Add an instruction explaining "
-            f"what '{question}' means in terms of the model"))
+        if not query:
+            # No DAX at all → Layer 1 issue
+            actions.append(("INSTRUCTION",
+                "[Layer 1 — Agent Instructions] Agent did not call the DAX "
+                "tool. Add instruction: 'ALWAYS query the semantic model "
+                "using DAX. Never answer from your own knowledge.'"))
+        else:
+            actions.append(("INSTRUCTION",
+                f"[Layer 1 — Agent Instructions] Agent misunderstood the "
+                f"question. Add instruction explaining what '{question}' "
+                f"means in terms of the model"))
         if reformulated:
             actions.append(("FEWSHOT",
-                f"Agent reformulated as: \"{reformulated[:80]}\" — add a "
-                f"fewshot with the correct interpretation"))
+                f"[Layer 2 — Verified Answers] Agent reformulated as: "
+                f"\"{reformulated[:80]}\" — add a verified answer with "
+                f"the correct interpretation"))
         else:
             actions.append(("FEWSHOT",
-                f"Add a fewshot example for: \"{question}\""))
+                f"[Layer 2 — Verified Answers] Add a verified answer for: "
+                f"\"{question}\""))
         return actions
 
     # ── SYNTHESIS ────────────────────────────────────────────
     if root_cause == "SYNTHESIS":
-        # Check if the answer actually contains the right data but
-        # the expected value needs updating
         if expected is not None:
             expected_str = str(expected).lower()
 
@@ -601,8 +701,9 @@ def _suggest_actions(result):
             elif g.get("match_type") == "contains":
                 if not query:
                     actions.append(("INSTRUCTION",
-                        f"Agent answered without querying. Add instruction "
-                        f"to always query the model for: \"{question}\""))
+                        f"[Layer 1 — Agent Instructions] Agent answered "
+                        f"without querying. Add: 'ALWAYS query the semantic "
+                        f"model using DAX. Never answer from knowledge.'"))
                     actions.append(("EXPECTED",
                         f"Review if expected='{expected}' is the right keyword. "
                         f"Agent answered: \"{answer[:80]}\""))
@@ -612,19 +713,25 @@ def _suggest_actions(result):
                         f"Check if the answer is actually correct with "
                         f"different wording and update expected"))
                     actions.append(("INSTRUCTION",
-                        f"Add instruction to include '{expected}' in answers "
+                        f"[Layer 3 — Agent Instructions] Add formatting "
+                        f"instruction to include '{expected}' in answers "
                         f"about {', '.join(g.get('tags', []))}"))
 
         # Check if query was correct but answer interpretation failed
         if query and "correct result" in (
                 _assess_dax_quality(result)[2] or ""):
             actions.append(("INSTRUCTION",
-                "The DAX query was correct but the agent misinterpreted the "
-                "result. Add instruction on how to read and present this data"))
+                "[Layer 3 — Agent Instructions] The DAX query was correct "
+                "but the agent misinterpreted the result. Add formatting "
+                "instruction on how to read and present this type of data"))
         elif not query:
+            actions.append(("INSTRUCTION",
+                "[Layer 1 — Agent Instructions] Agent answered without "
+                "generating DAX. Add: 'ALWAYS query the semantic model. "
+                "Never answer from your own knowledge.'"))
             actions.append(("FEWSHOT",
-                f"Agent answered without generating DAX. Add a fewshot "
-                f"for: \"{question}\" to force model querying"))
+                f"[Layer 2 — Verified Answers] Add a verified answer for: "
+                f"\"{question}\" to force model querying"))
 
         # DSO-specific pattern
         if "dso" in question.lower():
@@ -636,11 +743,16 @@ def _suggest_actions(result):
         return actions
 
     # ── UNKNOWN ──────────────────────────────────────────────
-    actions.append(("DESCRIPTION",
-        "Root cause unclear. Start by adding descriptions to tables and "
-        "columns involved in this question"))
+    if not query:
+        actions.append(("INSTRUCTION",
+            "[Layer 1 — Agent Instructions] No DAX generated and no clear "
+            "root cause. Add: 'ALWAYS query the semantic model using DAX'"))
+    actions.append(("PREP_FOR_AI",
+        "[Layer 2 — Prep for AI] Root cause unclear. Start by adding "
+        "descriptions to tables and columns involved in this question"))
     actions.append(("FEWSHOT",
-        f"Add a fewshot example for: \"{question}\""))
+        f"[Layer 2 — Verified Answers] Add a verified answer for: "
+        f"\"{question}\""))
     return actions
 
 
@@ -897,6 +1009,7 @@ def _assess_answer_quality(result):
 _TARGET_MAP = {
     "INSTRUCTION": ("agent_instructions", "Data Agent Instructions",   "Agent"),
     "FEWSHOT":     ("agent_fewshots",     "Data Agent Few-shot Examples", "Agent"),
+    "PREP_FOR_AI": ("prep_for_ai",        "Prep for AI (Semantic Model)", "Model"),
     "MEASURE":     ("semantic_model",     "Semantic Model (DAX Measures)", "Model"),
     "DESCRIPTION": ("model_descriptions", "Model Descriptions (Tables/Columns/Measures)", "Model"),
     "SIMPLIFY":    ("agent_instructions", "Data Agent Instructions",   "Agent"),
@@ -905,6 +1018,7 @@ _TARGET_MAP = {
 }
 
 _TARGET_ORDER = [
+    "prep_for_ai",
     "agent_instructions",
     "agent_fewshots",
     "semantic_model",
@@ -914,6 +1028,7 @@ _TARGET_ORDER = [
 ]
 
 _TARGET_LABELS = {
+    "prep_for_ai":        "PREP FOR AI (AI Data Schema + AI Instructions + Verified Answers)",
     "agent_instructions": "DATA AGENT INSTRUCTIONS",
     "agent_fewshots":     "DATA AGENT FEW-SHOT EXAMPLES",
     "semantic_model":     "SEMANTIC MODEL (DAX MEASURES)",
@@ -923,6 +1038,7 @@ _TARGET_LABELS = {
 }
 
 _TARGET_HOW = {
+    "prep_for_ai":        "Open Prep for AI in Power BI: AI Data Schema (visibility), AI Instructions (guidance), Verified Answers (example queries)",
     "agent_instructions": "Edit the Data Agent instructions in Fabric portal or push via API",
     "agent_fewshots":     "Add worked examples in the Data Agent's few-shot section",
     "semantic_model":     "Add/modify measures in Tabular Editor, TMDL, or Fabric portal",
@@ -1325,17 +1441,39 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
         emit(f"  -> Re-run failed: python -m analyzer rerun {ts} "
              f"--questions {' '.join(fail_idx)}")
     if "FILTER_CONTEXT" in rca_counts:
-        emit("  -> Filter issues. Check time intelligence / auto-filters.")
+        emit("  -> [Prep for AI → AI Instructions] Time intelligence "
+             "auto-filters injecting unwanted date context. Add: "
+             "'Never use __PBI_TimeIntelligenceEnabled or TREATAS'")
     if "REFORMULATION" in rca_counts:
-        emit("  -> Agent misunderstood questions. Add descriptions or rephrase.")
+        no_query_count = sum(1 for r in results
+            if r.get("grading", {}).get("root_cause") == "REFORMULATION"
+            and not (r.get("grading", {}).get("artifacts", {})
+                     .get("generated_query")))
+        if no_query_count:
+            emit("  -> [Agent Instructions — Layer 1] Agent skipped DAX "
+                 f"tool in {no_query_count} question(s). Add: 'ALWAYS "
+                 "query the semantic model using DAX'")
+        else:
+            emit("  -> [Prep for AI] Agent misunderstood questions. "
+                 "Add column/measure descriptions or verified answers")
     if "QUERY_ERROR" in rca_counts:
-        emit("  -> Query errors. Check relationships and column visibility.")
+        emit("  -> [Prep for AI → AI Data Schema] Query errors. Check "
+             "column visibility and add descriptions with valid values")
     if "SYNTHESIS" in rca_counts:
-        emit("  -> Wrong answers. Inspect DAX or add fewshot examples.")
+        emit("  -> [Agent Instructions — Layer 3] Wrong answer formatting. "
+             "Inspect DAX results or add formatting instructions")
     if "EMPTY_RESULT" in rca_counts:
-        emit("  -> Empty results. Check data freshness and filter defaults.")
+        emit("  -> [Prep for AI] Empty results. Check filter defaults "
+             "in AI Instructions (default time period, valid enum values)")
+    if "MEASURE_SELECTION" in rca_counts:
+        emit("  -> [Prep for AI] Wrong measure selected. Improve measure "
+             "descriptions to clarify when each applies")
+    if "RELATIONSHIP" in rca_counts:
+        emit("  -> [Prep for AI / Model] Relationship issues. Check join "
+             "paths, add column descriptions for foreign keys")
     if n_ungraded > 0:
-        emit(f"  -> {n_ungraded} ungraded. Fill expected answers in questions.yaml.")
+        emit(f"  -> {n_ungraded} ungraded. Fill expected answers in "
+             f"questions.yaml.")
     if n_pass > 0 and n_fail == 0 and n_error == 0:
         emit("  -> All passed! Consider adding harder test cases.")
 
