@@ -2,7 +2,35 @@
 
 End-to-end diagnostic and evaluation toolkit for **Fabric Data Agents** backed by Power BI semantic models.
 
+![Python](https://img.shields.io/badge/python-3.10+-blue?style=for-the-badge&logo=python&logoColor=white)
+![Fabric](https://img.shields.io/badge/Microsoft_Fabric-Data_Agents-742774?style=for-the-badge&logo=microsoft&logoColor=white)
+![Version](https://img.shields.io/badge/version-3.0-brightgreen?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
+
 **v3** — Multi-profile architecture: test multiple agents without changing code.
+
+```mermaid
+flowchart LR
+    subgraph Config
+        P["📋 Profile\n(questions.yaml)"]
+    end
+    subgraph Fabric
+        A["🤖 Data Agent"]
+        S["📊 Semantic Model"]
+        A -->|DAX| S
+    end
+    subgraph Analyzer
+        R["⚡ Runner\n(parallel)"]
+        G["🎯 Grader\n(5 match types)"]
+        D["🔍 RCA\n(8 categories)"]
+    end
+    P --> R
+    R -->|questions| A
+    A -->|answers| G
+    G --> D
+    D -->|report| O["📈 Score + Action Plan"]
+```
 
 ---
 
@@ -824,46 +852,47 @@ The SDK client is initialized by injecting the pre-authenticated credential, byp
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────┐
-│  PROFILES (config — no code changes)                │
-│  profiles/<name>/profile.yaml   → agent IDs         │
-│  profiles/<name>/questions.yaml → test cases        │
-└──────────────────────┬──────────────────────────────┘
-                       ↓
-┌─────────────────────────────────────────────────────┐
-│  SNAPSHOT (once / on change)                        │
-│  ┌─────────────┐  ┌──────────────────┐              │
-│  │ Agent Config │  │ Schema (TMDL)    │  → disk cache│
-│  │ (REST API)   │  │ (REST + LRO)     │  snapshots/  │
-│  └─────────────┘  └──────────────────┘              │
-└──────────────────────┬──────────────────────────────┘
-                       ↓ read from cache
-┌─────────────────────────────────────────────────────┐
-│  RUN (parallel or serial)                           │
-│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                   │
-│  │ Q1  │ │ Q2  │ │ Q3  │ │ Q4  │  ThreadPoolExecutor│
-│  │ SDK │ │ SDK │ │ SDK │ │ SDK │  max_workers=4     │
-│  └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘  + retry + Ctrl+C │
-│     └───────┴───────┴───────┘                       │
-│              ↓                                      │
-│  GRADE each answer vs questions.yaml                │
-│  ├─ Compare: exact / contains / numeric / regex     │
-│  ├─ Trace pipeline: NL→Query→Execute→Synthesize     │
-│  └─ RCA: identify WHY the answer was wrong          │
-│              ↓ combine with cached snapshot          │
-│  ┌──────────────────────────────────┐               │
-│  │ diagnostics/ + batch_summary.json│  → runs/<p>/  │
-│  │ report.html (if --html)          │               │
-│  └──────────────────────────────────┘               │
-└──────────────────────┬──────────────────────────────┘
-                       ↓ offline
-┌─────────────────────────────────────────────────────┐
-│  ANALYZE (no Fabric connection needed)              │
-│  Read batch_summary.json → terminal report + HTML   │
-│  RERUN → selective re-run of failed Qs              │
-│  DIFF → compare two runs side-by-side               │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Profiles ["📋 PROFILES — config, no code changes"]
+        PY[profile.yaml<br/>agent IDs] 
+        QY[questions.yaml<br/>test cases]
+    end
+
+    subgraph Snapshot ["📸 SNAPSHOT — once / on change"]
+        AC[Agent Config<br/>REST API]
+        SC[Schema TMDL<br/>REST + LRO]
+        AC --> CACHE[(snapshots/)]
+        SC --> CACHE
+    end
+
+    subgraph Run ["⚡ RUN — parallel or serial"]
+        direction LR
+        Q1[Q1] & Q2[Q2] & Q3[Q3] & Q4[Q4]
+    end
+
+    subgraph Grade ["🎯 GRADE + RCA"]
+        CMP[Compare<br/>exact / contains / numeric / regex]
+        TRACE[Pipeline Trace<br/>NL → Query → Execute → Synthesize]
+        RCA[Root Cause Analysis<br/>8 categories]
+        CMP --> TRACE --> RCA
+    end
+
+    subgraph Output ["📁 OUTPUT — runs/profile/timestamp/"]
+        DIAG[diagnostics/*.json]
+        BATCH[batch_summary.json]
+        HTML[report.html]
+    end
+
+    subgraph Offline ["🔍 ANALYZE — no Fabric needed"]
+        AN[analyze] & RERUN[rerun] & DIFF[diff]
+    end
+
+    Profiles --> CACHE
+    CACHE --> Run
+    Run -->|SDK calls| Grade
+    Grade --> Output
+    Output --> Offline
 ```
 
 **Performance:**
@@ -980,6 +1009,24 @@ Common fixes by root cause:
 | `RELATIONSHIP` | Check direction (Many→One), run Calculate refresh |
 | `REFORMULATION` | Add verified answers to the Data Agent, rephrase questions |
 | `SYNTHESIS` | Inspect generated DAX in diagnostic JSON |
+
+---
+
+## Contributing
+
+1. Fork the repo
+2. Create a branch: `git checkout -b feature/your-feature`
+3. Make your changes and test: `python -m analyzer -p marketing360 run`
+4. Commit: `git commit -m "feat: your change"`
+5. Push & open a Pull Request
+
+Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
