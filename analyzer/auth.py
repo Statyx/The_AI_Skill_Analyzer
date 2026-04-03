@@ -67,6 +67,8 @@ class FabricSession:
             self._client = FabricDataAgentClient.__new__(FabricDataAgentClient)
             self._client.tenant_id = self.cfg["tenant_id"]
             self._client.data_agent_url = self.cfg["data_agent_url"]
+            self._client.stage = self.cfg.get("stage", "production")
+            self._client.api_version = self.cfg.get("api_version", FabricDataAgentClient.DEFAULT_API_VERSION)
             self._client.credential = self._credential
             self._client.token = self._token
             print(f"Fabric Data Agent Client ready (cached auth)")

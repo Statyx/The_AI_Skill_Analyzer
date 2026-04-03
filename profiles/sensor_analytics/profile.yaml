@@ -1,0 +1,9 @@
+# ── Profile: SensorAnalytics ─────────────────────────────────────
+# Connection details for the SensorAnalytics Data Agent (RTI Demo).
+
+tenant_id: "92701a21-ddea-4028-ba85-4c1f91fab881"
+workspace_id: "a1dce412-7b2d-4406-838d-61c94cad8acf"
+agent_id: "9e866649-625e-4f52-95af-cb688be9455d"
+semantic_model_id: "3987fa4a-874f-43f9-bd3d-ac542b76135d"
+semantic_model_name: "SM_SensorAnalytics"
+stage: "sandbox"

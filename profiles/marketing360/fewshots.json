@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/dataAgent/definition/fewShots/1.0.0/schema.json",
+  "fewShots": [
+    {
+      "id": "fs-churn-rate-001",
+      "question": "what is the churn rate",
+      "query": "EVALUATE\n  ROW(\n    \"Churn Rate %\", [Churn Rate pourcentage]\n  )"
+    },
+    {
+      "id": "fs-top5-campaigns-002",
+      "question": "top 5 campaigns by revenue",
+      "query": "EVALUATE\n  TOPN(\n    5,\n    ADDCOLUMNS(\n      SUMMARIZE(\n        'orders',\n        'marketing_campaigns'[campaign_name]\n      ),\n      \"Revenue\", [Attributed Revenue]\n    ),\n    [Revenue], DESC\n  )\nORDER BY [Revenue] DESC"
+    },
+    {
+      "id": "fs-churn-risk-segments-003",
+      "question": "which customer segments have the highest churn risk",
+      "query": "EVALUATE\n  TOPN(\n    10,\n    ADDCOLUMNS(\n      VALUES('crm_segments'[segment_name]),\n      \"Average Churn Risk\", CALCULATE([Avg Churn Risk]),\n      \"Customer Count\", CALCULATE(DISTINCTCOUNT('crm_customers'[customer_id]))\n    ),\n    [Average Churn Risk], DESC\n  )\nORDER BY [Average Churn Risk] DESC"
+    }
+  ]
+}

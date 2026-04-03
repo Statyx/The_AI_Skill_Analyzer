@@ -21,7 +21,7 @@ def _run_single_question(client, question, idx, total, max_retries=MAX_RETRIES):
     for attempt in range(max_retries + 1):
         t0 = time.monotonic()
         try:
-            run_details = client.get_run_details(question)
+            run_details = client.get_raw_run_response(question)
             elapsed = time.monotonic() - t0
 
             # Extract answer

@@ -1,0 +1,93 @@
+# ── Test Cases for the SensorAnalytics Data Agent ─────────────────
+# Industrial IoT sensor monitoring — 3 sites, 12 zones, 60 sensors
+#
+# match_type: contains | numeric | exact | regex | any_of
+# expected: null → no grading, only completion check
+# tolerance: absolute tolerance for numeric matches
+
+test_cases:
+
+  # ── Basic KPIs ──────────────────────────────────────────────
+
+  - question: "how many sensor readings do we have"
+    expected: ~
+    match_type: "numeric"
+    tags: ["kpi", "counts"]
+
+  - question: "what is the anomaly rate"
+    expected: ~
+    match_type: "contains"
+    tags: ["kpi", "quality"]
+
+  - question: "how many alerts do we have"
+    expected: ~
+    match_type: "numeric"
+    tags: ["kpi", "alerts"]
+
+  # ── Breakdowns by dimension ─────────────────────────────────
+
+  - question: "show me the total readings per site"
+    expected: ~
+    match_type: "contains"
+    tags: ["breakdown", "sites"]
+
+  - question: "what is the anomaly rate per zone type"
+    expected: ~
+    match_type: "contains"
+    tags: ["breakdown", "zones"]
+
+  - question: "what is the average temperature per site"
+    expected: ~
+    match_type: "contains"
+    tags: ["breakdown", "sensor_type"]
+
+  # ── Alert analysis ──────────────────────────────────────────
+
+  - question: "how many critical vs warning alerts do we have"
+    expected: ~
+    match_type: "contains"
+    tags: ["alerts", "severity"]
+
+  - question: "which site has the most alerts"
+    expected: ~
+    match_type: "contains"
+    tags: ["alerts", "ranking"]
+
+  - question: "how many critical alerts in production zones"
+    expected: ~
+    match_type: "contains"
+    tags: ["alerts", "cross_filter"]
+
+  # ── Rankings / Top-N ────────────────────────────────────────
+
+  - question: "which 5 sensors have the most anomalies"
+    expected: ~
+    match_type: "contains"
+    tags: ["ranking", "anomalies"]
+
+  - question: "what is the data quality rate for each sensor type"
+    expected: ~
+    match_type: "contains"
+    tags: ["quality", "sensor_type"]
+
+  # ── Cross-filtering & advanced ──────────────────────────────
+
+  - question: "what is the average reading value for CO2 sensors"
+    expected: ~
+    match_type: "numeric"
+    tags: ["cross_filter", "sensor_type"]
+
+  - question: "show anomaly count by sensor type and site"
+    expected: ~
+    match_type: "contains"
+    tags: ["cross_filter", "multi_dim"]
+
+  - question: "what is the alert rate for the Lyon Factory"
+    expected: ~
+    match_type: "contains"
+    tags: ["cross_filter", "sites"]
+
+  - question: "which zone type has the worst data quality"
+    expected: ~
+    match_type: "contains"
+    tags: ["quality", "ranking"]

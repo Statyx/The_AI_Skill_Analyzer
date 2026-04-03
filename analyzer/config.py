@@ -56,7 +56,7 @@ def load_profile(profile_name, global_cfg):
     # Build data agent URL
     cfg["data_agent_url"] = (
         f"https://api.fabric.microsoft.com/v1/workspaces/{cfg['workspace_id']}"
-        f"/aiskills/{cfg['agent_id']}/aiassistant/openai"
+        f"/dataAgents/{cfg['agent_id']}/aiassistant/openai"
     )
     return cfg
 
@@ -83,7 +83,7 @@ def resolve_config(profile_name=None):
         cfg["profile_dir"] = str(ROOT / "scripts")  # legacy questions location
         cfg["data_agent_url"] = (
             f"https://api.fabric.microsoft.com/v1/workspaces/{cfg['workspace_id']}"
-            f"/aiskills/{cfg['agent_id']}/aiassistant/openai"
+            f"/dataAgents/{cfg['agent_id']}/aiassistant/openai"
         )
         return cfg
 
