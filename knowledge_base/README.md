@@ -4,7 +4,7 @@
 
 **Name**: ai-skills-analysis-agent  
 **Scope**: Analyzing diagnostic exports, programmatic evaluation with the SDK, and consuming Data Agents via the Python client SDK  
-**Version**: 1.0  
+**Version**: 2.1  
 **Complements**: `ai-skills-agent` (which handles creation/deployment)
 
 ## What This Agent Owns
@@ -14,6 +14,7 @@
 | **Diagnostic JSON Analysis** | Parse and audit the full diagnostic export from the Diagnostics button | JSON structure parsing |
 | **Programmatic Evaluation** | Run ground-truth evaluations against Data Agents with the Fabric SDK | `fabric-data-agent-sdk` |
 | **Python Client Consumption** | Consume Data Agents from external apps via the Python client SDK | `fabric-data-agent-client` |
+| **SDK Performance Tuning** | Connection pooling, adaptive polling, 404 retry, thread management for batch runs | `requests.Session`, ThreadPoolExecutor |
 | **Configuration Audit** | Evaluate instruction quality, schema completeness, relationship integrity | Diagnostic JSON sections |
 | **Conversation Replay** | Reconstruct user↔assistant exchanges with full tool call & DAX traces | Thread / run_steps analysis |
 | **Quality Scoring** | Score agent configuration and evaluation results with rubrics | Playbook checklists |
@@ -34,8 +35,9 @@
 | `diagnostic_schema.md` | Complete reference for the diagnostic JSON structure (schema v2.1.0) |
 | `semantic_model_best_practices.md` | **KEY FILE** — Prep for AI vs Data Agent instructions, AI Data Schema, Verified Answers, implementation workflow |
 | `evaluation_sdk.md` | Full guide for programmatic evaluation with `fabric-data-agent-sdk` |
-| `python_client_sdk.md` | Full guide for consuming Data Agents via `fabric-data-agent-client` |
-| `known_issues.md` | Common diagnostic patterns, SDK pitfalls, and edge cases |
+| `python_client_sdk.md` | Full guide for consuming Data Agents via `fabric-data-agent-client` + batch performance optimizations |
+| `known_issues.md` | Common diagnostic patterns, SDK pitfalls, edge cases, and thread management issues (GP-011 to GP-017) |
+| `dax_best_practices_bpa.md` | 24 BPA rules across 6 categories for DAX quality scoring |
 
 ## Quick Start (for a new session)
 
@@ -60,3 +62,9 @@
 
 > **The thread tells the story.** Run steps reveal exactly which tools fired, what DAX/SQL/KQL
 > was generated, and what data came back — essential for debugging wrong answers.
+
+> **Thread management is critical for batch runs.** Always DELETE + recreate the thread before
+> each question. Thread recycling (reuse N, DELETE every Nth) causes cascading 404 errors and
+> "queued" hangs. Retry 404 on ALL endpoints (POST and GET) with 1.5s/3s backoff. Use
+> `requests.Session` for connection pooling ($-53%$ wall time improvement on 6-question batch).
+> See `python_client_sdk.md` Performance Optimizations section.

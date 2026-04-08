@@ -1,0 +1,115 @@
+# ── Test Cases for CCE_Validation ──────────────────────────────────
+# Data Agent: CCE_Advisor (French-language cost estimation validation)
+# Semantic Model: SM_CCE_Validation (Direct Lake, 6 tables, 20 measures)
+#
+# Baseline: 20260407_191100 — 20/20 success, all values from DAX query results.
+
+test_cases:
+
+  # ── KPI / Simple measures ─────────────────────────────────────────
+  - question: "Combien de lignes de benchmark avons-nous ?"
+    expected: "1535"
+    match_type: "numeric"
+    tags: ["kpi", "measures"]
+
+  - question: "Quel est le taux moyen benchmark en EUR ?"
+    expected: "2701.88"
+    match_type: "numeric"
+    tags: ["kpi", "measures"]
+
+  - question: "Quel est le coût total historique ?"
+    expected: "31429480679.92"
+    match_type: "numeric"
+    tags: ["kpi", "measures"]
+
+  - question: "Combien de projets historiques distincts avons-nous ?"
+    expected: "8"
+    match_type: "numeric"
+    tags: ["kpi", "measures"]
+
+  - question: "Combien de pays sont couverts ?"
+    expected: "4"
+    match_type: "numeric"
+    tags: ["kpi", "measures"]
+
+  # ── Dimensions / Grouping ──────────────────────────────────────────
+  - question: "Quel est le taux moyen par discipline ?"
+    expected: "Génie Civil"
+    match_type: "contains"
+    tags: ["discipline", "grouping"]
+
+  - question: "Quel est le coût total historique par pays ?"
+    expected: "France"
+    match_type: "contains"
+    tags: ["country", "grouping"]
+
+  - question: "Combien de codes WBS distincts avons-nous ?"
+    expected: "96"
+    match_type: "numeric"
+    tags: ["wbs", "measures"]
+
+  # ── Filtering / Slicing ─────────────────────────────────────────────
+  - question: "Montre les benchmarks pour le Génie Civil"
+    expected: "Génie Civil"
+    match_type: "contains"
+    tags: ["discipline", "filtering"]
+
+  - question: "Quel est le taux moyen en France ?"
+    expected: "2705.72"
+    match_type: "numeric"
+    tags: ["country", "filtering"]
+
+  - question: "Compare les taux entre la France et le UK"
+    expected: "UK"
+    match_type: "contains"
+    tags: ["country", "comparison"]
+
+  # ── Ranking / Top-N ────────────────────────────────────────────────
+  - question: "Quels sont les 5 WBS les plus chers ?"
+    expected: "30.04.01"
+    match_type: "contains"
+    tags: ["wbs", "ranking"]
+
+  - question: "Quels sont les lots les plus risqués (écart-type élevé) ?"
+    expected: "Mécanique"
+    match_type: "contains"
+    tags: ["wbs", "risk", "ranking"]
+
+  - question: "Quel WBS a le taux le plus élevé ?"
+    expected: "60.02.01"
+    match_type: "contains"
+    tags: ["wbs", "ranking"]
+
+  # ── Cross-dimension ────────────────────────────────────────────────
+  - question: "Quel est le taux moyen pour la Tuyauterie en France ?"
+    expected: "1120.54"
+    match_type: "numeric"
+    tolerance: 2
+    tags: ["discipline", "country", "cross"]
+
+  - question: "Quel est le coût total par discipline et par pays ?"
+    expected: "Génie Civil"
+    match_type: "contains"
+    tags: ["discipline", "country", "cross"]
+
+  # ── Anomaly / Risk detection ───────────────────────────────────────
+  - question: "Quel est l'écart-type global des taux ?"
+    expected: "3785.06"
+    match_type: "numeric"
+    tags: ["risk", "measures"]
+
+  - question: "Quel est le taux minimum et maximum en EUR ?"
+    expected: "34,84"
+    match_type: "contains"
+    tags: ["kpi", "range"]
+
+  # ── Norms / Escalation ─────────────────────────────────────────────
+  - question: "Quels sont les taux unitaires standards par discipline ?"
+    expected: "Génie Civil"
+    match_type: "contains"
+    tags: ["norms", "reference"]
+
+  - question: "Quel est l'indice d'escalade pour la France ?"
+    expected: "118,89"
+    match_type: "contains"
+    tags: ["escalation", "country"]

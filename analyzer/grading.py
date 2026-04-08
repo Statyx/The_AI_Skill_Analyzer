@@ -46,16 +46,55 @@ _MAGNITUDE = {"k": 1e3, "m": 1e6, "b": 1e9, "bn": 1e9, "t": 1e12}
 
 # ── Number extraction ─────────────────────────────────────────
 
+def _normalize_french_numbers(text):
+    """Normalize French-formatted numbers to English before extraction.
+
+    French uses spaces as thousand separators and commas as decimal points:
+        "2 701,88"          -> "2701.88"
+        "31 429 480 679,92" -> "31429480679.92"
+        "1 535"             -> "1535"
+        "34,84"             -> "34.84"
+    """
+    # Step 1: French thousands — digits grouped by spaces, optional comma decimal
+    # e.g. "2 701,88" or "31 429 480 679,92" or "1 535"
+    # Handles regular space, non-breaking space (U+00A0), narrow no-break space
+    # (U+202F), and thin space (U+2009) as thousand separators.
+    def _replace_fr_thousands(m):
+        s = m.group(0)
+        for ch in ' \u00a0\u202f\u2009':
+            s = s.replace(ch, '')
+        s = s.replace(',', '.')
+        return s
+
+    text = re.sub(
+        r'(?<!\d)\d{1,3}(?:[ \u00a0\u202f\u2009]\d{3})+(?:,\d{1,2})?(?!\d)',
+        _replace_fr_thousands,
+        text,
+    )
+
+    # Step 2: Simple French decimal — e.g. "34,84" or "118,89"
+    # Only match comma + 1-2 trailing digits (not 3, which is English thousands)
+    text = re.sub(r'(?<!\d)(\d+),(\d{1,2})(?!\d)', r'\1.\2', text)
+
+    return text
+
+
 def _extract_numbers(text):
     """Extract numbers from text, handling commas, currency symbols,
-    percentage signs, and magnitude suffixes (K/M/B/T).
+    percentage signs, magnitude suffixes (K/M/B/T), and French formatting.
 
     Examples:
-        "23.5M" -> [23_500_000]
-        "$1,234.56" -> [1234.56]
-        "57%" -> [57]
-        "1.7B" -> [1_700_000_000]
+        "23.5M"              -> [23_500_000]
+        "$1,234.56"          -> [1234.56]
+        "57%"                -> [57]
+        "1.7B"               -> [1_700_000_000]
+        "2 701,88 EUR"       -> [2701.88]
+        "31 429 480 679,92"  -> [31429480679.92]
+        "34,84"              -> [34.84]
     """
+    # Normalize French number formatting first
+    text = _normalize_french_numbers(text)
+
     # Match optional minus, digits with optional commas/decimals,
     # followed by optional magnitude suffix or %
     pattern = r'(?<![a-zA-Z])-?\$?\d[\d,]*\.?\d*\s*(?:bn|[kmbt%])?(?![a-zA-Z])'

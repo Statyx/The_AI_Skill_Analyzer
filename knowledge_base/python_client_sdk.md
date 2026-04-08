@@ -245,6 +245,59 @@ for step in run_details.get('run_steps', {}).get('data', []):
 
 ---
 
+## Performance Optimizations (Batch Mode)
+
+When running multiple questions sequentially (e.g., in the AI Skill Analyzer), the SDK uses
+several optimizations to reduce per-question overhead:
+
+### Connection Pooling
+```python
+# Use requests.Session for TCP connection reuse
+self._http = requests.Session()
+self._http.headers.update({"Content-Type": "application/json"})
+```
+Reduces per-question overhead by ~2-3s by reusing TCP/TLS connections.
+
+### Adaptive Polling
+```python
+_POLL_INTERVALS = [0.5, 0.5, 1, 1, 2, 2] + [3] * 50
+```
+Starts polling at 0.5s (catches fast runs), ramps to 3s max. Saves ~2-5s per question vs fixed 2s interval.
+
+### Fresh Thread Per Question
+```python
+# Always DELETE + recreate — never reuse dirty threads
+thread = POST /threads → DELETE /threads/{id} → POST /threads
+```
+Thread reuse/recycling causes cascading failures. DELETE + recreate is the only reliable pattern.
+
+### 404 Retry on All Endpoints
+```python
+# Retry on 404 for both POST and GET (eventual consistency)
+def _request_with_retry(method, url, max_retries=2):
+    # 1.5s, 3s backoff on 404
+```
+Fabric has eventual consistency after thread creation. Both read and write endpoints need retry.
+
+### Parallel Message + Steps Retrieval
+```python
+# After run completes, fetch messages and steps concurrently
+with ThreadPoolExecutor(max_workers=2) as pool:
+    msgs_future = pool.submit(GET, f"/threads/{id}/messages")
+    steps_future = pool.submit(GET, f"/threads/{id}/runs/{run_id}/steps")
+```
+Saves ~0.5-1s per question. This is the ONLY safe parallelism — never parallelize questions themselves.
+
+### Measured Results
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Q1 (cold start) | 35.3s | 21.1s | -40% |
+| Q2+ (warm) | 32.7s | 17.4s | -47% |
+| 6-question batch | 251.9s | 117.5s | -53% |
+| Error rate | 67% (4/6 404) | 0% | Eliminated |
+
+---
+
 ## Advanced: Batch Diagnostic Automation
 
 Beyond simple `client.ask()` loops, you can build a **full diagnostic pipeline** that combines 3 data sources for portal-equivalent analysis:

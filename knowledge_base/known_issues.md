@@ -383,3 +383,131 @@ The time intelligence annotation takes priority over all Prep for AI configurati
 - Add explicit Verified Answers for questions where reformulation is harmful
 - Use CopilotInstructions to anchor metric definitions
 - Note that neither fully overrides the reformulation when time intelligence is enabled
+
+---
+
+### GP-011: Thread reuse causes cascading 404 errors
+
+**Symptom**: First 1-2 questions succeed, then subsequent questions fail with `404 Not Found` on `/threads/{id}/messages` or `/threads/{id}/runs`.
+
+**Cause**: Fabric returns the **same thread** per (agent, user) pair. If you reuse a thread without deleting it, accumulated messages pollute context. Thread "recycling" (reusing for N questions, then DELETE) creates an eventual consistency window where the new thread isn't ready.
+
+**Fix**: Always DELETE + recreate the thread **before each question**. Never reuse a dirty thread. The 0.5s post-DELETE sleep is sufficient.
+
+```python
+# Proven pattern: fresh thread per question
+def _get_fresh_thread(self, base_url, headers, params):
+    r = self._http.post(f"{base_url}/threads", headers=headers, json={}, params=params, timeout=30)
+    thread_id = r.json()["id"]
+    delete_params = {"api-version": self.api_version}  # NO stage param on DELETE
+    self._http.delete(f"{base_url}/threads/{thread_id}", headers=headers, params=delete_params, timeout=15)
+    time.sleep(0.5)
+    r = self._http.post(f"{base_url}/threads", headers=headers, json={}, params=params, timeout=30)
+    return r.json()["id"]
+```
+
+**Detection**: If `run_status` is `queued` (never progressed) or 404 errors appear after Q2-Q3, suspect thread pollution.
+
+---
+
+### GP-012: 404 on GET endpoints after thread create (eventual consistency)
+
+**Symptom**: Thread is created (POST returns 200), but immediate GET to `/threads/{id}/messages` returns 404.
+
+**Cause**: Fabric's backend has eventual consistency — thread creation may take ~1-3s to propagate to all read replicas.
+
+**Fix**: Wrap ALL HTTP calls (POST and GET) with a retry-on-404 helper:
+```python
+def _request_with_retry(self, method, url, headers, params, json_body=None, max_retries=2):
+    for attempt in range(max_retries + 1):
+        r = self._http.post(url, ...) if method == "POST" else self._http.get(url, ...)
+        if r.status_code == 404 and attempt < max_retries:
+            time.sleep(1.5 * (attempt + 1))  # 1.5s, 3s backoff
+            continue
+        r.raise_for_status()
+        return r
+```
+
+**Important**: The previous approach of only retrying POST (via `_post_with_retry`) missed 404s on GET calls during message/steps retrieval, causing errors on Q4+ in a batch.
+
+---
+
+### GP-013: `requests.Session` connection pooling reduces per-question overhead
+
+**Symptom**: Each question takes 3-5s of overhead for HTTP setup (TCP handshake, TLS negotiation).
+
+**Cause**: Using bare `requests.get()` / `requests.post()` opens a new TCP connection per call. A single question makes 8-12 HTTP calls.
+
+**Fix**: Use `requests.Session()` for connection pooling:
+```python
+if not hasattr(self, '_http'):
+    self._http = requests.Session()
+    self._http.headers.update({"Content-Type": "application/json"})
+```
+
+**Impact**: Reduces per-question overhead by ~2-3s. Measured improvement: 35s → 21s on first question, 33s → 17s on subsequent questions.
+
+---
+
+### GP-014: Adaptive polling reduces wasted wait time
+
+**Symptom**: Fixed 2s polling interval wastes time — too slow for fast questions, doesn't save much for slow ones.
+
+**Cause**: Fabric agent runs typically complete in 10-20s. A 2s interval means 5-10 idle polls.
+
+**Fix**: Use a ramping interval: start at 0.5s, increase to 3s:
+```python
+_POLL_INTERVALS = [0.5, 0.5, 1, 1, 2, 2] + [3] * 50
+```
+First completion check at 0.5s catches fast runs. Max interval of 3s prevents excessive polling on slow runs.
+
+**Impact**: Saves ~2-5s per question on average.
+
+---
+
+### GP-015: Parallel message + steps retrieval saves 0.5-1s per question
+
+**Symptom**: After run completion, sequential GET for messages then GET for steps adds ~1s.
+
+**Cause**: The two GET calls are independent — messages and run_steps can be fetched concurrently.
+
+**Fix**: Use `ThreadPoolExecutor(max_workers=2)` to fetch both in parallel:
+```python
+from concurrent.futures import ThreadPoolExecutor
+with ThreadPoolExecutor(max_workers=2) as pool:
+    msgs_future = pool.submit(self._request_with_retry, "GET", f"{base_url}/threads/{thread_id}/messages", ...)
+    steps_future = pool.submit(self._request_with_retry, "GET", f"{base_url}/threads/{thread_id}/runs/{run_id}/steps", ...)
+    msgs_r = msgs_future.result()
+    steps_r = steps_future.result()
+```
+
+**Important**: This is the ONLY safe use of parallelism with Fabric threads. Do NOT parallelize questions themselves — Fabric returns the same thread for the same user+agent, causing collisions.
+
+---
+
+### GP-016: Thread DELETE requires NO `stage` param (unlike all other endpoints)
+
+**Symptom**: `DELETE /threads/{id}` returns 400 or unexpected behavior when `stage` param is included.
+
+**Cause**: The thread DELETE endpoint only accepts `api-version`, NOT `stage`. This is inconsistent with all other Data Agent endpoints which require both.
+
+**Fix**:
+```python
+# CORRECT: api-version only
+delete_params = {"api-version": self.api_version}
+
+# WRONG: including stage
+delete_params = {"stage": "production", "api-version": self.api_version}
+```
+
+---
+
+### GP-017: True parallelism impossible with single identity
+
+**Symptom**: Running multiple questions concurrently (e.g., with ThreadPoolExecutor) causes all but one to fail with 409 Conflict or return wrong answers.
+
+**Cause**: Fabric returns the SAME thread_id for every `POST /threads` call from the same user+agent combination. Multiple concurrent runs on the same thread corrupt each other's context.
+
+**Fix**: There is NO fix with a single identity. To parallelize questions, you need N separate service principals (1 per concurrent worker), each getting their own thread. With a single user, questions MUST be serial.
+
+**Measured impact**: Serial with optimizations (connection pooling, adaptive polling, parallel retrieval) achieves ~18-21s per question vs ~35s without optimizations. For 20 questions: ~400s optimized vs ~600s baseline.

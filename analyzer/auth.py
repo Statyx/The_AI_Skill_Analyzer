@@ -7,7 +7,11 @@ browser popup only appears once per ~24h.
 
 import sys
 import os
+import json
+import shutil
+import subprocess
 import time
+from collections import namedtuple
 from azure.identity import (
     AzureCliCredential,
     InteractiveBrowserCredential,
@@ -19,10 +23,33 @@ sys.path.insert(0, os.path.join(os.environ.get("TEMP", "/tmp"), "fabric_data_age
 from fabric_data_agent_client import FabricDataAgentClient
 
 FABRIC_SCOPE = "https://api.fabric.microsoft.com/.default"
+FABRIC_RESOURCE = "https://api.fabric.microsoft.com"
+
+_TokenInfo = namedtuple("_TokenInfo", ["token", "expires_on"])
+
+
+class _AzCliShellCredential:
+    """Fallback credential that calls `az` via shell=True (Windows .cmd compat)."""
+
+    def __init__(self, tenant_id=None):
+        self.tenant_id = tenant_id
+
+    def get_token(self, *scopes, **kwargs):
+        cmd = f'az account get-access-token --resource {FABRIC_RESOURCE} -o json'
+        if self.tenant_id:
+            cmd += f' --tenant {self.tenant_id}'
+        r = subprocess.run(cmd, capture_output=True, text=True, shell=True, timeout=30)
+        if r.returncode != 0:
+            raise Exception(f"az CLI token failed: {r.stderr[:200]}")
+        data = json.loads(r.stdout)
+        from datetime import datetime
+        exp = datetime.fromisoformat(data["expiresOn"].replace(" ", "T"))
+        return _TokenInfo(token=data["accessToken"], expires_on=exp.timestamp())
 
 
 def _get_credential(tenant_id):
-    """Try AzureCliCredential first, fall back to InteractiveBrowserCredential."""
+    """Try AzureCliCredential first, shell fallback, then InteractiveBrowserCredential."""
+    # Try standard SDK credential
     cli_cred = AzureCliCredential(tenant_id=tenant_id)
     try:
         cli_cred.get_token(FABRIC_SCOPE)
@@ -30,6 +57,15 @@ def _get_credential(tenant_id):
         return cli_cred
     except Exception:
         pass
+
+    # Windows fallback: use shell=True to invoke az.cmd
+    try:
+        shell_cred = _AzCliShellCredential(tenant_id=tenant_id)
+        shell_cred.get_token(FABRIC_SCOPE)
+        print("  Auth: using Azure CLI credential (shell fallback)")
+        return shell_cred
+    except Exception as e:
+        print(f"  AzureCliCredential fallback failed: {e}")
 
     print("  Auth: Azure CLI not available, using browser login")
     cache_opts = TokenCachePersistenceOptions(
