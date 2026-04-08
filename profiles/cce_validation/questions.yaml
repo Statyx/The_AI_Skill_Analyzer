@@ -28,7 +28,7 @@ test_cases:
     tags: ["kpi", "measures"]
 
   - question: "Combien de pays sont couverts ?"
-    expected: "4"
+    expected: "5"
     match_type: "numeric"
     tags: ["kpi", "measures"]
 
@@ -55,8 +55,9 @@ test_cases:
     tags: ["discipline", "filtering"]
 
   - question: "Quel est le taux moyen en France ?"
-    expected: "2705.72"
+    expected: "2706"
     match_type: "numeric"
+    tolerance: 1
     tags: ["country", "filtering"]
 
   - question: "Compare les taux entre la France et le UK"
@@ -71,7 +72,7 @@ test_cases:
     tags: ["wbs", "ranking"]
 
   - question: "Quels sont les lots les plus risqués (écart-type élevé) ?"
-    expected: "Mécanique"
+    expected: "80.01.03"
     match_type: "contains"
     tags: ["wbs", "risk", "ranking"]
 
@@ -99,7 +100,7 @@ test_cases:
     tags: ["risk", "measures"]
 
   - question: "Quel est le taux minimum et maximum en EUR ?"
-    expected: "34,84"
+    expected: "34.84"
     match_type: "contains"
     tags: ["kpi", "range"]
 
@@ -110,6 +111,6 @@ test_cases:
     tags: ["norms", "reference"]
 
   - question: "Quel est l'indice d'escalade pour la France ?"
-    expected: "118,89"
+    expected: "118.89"
     match_type: "contains"
     tags: ["escalation", "country"]

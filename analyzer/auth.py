@@ -50,7 +50,7 @@ class _AzCliShellCredential:
 def _get_credential(tenant_id):
     """Try AzureCliCredential first, shell fallback, then InteractiveBrowserCredential."""
     # Try standard SDK credential
-    cli_cred = AzureCliCredential(tenant_id=tenant_id)
+    cli_cred = AzureCliCredential(tenant_id=tenant_id, process_timeout=30)
     try:
         cli_cred.get_token(FABRIC_SCOPE)
         print("  Auth: using Azure CLI credential")
