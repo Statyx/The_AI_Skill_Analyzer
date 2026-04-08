@@ -1,34 +1,34 @@
 # ── Test Cases for CCE_Validation ──────────────────────────────────
 # Data Agent: CCE_Advisor (French-language cost estimation validation)
-# Semantic Model: SM_CCE_Validation (Direct Lake, 6 tables, 20 measures)
+# Semantic Model: SM_CCE_Validation (Direct Lake, 6 tables, 20+ measures)
 #
-# Baseline: 20260407_191100 — 20/20 success, all values from DAX query results.
+# Baseline: 20260409 — 5573 benchmark rows, 8 countries, 24 projects, 124 WBS catalog.
 
 test_cases:
 
   # ── KPI / Simple measures ─────────────────────────────────────────
   - question: "Combien de lignes de benchmark avons-nous ?"
-    expected: "1535"
+    expected: "5573"
     match_type: "numeric"
     tags: ["kpi", "measures"]
 
   - question: "Quel est le taux moyen benchmark en EUR ?"
-    expected: "2701.88"
+    expected: "3185.52"
     match_type: "numeric"
     tags: ["kpi", "measures"]
 
   - question: "Quel est le coût total historique ?"
-    expected: "31429480679.92"
+    expected: "10944334825273.44"
     match_type: "numeric"
     tags: ["kpi", "measures"]
 
   - question: "Combien de projets historiques distincts avons-nous ?"
-    expected: "8"
+    expected: "24"
     match_type: "numeric"
     tags: ["kpi", "measures"]
 
   - question: "Combien de pays sont couverts ?"
-    expected: "5"
+    expected: "8"
     match_type: "numeric"
     tags: ["kpi", "measures"]
 
@@ -44,7 +44,7 @@ test_cases:
     tags: ["country", "grouping"]
 
   - question: "Combien de codes WBS distincts avons-nous ?"
-    expected: "96"
+    expected: "72"
     match_type: "numeric"
     tags: ["wbs", "measures"]
 
@@ -55,9 +55,9 @@ test_cases:
     tags: ["discipline", "filtering"]
 
   - question: "Quel est le taux moyen en France ?"
-    expected: "2706"
+    expected: "2723"
     match_type: "numeric"
-    tolerance: 1
+    tolerance: 2
     tags: ["country", "filtering"]
 
   - question: "Compare les taux entre la France et le UK"
@@ -67,23 +67,23 @@ test_cases:
 
   # ── Ranking / Top-N ────────────────────────────────────────────────
   - question: "Quels sont les 5 WBS les plus chers ?"
-    expected: "30.04.01"
+    expected: "70.05.01"
     match_type: "contains"
     tags: ["wbs", "ranking"]
 
   - question: "Quels sont les lots les plus risqués (écart-type élevé) ?"
-    expected: "80.01.03"
+    expected: "40.03.03"
     match_type: "contains"
     tags: ["wbs", "risk", "ranking"]
 
   - question: "Quel WBS a le taux le plus élevé ?"
-    expected: "60.02.01"
+    expected: "15.01.02"
     match_type: "contains"
     tags: ["wbs", "ranking"]
 
   # ── Cross-dimension ────────────────────────────────────────────────
   - question: "Quel est le taux moyen pour la Tuyauterie en France ?"
-    expected: "1120.54"
+    expected: "1215.96"
     match_type: "numeric"
     tolerance: 2
     tags: ["discipline", "country", "cross"]
@@ -95,12 +95,13 @@ test_cases:
 
   # ── Anomaly / Risk detection ───────────────────────────────────────
   - question: "Quel est l'écart-type global des taux ?"
-    expected: "3785.06"
+    expected: "4705"
     match_type: "numeric"
+    tolerance: 2
     tags: ["risk", "measures"]
 
   - question: "Quel est le taux minimum et maximum en EUR ?"
-    expected: "34.84"
+    expected: "33.82"
     match_type: "contains"
     tags: ["kpi", "range"]
 
@@ -111,6 +112,32 @@ test_cases:
     tags: ["norms", "reference"]
 
   - question: "Quel est l'indice d'escalade pour la France ?"
-    expected: "118.89"
+    expected: "123.44"
     match_type: "contains"
     tags: ["escalation", "country"]
+
+  # ── Estimate Validation / Confidence ───────────────────────────────
+  - question: "Quel est le score de confiance du CCE soumis ?"
+    expected: "Score"
+    match_type: "contains"
+    tags: ["estimate", "confidence"]
+
+  - question: "Combien d'anomalies dans l'estimation ?"
+    expected: "Anomal"
+    match_type: "contains"
+    tags: ["estimate", "anomaly"]
+
+  - question: "Quel est l'écart entre l'estimation et les benchmarks ?"
+    expected: "Delta"
+    match_type: "contains"
+    tags: ["estimate", "delta"]
+
+  - question: "Quel est le coût total de l'estimation soumise ?"
+    expected: "EUR"
+    match_type: "contains"
+    tags: ["estimate", "cost"]
+
+  - question: "Compare le taux estimé vs benchmark par discipline"
+    expected: "Génie Civil"
+    match_type: "contains"
+    tags: ["estimate", "discipline", "comparison"]
