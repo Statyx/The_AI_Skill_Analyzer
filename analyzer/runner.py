@@ -10,8 +10,8 @@ RETRY_DELAY_BASE = 3  # seconds
 
 def _is_retryable(error_str):
     """Check if an error is transient and worth retrying."""
-    retryable = ["429", "503", "timeout", "throttl", "temporarily unavailable",
-                 "connection", "reset by peer"]
+    retryable = ["400", "404", "429", "500", "502", "503", "timeout", "throttl",
+                 "temporarily unavailable", "connection", "reset by peer", "bad request", "not found"]
     lower = error_str.lower()
     return any(kw in lower for kw in retryable)
 
@@ -46,6 +46,15 @@ def _run_single_question(client, question, idx, total, max_retries=MAX_RETRIES):
             step_duration = (max(all_completed) - min(all_created)) if all_created and all_completed else None
 
             status = run_details.get("run_status", "unknown")
+
+            # Retry on failed runs or empty answers (transient Fabric issues)
+            if (status == "failed" or (status == "completed" and not answer.strip())) and attempt < max_retries:
+                delay = RETRY_DELAY_BASE * (2 ** attempt)
+                reason = f"run_status={status}" if status == "failed" else "empty answer"
+                print(f"  ~ [{idx}/{total}] Retry {attempt+1}/{max_retries} in {delay}s: {reason}")
+                time.sleep(delay)
+                continue
+
             icon = "+" if status == "completed" else "X"
             print(f"  {icon} [{idx}/{total}] ({elapsed:.1f}s) {question[:60]}")
 

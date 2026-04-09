@@ -7,6 +7,7 @@ __pycache__/
 runs/
 results/
 snapshots/
+profiles/
 
 # ── Debug & scratch ──
 debug/
