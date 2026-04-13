@@ -4,6 +4,6 @@
 
 workspace_id: "acf3556a-b23c-4ea1-b706-4ea9c9a1c181"
 agent_id: "b90bd88c-0714-4d4a-8c99-05da816dc125"
-semantic_model_id: "fa2333c4-b003-440b-b6f5-25b6e2454d6c"
+semantic_model_id: "645b4eb1-9991-4c2b-9440-2f9ac6a045dd"
 semantic_model_name: "SM_CCE_Validation"
 stage: "production"

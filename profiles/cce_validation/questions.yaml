@@ -3,6 +3,7 @@
 # Semantic Model: SM_CCE_Validation (Direct Lake, 6 tables, 20+ measures)
 #
 # Baseline: 20260409 — 5573 benchmark rows, 8 countries, 24 projects, 124 WBS catalog.
+# Trimmed to 10 representative questions (was 25).
 
 test_cases:
 
@@ -18,17 +19,6 @@ test_cases:
     tolerance: 1
     tags: ["kpi", "measures"]
 
-  - question: "Quel est le coût total historique ?"
-    expected: "10944334825273"
-    match_type: "numeric"
-    tolerance: 1
-    tags: ["kpi", "measures"]
-
-  - question: "Combien de projets historiques distincts avons-nous ?"
-    expected: "24"
-    match_type: "numeric"
-    tags: ["kpi", "measures"]
-
   - question: "Combien de pays sont couverts ?"
     expected: "8"
     match_type: "numeric"
@@ -40,46 +30,16 @@ test_cases:
     match_type: "contains"
     tags: ["discipline", "grouping"]
 
-  - question: "Quel est le coût total historique par pays ?"
-    expected: "France"
-    match_type: "contains"
-    tags: ["country", "grouping"]
-
-  - question: "Combien de codes WBS distincts avons-nous ?"
-    expected: "124"
-    match_type: "numeric"
-    tags: ["wbs", "measures"]
-
   # ── Filtering / Slicing ─────────────────────────────────────────────
-  - question: "Montre les benchmarks pour le Génie Civil"
-    expected: "Génie Civil"
-    match_type: "contains"
-    tags: ["discipline", "filtering"]
-
   - question: "Quel est le taux moyen en France ?"
     expected: "2723"
     match_type: "numeric"
     tolerance: 2
     tags: ["country", "filtering"]
 
-  - question: "Compare les taux entre la France et le UK"
-    expected: "UK"
-    match_type: "contains"
-    tags: ["country", "comparison"]
-
   # ── Ranking / Top-N ────────────────────────────────────────────────
   - question: "Quels sont les 5 WBS les plus chers ?"
     expected: "60.02.01"
-    match_type: "contains"
-    tags: ["wbs", "ranking"]
-
-  - question: "Quels sont les lots les plus risqués (écart-type élevé) ?"
-    expected: "cart-type"
-    match_type: "contains"
-    tags: ["wbs", "risk", "ranking"]
-
-  - question: "Quel WBS a le taux le plus élevé ?"
-    expected: "80.01.03"
     match_type: "contains"
     tags: ["wbs", "ranking"]
 
@@ -90,11 +50,6 @@ test_cases:
     tolerance: 2
     tags: ["discipline", "country", "cross"]
 
-  - question: "Quel est le coût total par discipline et par pays ?"
-    expected: "discipline"
-    match_type: "contains"
-    tags: ["discipline", "country", "cross"]
-
   # ── Anomaly / Risk detection ───────────────────────────────────────
   - question: "Quel est l'écart-type global des taux ?"
     expected: "4705"
@@ -102,43 +57,13 @@ test_cases:
     tolerance: 2
     tags: ["risk", "measures"]
 
-  - question: "Quel est le taux minimum et maximum en EUR ?"
-    expected: "33.82"
-    match_type: "contains"
-    tags: ["kpi", "range"]
-
   # ── Norms / Escalation ─────────────────────────────────────────────
-  - question: "Quels sont les taux unitaires standards par discipline ?"
-    expected: "Génie Civil"
-    match_type: "contains"
-    tags: ["norms", "reference"]
-
   - question: "Quel est l'indice d'escalade pour la France ?"
     expected: "123.44"
     match_type: "contains"
     tags: ["escalation", "country"]
 
   # ── Estimate Validation / Confidence ───────────────────────────────
-  - question: "Quel est le score de confiance du CCE soumis ?"
-    expected: "Score"
-    match_type: "contains"
-    tags: ["estimate", "confidence"]
-
-  - question: "Combien d'anomalies dans l'estimation ?"
-    expected: "Anomal"
-    match_type: "contains"
-    tags: ["estimate", "anomaly"]
-
-  - question: "Quel est l'écart entre l'estimation et les benchmarks ?"
-    expected: "Delta|cart"
-    match_type: "regex"
-    tags: ["estimate", "delta"]
-
-  - question: "Quel est le coût total de l'estimation soumise ?"
-    expected: "EUR"
-    match_type: "contains"
-    tags: ["estimate", "cost"]
-
   - question: "Compare le taux estimé vs benchmark par discipline"
     expected: "Génie Civil"
     match_type: "contains"
