@@ -30,6 +30,8 @@ def build_diagnostic(agent_data, schema, question_result, cfg, verdict_data=None
             "created_at": s.get("created_at"), "completed_at": s.get("completed_at"),
         })
 
+    profile_fewshots = _load_profile_fewshots(cfg)
+
     diag = {
         "downloaded_at": datetime.now(timezone.utc).isoformat(),
         "rolloutEnvironment": "PROD",
@@ -41,7 +43,8 @@ def build_diagnostic(agent_data, schema, question_result, cfg, verdict_data=None
         "config": agent_data.get("config"),
         "datasources": {
             cfg["semantic_model_id"]: {
-                "fewshots": {"fewShots": [], "parentId": cfg["semantic_model_id"],
+                "fewshots": {"fewShots": profile_fewshots,
+                             "parentId": cfg["semantic_model_id"],
                              "type": "semantic_model"},
                 "schema": schema,
             }
@@ -781,11 +784,58 @@ def _load_snapshot_measures(cfg):
     return measures
 
 
-def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=None):
+def _load_profile_fewshots(cfg):
+    """Load few-shot examples from the profile's fewshots.json if available."""
+    profile = cfg.get("profile_name", "default")
+    fs_path = ROOT / "profiles" / profile / "fewshots.json"
+    if not fs_path.exists():
+        return []
+    try:
+        with open(fs_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("fewShots", [])
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def _question_has_fewshot(question, fewshots, threshold=0.5):
+    """Check if a question is already covered by an existing few-shot example.
+
+    Uses word-overlap ratio: if >= threshold of question words appear in a
+    fewshot question (or vice versa), it's considered covered.
+    """
+    if not fewshots:
+        return False
+    q_words = set(re.sub(r"[^\w\s]", "", question.lower()).split())
+    q_words -= {"the", "a", "an", "is", "are", "what", "how", "by", "for",
+                "in", "of", "to", "and", "or", "le", "la", "les", "des",
+                "du", "de", "un", "une", "est", "par", "quel", "quelle",
+                "quels", "quelles", "combien", "pour"}
+    if not q_words:
+        return False
+    for fs in fewshots:
+        fs_words = set(re.sub(r"[^\w\s]", "", fs.get("question", "").lower()).split())
+        fs_words -= {"the", "a", "an", "is", "are", "what", "how", "by", "for",
+                     "in", "of", "to", "and", "or", "le", "la", "les", "des",
+                     "du", "de", "un", "une", "est", "par", "quel", "quelle",
+                     "quels", "quelles", "combien", "pour"}
+        if not fs_words:
+            continue
+        overlap = len(q_words & fs_words)
+        ratio = overlap / min(len(q_words), len(fs_words))
+        if ratio >= threshold:
+            return True
+    return False
+
+
+def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=None, fewshots=None):
     """Suggest concrete improvements for any question with imperfect DAX.
 
     Returns list of (fix_type, suggestion) tuples where fix_type is one of:
     MEASURE, INSTRUCTION, SIMPLIFY, FEWSHOT
+
+    If fewshots is provided, FEWSHOT suggestions are suppressed for questions
+    that already have a matching few-shot example.
     """
     artifacts = result.get("grading", {}).get("artifacts", {})
     query = artifacts.get("generated_query", "") or ""
@@ -971,6 +1021,11 @@ def _suggest_dax_improvements(result, dax_stars, dax_note, snapshot_measures=Non
         if text not in seen:
             seen.add(text)
             unique.append((fix_type, text))
+
+    # Filter out FEWSHOT suggestions for questions already covered by existing few-shots
+    if fewshots and _question_has_fewshot(question, fewshots):
+        unique = [(ft, t) for ft, t in unique if ft != "FEWSHOT"]
+
     return unique
 
 
@@ -1276,6 +1331,9 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
     # Load snapshot measures for DAX improvement suggestions
     snapshot_measures = _load_snapshot_measures(cfg)
 
+    # Load profile few-shots to suppress redundant FEWSHOT suggestions
+    profile_fewshots = _load_profile_fewshots(cfg)
+
     # ═══ HEADER ═══
     emit(f"\n{'=' * W}")
     emit(f"  POST-RUN ANALYSIS")
@@ -1397,7 +1455,7 @@ def print_post_run_report(results, ts, out, cfg, total_wall):
             emit(f"    +--")
 
         # DAX improvement suggestions (for imperfect DAX or failures)
-        fixes = _suggest_dax_improvements(r, dax_stars, dax_note, snapshot_measures)
+        fixes = _suggest_dax_improvements(r, dax_stars, dax_note, snapshot_measures, fewshots=profile_fewshots)
         if verdict == "fail":
             fixes.extend(_suggest_actions(r))
         if fixes:
@@ -1640,6 +1698,7 @@ def analyze_run(run_dir):
     # Load snapshot measures for suggestions
     _cfg_for_snapshot = {"profile_name": summary.get("profile", "default")}
     _snapshot_measures = _load_snapshot_measures(_cfg_for_snapshot)
+    _profile_fewshots = _load_profile_fewshots(_cfg_for_snapshot)
     all_fixes = []
 
     for r in results:
@@ -1696,7 +1755,7 @@ def analyze_run(run_dir):
             print(f"     +--")
 
         # DAX improvement suggestions
-        fixes = _suggest_dax_improvements(r, dax_stars, dax_note, _snapshot_measures)
+        fixes = _suggest_dax_improvements(r, dax_stars, dax_note, _snapshot_measures, fewshots=_profile_fewshots)
         if verdict == "fail":
             fixes.extend(_suggest_actions(r))
         if fixes:

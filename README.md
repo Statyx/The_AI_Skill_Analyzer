@@ -1,4 +1,4 @@
-# The AI Skill Analyzer
+﻿# The AI Skill Analyzer
 
 End-to-end diagnostic and evaluation toolkit for **Fabric Data Agents** backed by Power BI semantic models.
 
@@ -70,7 +70,7 @@ python -m analyzer -p my_agent run
 All 4 IDs are visible in the Fabric portal URL when you open each item:
 
 | ID | Where to find it |
-|----|------------------|
+| ---- | ------------------ |
 | **workspace_id** | Open your workspace → URL: `app.fabric.microsoft.com/groups/`**`<workspace_id>`**`/...` |
 | **agent_id** | Open the Data Agent (AI Skill) → URL: `...aiskills/`**`<agent_id>`** |
 | **semantic_model_id** | Open the semantic model → Settings → URL: `...datasets/`**`<model_id>`** |
@@ -131,12 +131,14 @@ pip install -r requirements.txt
 ```
 
 **Dependencies:**
+
 - `azure-identity` >= 1.15.0 — Entra ID / browser authentication
 - `requests` >= 2.31.0 — Fabric REST API calls
 - `pyyaml` >= 6.0 — Config and test case parsing
 - `fabric-data-agent-client` — Fabric SDK (installed separately to `%TEMP%`)
 
 **Prerequisites:**
+
 - Python >= 3.10
 - Fabric capacity F2+ with Data Agent tenant settings enabled
 - XMLA endpoints enabled on the workspace
@@ -146,7 +148,7 @@ pip install -r requirements.txt
 
 ## Folder Structure
 
-```
+```text
 The_AI_Skill_Analyzer/
 ├── config.yaml                    # Global settings (tenant, defaults, workers)
 ├── requirements.txt               # Python dependencies
@@ -233,7 +235,7 @@ stage: "sandbox"
 ```
 
 | Key | Type | Default | Description |
-|-----|------|---------|-------------|
+| ----- | ------ | --------- | ------------- |
 | `tenant_id` | string | required | Microsoft Entra tenant ID |
 | `default_profile` | string | `null` | Profile to use when `--profile` is not specified |
 | `snapshot_ttl_hours` | int | `24` | Hours before snapshot is considered stale. `0` = always refresh |
@@ -257,7 +259,7 @@ stage: "sandbox"
 ```
 
 | Key | Type | Required | Description |
-|-----|------|----------|-------------|
+| ----- | ------ | ---------- | ------------- |
 | `workspace_id` | string | yes | Fabric workspace GUID |
 | `agent_id` | string | yes | Data Agent (AI Skill) artifact GUID |
 | `semantic_model_id` | string | yes | Backing Power BI semantic model GUID |
@@ -287,7 +289,8 @@ python -m analyzer init sales_agent
 ```
 
 This creates:
-```
+
+```text
 profiles/sales_agent/
 ├── profile.yaml     # Template with placeholder IDs + instructions
 └── questions.yaml   # Starter questions (KPIs, counts, rankings)
@@ -324,6 +327,7 @@ python -m analyzer -p sales_agent run
 ```
 
 Or set it as default in `config.yaml`:
+
 ```yaml
 default_profile: "sales_agent"
 ```
@@ -335,8 +339,10 @@ python -m analyzer profiles
 ```
 
 Output:
-```
+
+```text
 Available profiles:
+
   - my_agent (default)
   - sales_agent
 ```
@@ -360,7 +366,7 @@ python scripts/run_test.py [--profile PROFILE] <command> [options]
 ### Global Options
 
 | Option | Short | Description |
-|--------|-------|-------------|
+| -------- | ------- | ------------- |
 | `--profile NAME` | `-p NAME` | Profile to use. Overrides `default_profile` from config.yaml |
 | `--help` | `-h` | Show help for any command |
 
@@ -375,7 +381,7 @@ python -m analyzer init <NAME>
 ```
 
 | Argument | Description |
-|----------|-------------|
+| ---------- | ------------- |
 | `NAME` | Profile name (e.g., `sales_agent`). Converted to lowercase with underscores |
 
 **Does not require Fabric authentication.** Creates files only.
@@ -405,7 +411,7 @@ python -m analyzer [-p PROFILE] validate
 **Checks performed:**
 
 | Check | What it tests |
-|-------|---------------|
+| ------- | --------------- |
 | `config` | All required fields present and not `REPLACE_ME` |
 | `questions` | `questions.yaml` loads correctly, shows question count |
 | `auth` | Entra ID token acquisition works |
@@ -416,10 +422,11 @@ python -m analyzer [-p PROFILE] validate
 
 **Example output:**
 
-```
+```text
 ============================================================
   VALIDATE: sales_agent
 ============================================================
+
   + config        All required fields present
   + questions     8 questions loaded (2 with expected answers)
   + auth          Token acquired (len=1847)
@@ -459,6 +466,7 @@ python -m analyzer snapshot
 **No options.** Always forces a full refresh (ignores TTL).
 
 **What it fetches:**
+
 1. Agent metadata (`GET /workspaces/{ws}/items/{agent}`)
 2. Agent definition (`POST .../getDefinition`) — instructions, system prompt, few-shots
 3. Semantic model TMDL (`POST .../getDefinition?format=TMDL`) — tables, columns, measures, relationships, descriptions
@@ -478,7 +486,7 @@ python -m analyzer run [--refresh] [--serial] [--tag TAG] [--html] [--dry-run]
 ```
 
 | Option | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `--refresh` | Force-refresh the snapshot before running (even if cached) |
 | `--serial` | Run questions one at a time instead of parallel. Sets `max_workers=1` |
 | `--tag TAG` | Run only questions that have this tag in their `tags` list |
@@ -486,6 +494,7 @@ python -m analyzer run [--refresh] [--serial] [--tag TAG] [--html] [--dry-run]
 | `--dry-run` | Validate config + loaded questions, print summary, but **do not call Fabric** |
 
 **Workflow:**
+
 1. Load profile config + test cases
 2. Check/refresh snapshot (agent config + schema)
 3. Send each question to the agent via SDK (`get_run_details`)
@@ -511,7 +520,8 @@ python -m analyzer run --refresh
 ```
 
 **Output (terminal):**
-```
+
+```text
 ========================================================================
   THE AI SKILL ANALYZER -- BATCH RUN + GRADING
 ========================================================================
@@ -525,6 +535,7 @@ python -m analyzer run --refresh
 
 [1/4] Using cached snapshot (< 24h old)
 [2/4] Running questions...
+
   + [1/8] (12.3s) what is the churn rate
   + [2/8] (8.7s) what is the total revenue
   ...
@@ -537,8 +548,10 @@ python -m analyzer run --refresh
   Run ID : 20260325_143022
   Profile: my_agent
   Score  : 2/2 = 100%
+
   + Pass: 2  X Fail: 0  ? Ungraded: 6  | 24.5s
 ========================================================================
+
   + Q1 [12.3s] what is the churn rate
   ? Q2 [8.7s] what is the total revenue
   ...
@@ -547,6 +560,7 @@ python -m analyzer run --refresh
 ```
 
 **Resilience features:**
+
 - **Retry with backoff:** Transient errors (HTTP 429, 503, timeouts) are retried up to 2 times with exponential delay
 - **Graceful Ctrl+C:** Keyboard interrupt saves all completed results instead of losing the run
 
@@ -561,7 +575,7 @@ python -m analyzer rerun <RUN_ID> [--questions Q1 Q2 ...] [--html]
 ```
 
 | Argument / Option | Description |
-|-------------------|-------------|
+| ------------------- | ------------- |
 | `RUN_ID` | Timestamp folder name (e.g., `20260325_143022`) or `--latest` |
 | `--questions N ...` | Space-separated question indices (1-based) to re-run. If omitted, re-runs all failed questions + errors |
 | `--html` | Generate HTML report for the rerun |
@@ -580,6 +594,7 @@ python -m analyzer rerun 20260325_143022 --questions 1 --html
 ```
 
 **Behavior:**
+
 - Loads `batch_summary.json` from the specified run
 - If `--questions` is not specified, selects questions with verdict `fail` or status `error`
 - Uses current `questions.yaml` for grading (so updated expected values are applied)
@@ -596,7 +611,7 @@ python -m analyzer analyze [RUN_ID] [--latest] [--html]
 ```
 
 | Argument / Option | Description |
-|-------------------|-------------|
+| ------------------- | ------------- |
 | `RUN_ID` | Timestamp folder name. Optional if `--latest` is used |
 | `--latest` | Analyze the most recent run for the current profile |
 | `--html` | Generate a self-contained HTML report |
@@ -615,6 +630,7 @@ python -m analyzer -p sales_agent analyze --latest
 ```
 
 **Terminal output includes:**
+
 - Header: profile, agent, model, stage, wall time, schema stats
 - Scoreboard: pass / fail / ungraded counts + score percentage
 - Per-question detail: question, tools used, answer, expected, verdict
@@ -633,7 +649,7 @@ python -m analyzer diff <RUN_A> <RUN_B>
 ```
 
 | Argument | Description |
-|----------|-------------|
+| ---------- | ------------- |
 | `RUN_A` | First run ID (timestamp) |
 | `RUN_B` | Second run ID (timestamp) |
 
@@ -644,7 +660,8 @@ python -m analyzer diff 20260324_202817 20260325_143022
 ```
 
 **Output:**
-```
+
+```text
 ========================================================================
   DIFF: 20260324_202817  vs  20260325_143022
 ========================================================================
@@ -663,6 +680,7 @@ python -m analyzer diff 20260324_202817 20260325_143022
 ```
 
 **Change labels:**
+
 - `FIXED` — was fail, now pass
 - `REGRESSED` — was pass, now fail
 - `CHANGED` — verdict changed (e.g., `no_expected` → `pass`)
@@ -677,6 +695,7 @@ Located at `profiles/<profile>/questions.yaml`. Defines what questions to ask th
 
 ```yaml
 test_cases:
+
   - question: "how many active customers do we have"
     expected: "18016"
     match_type: "numeric"
@@ -690,7 +709,7 @@ test_cases:
 ```
 
 | Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
+| ------- | ------ | ---------- | --------- | ------------- |
 | `question` | string | yes | — | Natural language question sent to the agent |
 | `expected` | string/number/list/null | no | `null` | Expected answer. `null` or `~` = no grading |
 | `match_type` | string | no | `"contains"` | How to compare actual vs expected |
@@ -700,7 +719,7 @@ test_cases:
 ### Match Types
 
 | Type | Comparison Logic | Example |
-|------|-----------------|---------|
+| ------ | ----------------- | --------- |
 | `contains` | `expected` appears anywhere in the answer (case-insensitive) | expected: `"churn"` matches `"The churn rate is 5%"` |
 | `numeric` | Extracts all numbers from the answer, checks if any is within `±tolerance` of `expected` | expected: `18016`, tolerance: `50` matches `"We have 18,016 active customers"` |
 | `exact` | Exact string match after lowercasing and trimming | expected: `"yes"` matches `"Yes"` but not `"Yes, we do"` |
@@ -710,6 +729,7 @@ test_cases:
 ### Tags
 
 Tags are free-form labels. Use them to:
+
 - **Filter runs:** `python -m analyzer run --tag kpi` runs only questions tagged `"kpi"`
 - **Group in reports:** tags appear in the HTML report and analysis output
 - **Organize:** common tags: `kpi`, `measures`, `time_intelligence`, `ranking`, `segmentation`
@@ -723,7 +743,7 @@ Tags are free-form labels. Use them to:
 Every question receives one of three verdicts:
 
 | Verdict | Icon | Meaning |
-|---------|------|---------|
+| --------- | ------ | --------- |
 | `pass` | `+` | Agent answer matches the expected value within the match rules |
 | `fail` | `X` | Answer does not match — root cause analysis is generated |
 | `no_expected` | `?` | No expected answer defined (`expected: ~`) — manual review needed |
@@ -733,7 +753,7 @@ Every question receives one of three verdicts:
 When a question **fails**, the analyzer traces the agent's internal pipeline and classifies the root cause:
 
 | Category | Description | Suggested Fix |
-|----------|-------------|---------------|
+| ---------- | ------------- | --------------- |
 | `AGENT_ERROR` | Agent returned an error or non-completed status | Check agent health, retry |
 | `QUERY_ERROR` | Generated DAX/SQL failed to execute (syntax, missing column) | Fix model relationships or column visibility |
 | `EMPTY_RESULT` | Query succeeded but returned no data or empty result | Check data freshness, filter defaults |
@@ -748,11 +768,12 @@ When a question **fails**, the analyzer traces the agent's internal pipeline and
 
 For every question, the analyzer records the full tool call chain:
 
-```
+```text
 NL_TO_QUERY → QUERY_EXECUTION → ANSWER_SYNTHESIS
 ```
 
 Each step includes:
+
 - **Stage:** `NL_TO_QUERY`, `DAX_EXECUTION`, `SQL_EXECUTION`, `QUERY_EXECUTION`, `ANSWER_SYNTHESIS`, `TOOL_CALL`
 - **Tool name:** `nl2sa_query`, `evaluate_dax`, `evaluate_sql`, `message_creation`, etc.
 - **Arguments:** reformulated question, generated DAX/SQL query
@@ -768,7 +789,7 @@ Each step includes:
 
 Each run creates a timestamped folder under `runs/<profile>/`:
 
-```
+```text
 runs/<profile>/20260325_143022/
 ├── batch_summary.json              # Aggregated results + grading stats
 ├── test_cases.yaml                 # Frozen copy of questions used in this run
@@ -783,7 +804,7 @@ runs/<profile>/20260325_143022/
 Top-level fields:
 
 | Field | Description |
-|-------|-------------|
+| ------- | ------------- |
 | `timestamp` | Run ID (YYYYMMDD_HHMMSS) |
 | `profile` | Profile name |
 | `agent_id` | Data Agent GUID |
@@ -809,7 +830,7 @@ Top-level fields:
 Each question produces a `full_diag_<question_slug>.json` file containing:
 
 | Section | Content |
-|---------|---------|
+| --------- | --------- |
 | `config` | Agent definition (instructions, system prompt) |
 | `datasources` | Schema snapshot (tables, columns, measures, relationships) |
 | `thread.question` | Original question text |
@@ -830,6 +851,7 @@ Each question produces a `full_diag_<question_slug>.json` file containing:
 Generated when `--html` is passed to `run`, `rerun`, or `analyze`. Saved as `report.html` in the run directory. Self-contained (no external CSS/JS) — can be shared via email or Teams.
 
 Features:
+
 - Score badges (pass / fail / ungraded)
 - Per-question cards with verdict, answer, expected, tools, and root cause
 - Root cause summary table
@@ -898,7 +920,7 @@ flowchart TD
 **Performance:**
 
 | Approach | 8 Questions | Config/Schema Fetch |
-|----------|-------------|---------------------|
+| ---------- | ------------- | --------------------- |
 | v1 (`full_diagnostic.py`) | ~80-120s serial | Every run (~15-30s) |
 | v2 (`scripts/analyzer.py`) | ~20-30s parallel (4 workers) | Cached (0s if fresh) |
 | **v3** (`python -m analyzer`) | ~20-30s parallel + retry | Cached + per-profile |
@@ -908,7 +930,7 @@ flowchart TD
 ## Module Reference
 
 | Module | Purpose |
-|--------|---------|
+| -------- | --------- |
 | `analyzer/config.py` | Load `config.yaml`, resolve profiles, load test cases from `questions.yaml` |
 | `analyzer/auth.py` | `FabricSession` class: persistent MSAL cache, SDK client init, token refresh |
 | `analyzer/api.py` | `fabric_get()`, `fabric_post()`, LRO polling (30 attempts, 2s interval) |
@@ -1003,7 +1025,7 @@ After your first batch run, the typical improvement cycle looks like this:
 Common fixes by root cause:
 
 | Root Cause | Fix |
-|------------|-----|
+| ------------ | ----- |
 | `MEASURE_SELECTION` | Improve measure descriptions, add `/// summary:` TMDL doc comments |
 | `FILTER_CONTEXT` | Disable `__PBI_TimeIntelligenceEnabled`, add `REMOVEFILTERS` |
 | `RELATIONSHIP` | Check direction (Many→One), run Calculate refresh |
@@ -1033,7 +1055,7 @@ This project is licensed under the [MIT License](LICENSE).
 ## Related Resources
 
 | Resource | Location |
-|----------|----------|
+| ---------- | ---------- |
 | Github Brain (full agent KB) | `../Github_Brain/agents/ai-skills-analysis-agent/` |
 | Fabric RTI Demo (infra scripts) | `../Fabric RTI Demo/` |
 | Semantic Model Agent KB | `../Github_Brain/agents/semantic-model-agent/` |
