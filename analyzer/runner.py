@@ -10,8 +10,10 @@ RETRY_DELAY_BASE = 3  # seconds
 
 def _is_retryable(error_str):
     """Check if an error is transient and worth retrying."""
-    retryable = ["400", "404", "429", "500", "502", "503", "timeout", "throttl",
-                 "temporarily unavailable", "connection", "reset by peer", "bad request", "not found"]
+    # 400/404/500/502 now retried inside SDK (_request_with_retry) — only keep
+    # errors that warrant retrying the *entire question* from scratch.
+    retryable = ["429", "503", "timeout", "throttl",
+                 "temporarily unavailable", "connection", "reset by peer"]
     lower = error_str.lower()
     return any(kw in lower for kw in retryable)
 

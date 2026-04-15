@@ -18,8 +18,10 @@ from azure.identity import (
     TokenCachePersistenceOptions,
 )
 
-# SDK bootstrap — the SDK is installed to a temp directory
-sys.path.insert(0, os.path.join(os.environ.get("TEMP", "/tmp"), "fabric_data_agent_client"))
+# SDK bootstrap — prefer project-local copy, fall back to temp directory
+_sdk_local = os.path.join(os.path.dirname(__file__), "sdk")
+_sdk_temp = os.path.join(os.environ.get("TEMP", "/tmp"), "fabric_data_agent_client")
+sys.path.insert(0, _sdk_local if os.path.isfile(os.path.join(_sdk_local, "fabric_data_agent_client.py")) else _sdk_temp)
 from fabric_data_agent_client import FabricDataAgentClient
 
 FABRIC_SCOPE = "https://api.fabric.microsoft.com/.default"

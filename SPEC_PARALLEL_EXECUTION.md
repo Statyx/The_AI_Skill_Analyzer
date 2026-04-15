@@ -1,7 +1,7 @@
 # Spec: Accelerating The AI Skill Analyzer — Single Identity
 
-**Status**: Draft  
-**Date**: 2026-04-08  
+**Status**: Implemented  
+**Date**: 2026-04-08 (spec) / 2026-04-15 (implemented)  
 **Scope**: SDK `fabric_data_agent_client.py`, `analyzer/runner.py`, `analyzer/auth.py`  
 **Constraint**: Single user identity (Azure CLI `az login`), no service principals
 
@@ -241,14 +241,15 @@ retryable = ["429", "503", "timeout", "throttl", "temporarily unavailable",
 
 ## 6. Implementation Order
 
-| Step | File | Risk | Description |
-|------|------|------|-------------|
-| 1 | SDK | Low | Add `self._http = requests.Session()`, replace bare `requests.*` calls |
-| 2 | SDK | Low | Adaptive polling intervals |
-| 3 | SDK | Low | `_post_with_retry` for 404 resilience on message/run creation |
-| 4 | SDK | Low | Parallel GET for messages + steps |
-| 5 | SDK | Medium | Thread recycling (`_get_thread` with reuse + periodic DELETE) |
-| 6 | runner.py | Low | Remove `"404"` from retryable errors |
+| Step | File | Risk | Status | Description |
+|------|------|------|--------|-------------|
+| 1 | SDK | Low | ✅ Done | `requests.Session` connection pooling |
+| 2 | SDK | Low | ✅ Done | Adaptive polling intervals (0.5s→3s) |
+| 3 | SDK | Low | ✅ Done | `_request_with_retry` for 404/400/429/5xx |
+| 4 | SDK | Low | ✅ Done | Parallel GET for messages + steps |
+| 5 | SDK | Medium | ✅ Done | Thread recycling (`_get_thread`, reuse every 8, DELETE+recreate on overflow) |
+| 6 | runner.py | Low | ✅ Done | Removed SDK-handled errors from `_is_retryable` |
+| 7 | auth.py | Low | ✅ Done | SDK moved from `%TEMP%` to `analyzer/sdk/` (version-controlled) |
 
 Steps 1-4 are pure optimizations with no behavior change. Step 5 changes thread lifecycle. Step 6 is cleanup.
 
@@ -294,6 +295,7 @@ Server processing:   15-25s (DAX pipeline: fewshots → nl2code → execute → 
 ## 9. Future: True Parallelism (If SPs Become Available)
 
 If service principals are ever provisioned, the path is straightforward:
+
 - Each SP gets its own Fabric thread (different user identity)
 - Distribute questions round-robin across SPs
 - Each worker runs serially on its own thread
