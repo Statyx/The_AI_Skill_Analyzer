@@ -1,5 +1,3 @@
 {
-  "MD013": false,
-  "MD033": false,
-  "MD060": { "table_column_count": false }
+  "default": false
 }
