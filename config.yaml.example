@@ -1,0 +1,18 @@
+# ── The AI Skill Analyzer — Configuration ──────────────────
+# Copy this file to config.yaml and fill in your values.
+# config.yaml is gitignored — your IDs stay private.
+
+# Your Entra ID tenant (Azure portal → Entra ID → Overview → Tenant ID)
+tenant_id: "<your-tenant-id>"
+
+# Default profile to use when --profile is not specified
+default_profile: "my_agent"
+
+# Snapshot cache TTL in hours. Set to 0 to always refresh.
+snapshot_ttl_hours: 24
+
+# Max parallel questions. Fabric may throttle above 4-5.
+max_workers: 4
+
+# Output directory for runs (relative to project root)
+output_dir: "runs"

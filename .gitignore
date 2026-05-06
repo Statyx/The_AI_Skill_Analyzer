@@ -3,10 +3,15 @@ __pycache__/
 *.pyc
 *.pyo
 
+# ── Personal config (contains tenant IDs) ──
+config.yaml
+
 # ── Run outputs (large, per-run) ──
 runs/
 results/
 snapshots/
+
+# ── Personal profiles (contain workspace/agent IDs) ──
 profiles/
 
 # ── Debug & scratch ──
