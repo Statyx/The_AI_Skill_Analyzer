@@ -10,22 +10,26 @@ Usage:
 import base64
 import json
 import os
+import pathlib
 import subprocess
 import sys
 import time
 
 import requests
+import yaml
 
 # ═══════════════════════════════════════════════════════════════
 # CONFIG
 # ═══════════════════════════════════════════════════════════════
+# Load IDs from local config.yaml (gitignored, see config.yaml.example)
+_cfg = yaml.safe_load((pathlib.Path(__file__).resolve().parents[1] / "config.yaml").read_text(encoding="utf-8"))
 API = "https://api.fabric.microsoft.com/v1"
-WORKSPACE_ID = "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
-AGENT_ID = "e92e5867-213a-4a7d-8fac-af1711046527"
+WORKSPACE_ID = _cfg["workspace_id"]
+AGENT_ID = _cfg["agent_id"]
 AGENT_NAME = "Marketing360_Agent"
 
-SEMANTIC_MODEL_ID = "3d00aeaa-91b9-4567-9166-fa3fc8249e6f"
-SEMANTIC_MODEL_NAME = "Marketing360_Model"
+SEMANTIC_MODEL_ID = _cfg["semantic_model_id"]
+SEMANTIC_MODEL_NAME = _cfg.get("semantic_model_name", "Marketing360_Model")
 DATASOURCE_FOLDER = f"semantic-model-{SEMANTIC_MODEL_NAME}"
 
 PROFILE_DIR = os.path.dirname(os.path.abspath(__file__))

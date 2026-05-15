@@ -8,6 +8,8 @@ import sys
 import json
 import time
 import os
+import pathlib
+import yaml
 
 # Add the cloned client SDK to path
 sys.path.insert(0, os.path.join(os.environ["TEMP"], "fabric_data_agent_client"))
@@ -15,9 +17,11 @@ sys.path.insert(0, os.path.join(os.environ["TEMP"], "fabric_data_agent_client"))
 from fabric_data_agent_client import FabricDataAgentClient
 
 # --- Configuration ---
-TENANT_ID = "92701a21-ddea-4028-ba85-4c1f91fab881"  # Fabric tenant
-WORKSPACE_ID = "5fa6b81d-fabe-4363-ad3d-b09ef82d16f2"
-AGENT_ID = "e92e5867-213a-4a7d-8fac-af1711046527"
+# Load IDs from local config.yaml (gitignored, see config.yaml.example)
+_cfg = yaml.safe_load((pathlib.Path(__file__).resolve().parents[1] / "config.yaml").read_text(encoding="utf-8"))
+TENANT_ID = _cfg["tenant_id"]
+WORKSPACE_ID = _cfg["workspace_id"]
+AGENT_ID = _cfg["agent_id"]
 DATA_AGENT_URL = f"https://api.fabric.microsoft.com/v1/workspaces/{WORKSPACE_ID}/aiskills/{AGENT_ID}/aiassistant/openai"
 
 QUESTION = "what is the churn rate"
