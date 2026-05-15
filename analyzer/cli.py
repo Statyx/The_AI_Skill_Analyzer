@@ -10,12 +10,15 @@ Usage:
     python -m analyzer -p my_agent generate
     python -m analyzer -p my_agent generate --out questions.yaml --max 30
     python -m analyzer diff RUN_A RUN_B
+    python -m analyzer diagnose path/to/diagnostic.json
+    python -m analyzer diagnose path/to/folder/  --json
 
 If --profile is omitted, uses default_profile from config.yaml,
 or falls back to legacy mode (all IDs in config.yaml).
 """
 
 import argparse
+from pathlib import Path
 
 from .config import ROOT, resolve_config, load_test_cases, list_profiles
 from .auth import FabricSession
@@ -25,6 +28,7 @@ from .reporting import save_run, analyze_run, find_run_dir, diff_runs, generate_
 from .init import scaffold_profile
 from .validate import validate_profile
 from .generate import generate_questions, write_questions_yaml
+from .diagnose import diagnose_file, diagnose_folder, analyze_diagnostic, format_report, format_batch_summary
 
 
 def cmd_init(args):
@@ -226,6 +230,32 @@ def cmd_profiles(args, cfg):
         print(f"  - {p}{marker}")
 
 
+def cmd_diagnose(args):
+    """Parse and analyze diagnostic JSON files — works with any datasource type."""
+    import json as _json
+    target = Path(args.path)
+
+    if target.is_file():
+        analysis = diagnose_file(target)
+        if getattr(args, "json", False):
+            # Remove non-serializable fields for clean JSON output
+            output = {k: v for k, v in analysis.items() if k != "steps" or True}
+            print(_json.dumps(output, indent=2, default=str))
+        else:
+            print(format_report(analysis))
+    elif target.is_dir():
+        results = diagnose_folder(target)
+        if not results:
+            print(f"No .json files found in {target}")
+            return
+        if getattr(args, "json", False):
+            print(_json.dumps(results, indent=2, default=str))
+        else:
+            print(format_batch_summary(results))
+    else:
+        print(f"ERROR: Path not found: {target}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="analyzer",
@@ -280,6 +310,11 @@ def main():
     diff_p.add_argument("run_a", help="First run ID")
     diff_p.add_argument("run_b", help="Second run ID")
 
+    # diagnose
+    diag_p = sub.add_parser("diagnose", help="Parse & analyze any Data Agent diagnostic JSON (any datasource type)")
+    diag_p.add_argument("path", help="Path to a diagnostic .json file or folder of .json files")
+    diag_p.add_argument("--json", action="store_true", help="Output structured JSON instead of text report")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -291,6 +326,10 @@ def main():
         from .config import load_global_config
         cfg = load_global_config()
         cmd_profiles(args, cfg)
+        return
+
+    if args.command == "diagnose":
+        cmd_diagnose(args)
         return
 
     cfg = resolve_config(args.profile)
