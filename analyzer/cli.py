@@ -28,7 +28,11 @@ from .reporting import save_run, analyze_run, find_run_dir, diff_runs, generate_
 from .init import scaffold_profile
 from .validate import validate_profile
 from .generate import generate_questions, write_questions_yaml
-from .diagnose import diagnose_file, diagnose_folder, analyze_diagnostic, format_report, format_batch_summary
+from .diagnose import (
+    diagnose_file, diagnose_folder, analyze_diagnostic,
+    format_report, format_batch_summary,
+    diff_diagnostics, format_diff,
+)
 
 
 def cmd_init(args):
@@ -234,13 +238,12 @@ def cmd_diagnose(args):
     """Parse and analyze diagnostic JSON files — works with any datasource type."""
     import json as _json
     target = Path(args.path)
+    fmt = getattr(args, "format", None) or ("json" if getattr(args, "json", False) else "text")
 
     if target.is_file():
         analysis = diagnose_file(target)
-        if getattr(args, "json", False):
-            # Remove non-serializable fields for clean JSON output
-            output = {k: v for k, v in analysis.items() if k != "steps" or True}
-            print(_json.dumps(output, indent=2, default=str))
+        if fmt == "json":
+            print(_json.dumps(analysis, indent=2, default=str))
         else:
             print(format_report(analysis))
     elif target.is_dir():
@@ -248,12 +251,29 @@ def cmd_diagnose(args):
         if not results:
             print(f"No .json files found in {target}")
             return
-        if getattr(args, "json", False):
+        if fmt == "json":
             print(_json.dumps(results, indent=2, default=str))
         else:
             print(format_batch_summary(results))
     else:
         print(f"ERROR: Path not found: {target}")
+
+
+def cmd_diagnose_diff(args):
+    """Diff two diagnostic JSON files (before → after)."""
+    import json as _json
+    a_path = Path(args.before)
+    b_path = Path(args.after)
+    if not a_path.is_file() or not b_path.is_file():
+        print("ERROR: Both paths must be diagnostic .json files")
+        return
+    a = diagnose_file(a_path)
+    b = diagnose_file(b_path)
+    diff = diff_diagnostics(a, b)
+    if getattr(args, "format", "text") == "json":
+        print(_json.dumps(diff, indent=2, default=str))
+    else:
+        print(format_diff(diff, a_path.name, b_path.name))
 
 
 def main():
@@ -313,7 +333,16 @@ def main():
     # diagnose
     diag_p = sub.add_parser("diagnose", help="Parse & analyze any Data Agent diagnostic JSON (any datasource type)")
     diag_p.add_argument("path", help="Path to a diagnostic .json file or folder of .json files")
-    diag_p.add_argument("--json", action="store_true", help="Output structured JSON instead of text report")
+    diag_p.add_argument("--json", action="store_true", help="Shortcut for --format json")
+    diag_p.add_argument("--format", choices=["text", "json"], default=None,
+                        help="Output format (default: text)")
+
+    # diagnose-diff
+    diff_p2 = sub.add_parser("diagnose-diff", help="Diff two diagnostic JSON files (before → after)")
+    diff_p2.add_argument("before", help="Path to the 'before' diagnostic .json")
+    diff_p2.add_argument("after", help="Path to the 'after' diagnostic .json")
+    diff_p2.add_argument("--format", choices=["text", "json"], default="text",
+                         help="Output format (default: text)")
 
     args = parser.parse_args()
 
@@ -330,6 +359,10 @@ def main():
 
     if args.command == "diagnose":
         cmd_diagnose(args)
+        return
+
+    if args.command == "diagnose-diff":
+        cmd_diagnose_diff(args)
         return
 
     cfg = resolve_config(args.profile)
