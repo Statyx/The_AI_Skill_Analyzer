@@ -1,0 +1,4 @@
+# ── Data Agent Inspector (Streamlit app) — Dependencies ───────
+streamlit>=1.36.0
+pandas>=2.0.0
+pyyaml>=6.0
